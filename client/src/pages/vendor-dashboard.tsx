@@ -268,18 +268,26 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useAuth();
   const createEvent = useMutation({
     mutationFn: async (values: any) => {
-      const res = await apiRequest("POST", "/api/events", {
-        ...values,
-        vendorId: user?.id,
-        startDate: new Date(values.startDate).toISOString(),
-        endDate: new Date(values.endDate).toISOString(),
-        approved: false
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message);
+      try {
+        const res = await apiRequest("POST", "/api/events", {
+          ...values,
+          vendorId: user?.id,
+          startDate: new Date(values.startDate).toISOString(),
+          endDate: new Date(values.endDate).toISOString(),
+          approved: false
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to create event");
+        }
+        
+        return data;
+      } catch (error: any) {
+        console.error("Event creation error:", error);
+        throw error;
       }
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -287,11 +295,10 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
         title: "Success",
         description: "Event created successfully",
       });
-      onSuccess();
       form.reset();
+      onSuccess();
     },
     onError: (error: any) => {
-      console.error("Event creation error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to create event",
@@ -304,7 +311,11 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          createEvent.mutate(data);
+          try {
+            createEvent.mutate(data);
+          } catch (error) {
+            console.error("Form submission error:", error);
+          }
         })}
         className="space-y-4"
       >
