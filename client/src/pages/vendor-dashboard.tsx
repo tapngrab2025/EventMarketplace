@@ -268,26 +268,20 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useAuth();
   const createEvent = useMutation({
     mutationFn: async (values: any) => {
-      try {
-        const res = await apiRequest("POST", "/api/events", {
-          ...values,
-          vendorId: user?.id,
-          startDate: new Date(values.startDate).toISOString(),
-          endDate: new Date(values.endDate).toISOString(),
-          approved: false
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to create event");
-        }
-        
-        return data;
-      } catch (error: any) {
-        console.error("Event creation error:", error);
-        throw error;
+      const formattedValues = {
+        ...values,
+        vendorId: user?.id,
+        startDate: new Date(values.startDate).toISOString(),
+        endDate: new Date(values.endDate).toISOString(),
+        approved: false
+      };
+      console.log('Submitting event:', formattedValues);
+      const res = await apiRequest("POST", "/api/events", formattedValues);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create event");
       }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -299,6 +293,7 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
       onSuccess();
     },
     onError: (error: any) => {
+      console.error('Event creation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create event",
@@ -311,11 +306,7 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          try {
-            createEvent.mutate(data);
-          } catch (error) {
-            console.error("Form submission error:", error);
-          }
+          createEvent.mutate(data);
         })}
         className="space-y-4"
       >
