@@ -266,24 +266,17 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
   });
 
   const createEvent = useMutation({
-    mutationFn: async (data: any) => {
-      try {
-        const res = await apiRequest("POST", "/api/events", {
-          ...data,
-          startDate: new Date(data.startDate).toISOString(),
-          endDate: new Date(data.endDate).toISOString()
-        });
-        
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || "Failed to create event");
-        }
-        
-        return await res.json();
-      } catch (error: any) {
-        console.error("Event creation error:", error);
-        throw new Error(error.message || "Failed to create event");
+    mutationFn: async (values: any) => {
+      const res = await apiRequest("POST", "/api/events", {
+        ...values,
+        startDate: new Date(values.startDate).toISOString(),
+        endDate: new Date(values.endDate).toISOString()
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message);
       }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -291,10 +284,11 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
         title: "Success",
         description: "Event created successfully",
       });
-      form.reset();
       onSuccess();
+      form.reset();
     },
     onError: (error: any) => {
+      console.error("Event creation error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to create event",
@@ -307,7 +301,12 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          createEvent.mutate(data);
+          createEvent.mutate(data, {
+            onSuccess: () => {
+              form.reset();
+              onSuccess();
+            }
+          });
         })}
         className="space-y-4"
       >
