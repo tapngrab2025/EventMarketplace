@@ -67,23 +67,27 @@ export default function VendorDashboard() {
               </Dialog>
             </div>
             <div className="grid gap-6">
-              {myEvents?.map((event) => (
-                <Card key={event.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {event.name}
-                      <span className={`text-sm px-2 py-1 rounded-full ${event.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {event.approved ? 'Approved' : 'Pending'}
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{event.description}</p>
-                    <p className="mt-2">Location: {event.location}</p>
-                    <p>Dates: {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {myEvents?.length === 0 ? (
+                <p className="text-muted-foreground">No events created yet</p>
+              ) : (
+                myEvents?.map((event) => (
+                  <Card key={event.id}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        {event.name}
+                        <span className={`text-sm px-2 py-1 rounded-full ${event.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {event.approved ? 'Approved' : 'Pending'}
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">{event.description}</p>
+                      <p className="mt-2">Location: {event.location}</p>
+                      <p>Dates: {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </section>
 
@@ -109,24 +113,33 @@ export default function VendorDashboard() {
               </Dialog>
             </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {myProducts?.map((product) => (
-                <Card key={product.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {product.name}
-                      <span className={`text-sm px-2 py-1 rounded-full ${product.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {product.approved ? 'Approved' : 'Pending'}
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{product.description}</p>
-                    <p className="mt-2">Price: ${(product.price / 100).toFixed(2)}</p>
-                    <p>Stock: {product.stock}</p>
-                    <p>Category: {product.category}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {myProducts?.length === 0 ? (
+                <p className="text-muted-foreground">No products created yet</p>
+              ) : (
+                myProducts?.map((product) => (
+                  <Card key={product.id}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        {product.name}
+                        <span className={`text-sm px-2 py-1 rounded-full ${product.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {product.approved ? 'Approved' : 'Pending'}
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-48 object-cover rounded-md mb-4"
+                      />
+                      <p className="text-muted-foreground">{product.description}</p>
+                      <p className="mt-2">Price: ${(product.price / 100).toFixed(2)}</p>
+                      <p>Stock: {product.stock}</p>
+                      <p>Category: {product.category}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </section>
         </div>
@@ -138,6 +151,10 @@ export default function VendorDashboard() {
 function EventForm({ onSuccess }: { onSuccess: () => void }) {
   const form = useForm({
     resolver: zodResolver(insertEventSchema),
+    defaultValues: {
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0],
+    },
   });
 
   const createEvent = useMutation({
@@ -236,11 +253,20 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
 function ProductForm({ events, onSuccess }: { events: Event[], onSuccess: () => void }) {
   const form = useForm({
     resolver: zodResolver(insertProductSchema),
+    defaultValues: {
+      price: 0,
+      stock: 0,
+    },
   });
 
   const createProduct = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/products", data);
+      // Convert price to cents
+      const dataWithCents = {
+        ...data,
+        price: Math.round(parseFloat(data.price) * 100),
+      };
+      const res = await apiRequest("POST", "/api/products", dataWithCents);
       return res.json();
     },
     onSuccess: () => {
@@ -286,9 +312,9 @@ function ProductForm({ events, onSuccess }: { events: Event[], onSuccess: () => 
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Price (in cents)</FormLabel>
+              <FormLabel>Price (in dollars)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number" step="0.01" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
