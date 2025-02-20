@@ -6,7 +6,7 @@ import EventCard from "@/components/event-card";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShoppingCart, LogOut } from "lucide-react";
+import { Loader2, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
@@ -61,37 +61,64 @@ export default function HomePage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            {user?.role === "customer" && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <ShoppingCart className="h-5 w-5" />
+            {!user ? (
+              <Button onClick={() => setLocation("/auth")}>Sign In</Button>
+            ) : (
+              <>
+                {user.role === "vendor" && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setLocation("/vendor")}
+                    title="Vendor Dashboard"
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
                   </Button>
-                </SheetTrigger>
-                <CartDrawer />
-              </Sheet>
+                )}
+                {user.role === "customer" && (
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <ShoppingCart className="h-5 w-5" />
+                      </Button>
+                    </SheetTrigger>
+                    <CartDrawer />
+                  </Sheet>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => {
+                    logoutMutation.mutate(undefined, {
+                      onSuccess: () => setLocation("/auth")
+                    });
+                  }}
+                  disabled={logoutMutation.isPending}
+                >
+                  {logoutMutation.isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <LogOut className="h-5 w-5" />
+                  )}
+                </Button>
+              </>
             )}
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => {
-                logoutMutation.mutate(undefined, {
-                  onSuccess: () => setLocation("/auth")
-                });
-              }}
-              disabled={logoutMutation.isPending}
-            >
-              {logoutMutation.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <LogOut className="h-5 w-5" />
-              )}
-            </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <section className="text-center mb-16">
+          <h1 className="text-4xl font-bold mb-4">
+            Your One-Stop Event Marketplace
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Discover unique souvenirs, promotional items, and giveaways for your next event.
+            Connect with vendors and event organizers all in one place.
+          </p>
+        </section>
+
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
           {filteredEvents?.length === 0 ? (

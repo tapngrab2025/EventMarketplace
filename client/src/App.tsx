@@ -13,10 +13,18 @@ import AdminDashboard from "@/pages/admin-dashboard";
 function Router() {
   return (
     <Switch>
+      <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/" component={HomePage} />
-      <ProtectedRoute path="/vendor" component={VendorDashboard} />
-      <ProtectedRoute path="/admin" component={AdminDashboard} />
+      <ProtectedRoute 
+        path="/vendor" 
+        component={VendorDashboard}
+        roles={["vendor"]} 
+      />
+      <ProtectedRoute 
+        path="/admin" 
+        component={AdminDashboard}
+        roles={["admin"]} 
+      />
       <Route component={NotFound} />
     </Switch>
   );
