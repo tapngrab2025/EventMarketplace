@@ -253,6 +253,8 @@ export default function VendorDashboard() {
 
 function EventForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  
   const form = useForm({
     resolver: zodResolver(insertEventSchema),
     defaultValues: {
@@ -262,25 +264,31 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
       imageUrl: "",
       startDate: new Date().toISOString().split("T")[0],
       endDate: new Date().toISOString().split("T")[0],
+      vendorId: user?.id,
     },
   });
 
-  const { user } = useAuth();
   const createEvent = useMutation({
     mutationFn: async (values: any) => {
+      if (!user?.id) {
+        throw new Error("You must be logged in to create an event");
+      }
+
       const formattedValues = {
         ...values,
-        vendorId: user?.id,
+        vendorId: user.id,
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
-        approved: false
       };
+      
       console.log('Submitting event:', formattedValues);
       const res = await apiRequest("POST", "/api/events", formattedValues);
+      
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to create event");
       }
+      
       return res.json();
     },
     onSuccess: () => {
@@ -302,14 +310,21 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
+  const onSubmit = form.handleSubmit((data) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create an event",
+        variant: "destructive",
+      });
+      return;
+    }
+    createEvent.mutate(data);
+  });
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => {
-          createEvent.mutate(data);
-        })}
-        className="space-y-4"
-      >
+      <form onSubmit={onSubmit} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -403,37 +418,76 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-function StallForm({
-  event,
-  onSuccess,
-}: {
-  event: Event;
-  onSuccess: () => void;
-}) {
+function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
   const form = useForm({
     resolver: zodResolver(insertStallSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      location: "",
+      imageUrl: "",
+    },
   });
 
   const createStall = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/stalls", {
+      if (!user?.id) {
+        throw new Error("You must be logged in to create a stall");
+      }
+
+      const formattedValues = {
         ...data,
         eventId: event.id,
-      });
+        vendorId: user.id,
+      };
+      
+      console.log('Submitting stall:', formattedValues);
+      const res = await apiRequest("POST", "/api/stalls", formattedValues);
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create stall");
+      }
+      
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/stalls"] });
+      toast({
+        title: "Success",
+        description: "Stall created successfully",
+      });
+      form.reset();
       onSuccess();
     },
+    onError: (error: any) => {
+      console.error('Stall creation error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create stall",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = form.handleSubmit((data) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a stall",
+        variant: "destructive",
+      });
+      return;
+    }
+    createStall.mutate(data);
   });
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => createStall.mutate(data))}
-        className="space-y-4"
-      >
+      <form onSubmit={onSubmit} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
