@@ -263,11 +263,26 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
   const createEvent = useMutation({
     mutationFn: async (data: any) => {
       const res = await apiRequest("POST", "/api/events", data);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create event");
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      toast({
+        title: "Success",
+        description: "Event created successfully",
+      });
       onSuccess();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 

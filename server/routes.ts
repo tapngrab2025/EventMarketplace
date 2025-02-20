@@ -18,11 +18,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || req.user.role !== "vendor") {
       return res.sendStatus(403);
     }
-    const event = await storage.createEvent({
-      ...req.body,
-      vendorId: req.user.id,
-    });
-    res.status(201).json(event);
+    try {
+      const parsedEvent = insertEventSchema.parse({
+        ...req.body,
+        vendorId: req.user.id,
+      });
+      const event = await storage.createEvent(parsedEvent);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Event creation error:", error);
+      res.status(400).json({ message: "Invalid event data" });
+    }
   });
 
   app.patch("/api/events/:id/approve", async (req, res) => {
