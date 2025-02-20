@@ -252,9 +252,14 @@ export default function VendorDashboard() {
 }
 
 function EventForm({ onSuccess }: { onSuccess: () => void }) {
+  const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(insertEventSchema),
     defaultValues: {
+      name: "",
+      description: "",
+      location: "",
+      imageUrl: "",
       startDate: new Date().toISOString().split("T")[0],
       endDate: new Date().toISOString().split("T")[0],
     },
@@ -262,17 +267,23 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
 
   const createEvent = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/events", {
-        ...data,
-        startDate: new Date(data.startDate).toISOString(),
-        endDate: new Date(data.endDate).toISOString()
-      });
-      if (!res.ok) {
-        const error = await res.json();
+      try {
+        const res = await apiRequest("POST", "/api/events", {
+          ...data,
+          startDate: new Date(data.startDate).toISOString(),
+          endDate: new Date(data.endDate).toISOString()
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to create event");
+        }
+        
+        return await res.json();
+      } catch (error: any) {
+        console.error("Event creation error:", error);
         throw new Error(error.message || "Failed to create event");
       }
-      const result = await res.json();
-      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -280,11 +291,10 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
         title: "Success",
         description: "Event created successfully",
       });
-      onSuccess();
       form.reset();
+      onSuccess();
     },
-    onError: (error: Error) => {
-      console.error("Event creation error:", error);
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to create event",
@@ -296,7 +306,9 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => createEvent.mutate(data))}
+        onSubmit={form.handleSubmit((data) => {
+          createEvent.mutate(data);
+        })}
         className="space-y-4"
       >
         <FormField
