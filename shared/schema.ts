@@ -37,7 +37,7 @@ export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  price: integer("price").notNull(),
+  price: integer("price").notNull(), // Stored in cents
   imageUrl: text("image_url").notNull(),
   category: text("category", { enum: ["souvenir", "giveaway", "promotional"] }).notNull(),
   stallId: integer("stall_id").notNull(),
