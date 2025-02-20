@@ -265,12 +265,15 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
+  const { user } = useAuth();
   const createEvent = useMutation({
     mutationFn: async (values: any) => {
       const res = await apiRequest("POST", "/api/events", {
         ...values,
+        vendorId: user?.id,
         startDate: new Date(values.startDate).toISOString(),
-        endDate: new Date(values.endDate).toISOString()
+        endDate: new Date(values.endDate).toISOString(),
+        approved: false
       });
       if (!res.ok) {
         const error = await res.json();

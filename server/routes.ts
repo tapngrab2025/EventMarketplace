@@ -16,18 +16,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/events", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "vendor") {
-      return res.sendStatus(403);
+      return res.status(403).json({ message: "Unauthorized - Vendor access required" });
     }
     try {
       const parsedEvent = insertEventSchema.parse({
         ...req.body,
         vendorId: req.user.id,
+        approved: false
       });
       const event = await storage.createEvent(parsedEvent);
       res.status(201).json(event);
     } catch (error) {
       console.error("Event creation error:", error);
-      res.status(400).json({ message: "Invalid event data" });
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
     }
   });
 
