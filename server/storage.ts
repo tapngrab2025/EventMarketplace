@@ -2,14 +2,17 @@ import { IStorage } from "./types";
 import {
   User,
   Event,
+  Stall,
   Product,
   CartItem,
   InsertUser,
   InsertEvent,
+  InsertStall,
   InsertProduct,
   InsertCartItem,
   users,
   events,
+  stalls,
   products,
   cartItems,
 } from "@shared/schema";
@@ -31,6 +34,7 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  // User operations
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -49,6 +53,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Event operations
   async getEvents(): Promise<Event[]> {
     return await db.select().from(events);
   }
@@ -80,8 +85,55 @@ export class DatabaseStorage implements IStorage {
     return !!deleted;
   }
 
+  // Stall operations
+  async getStalls(): Promise<Stall[]> {
+    return await db.select().from(stalls);
+  }
+
+  async getStallsByEvent(eventId: number): Promise<Stall[]> {
+    return await db
+      .select()
+      .from(stalls)
+      .where(eq(stalls.eventId, eventId));
+  }
+
+  async getStall(id: number): Promise<Stall | undefined> {
+    const [stall] = await db.select().from(stalls).where(eq(stalls.id, id));
+    return stall;
+  }
+
+  async createStall(insertStall: InsertStall): Promise<Stall> {
+    const [stall] = await db.insert(stalls).values(insertStall).returning();
+    return stall;
+  }
+
+  async updateStall(id: number, stall: Partial<Stall>): Promise<Stall | undefined> {
+    const [updated] = await db
+      .update(stalls)
+      .set(stall)
+      .where(eq(stalls.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteStall(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(stalls)
+      .where(eq(stalls.id, id))
+      .returning();
+    return !!deleted;
+  }
+
+  // Product operations
   async getProducts(): Promise<Product[]> {
     return await db.select().from(products);
+  }
+
+  async getProductsByStall(stallId: number): Promise<Product[]> {
+    return await db
+      .select()
+      .from(products)
+      .where(eq(products.stallId, stallId));
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
@@ -120,6 +172,7 @@ export class DatabaseStorage implements IStorage {
     return !!deleted;
   }
 
+  // Cart operations
   async getCartItems(userId: number): Promise<CartItem[]> {
     return await db
       .select()

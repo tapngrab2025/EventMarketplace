@@ -1,9 +1,9 @@
-import { User, Event, Product, CartItem, InsertUser, InsertEvent, InsertProduct, InsertCartItem } from "@shared/schema";
+import { User, Event, Stall, Product, CartItem, InsertUser, InsertEvent, InsertStall, InsertProduct, InsertCartItem } from "@shared/schema";
 import session from "express-session";
 
 export interface IStorage {
   sessionStore: session.Store;
-  
+
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -16,8 +16,17 @@ export interface IStorage {
   updateEvent(id: number, event: Partial<Event>): Promise<Event | undefined>;
   deleteEvent(id: number): Promise<boolean>;
 
+  // Stall operations
+  getStalls(): Promise<Stall[]>;
+  getStallsByEvent(eventId: number): Promise<Stall[]>;
+  getStall(id: number): Promise<Stall | undefined>;
+  createStall(stall: InsertStall): Promise<Stall>;
+  updateStall(id: number, stall: Partial<Stall>): Promise<Stall | undefined>;
+  deleteStall(id: number): Promise<boolean>;
+
   // Product operations
   getProducts(): Promise<Product[]>;
+  getProductsByStall(stallId: number): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<Product>): Promise<Product | undefined>;

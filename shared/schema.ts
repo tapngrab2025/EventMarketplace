@@ -15,8 +15,20 @@ export const events = pgTable("events", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   location: text("location").notNull(),
+  imageUrl: text("image_url").notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
+  vendorId: integer("vendor_id").notNull(),
+  approved: boolean("approved").notNull().default(false),
+});
+
+export const stalls = pgTable("stalls", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  location: text("location").notNull(), // Location within the event venue
+  eventId: integer("event_id").notNull(),
   vendorId: integer("vendor_id").notNull(),
   approved: boolean("approved").notNull().default(false),
 });
@@ -28,8 +40,7 @@ export const products = pgTable("products", {
   price: integer("price").notNull(),
   imageUrl: text("image_url").notNull(),
   category: text("category", { enum: ["souvenir", "giveaway", "promotional"] }).notNull(),
-  vendorId: integer("vendor_id").notNull(),
-  eventId: integer("event_id"),
+  stallId: integer("stall_id").notNull(),
   approved: boolean("approved").notNull().default(false),
   stock: integer("stock").notNull(),
 });
@@ -53,6 +64,11 @@ export const insertEventSchema = createInsertSchema(events).omit({
   approved: true,
 });
 
+export const insertStallSchema = createInsertSchema(stalls).omit({
+  id: true,
+  approved: true,
+});
+
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   approved: true,
@@ -66,6 +82,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Stall = typeof stalls.$inferSelect;
+export type InsertStall = z.infer<typeof insertStallSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type CartItem = typeof cartItems.$inferSelect;

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertEventSchema, insertProductSchema, insertCartItemSchema } from "@shared/schema";
+import { insertEventSchema, insertStallSchema, insertProductSchema, insertCartItemSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
@@ -36,9 +36,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(event);
   });
 
+  // Stalls
+  app.get("/api/stalls", async (_req, res) => {
+    const stalls = await storage.getStalls();
+    res.json(stalls);
+  });
+
+  app.get("/api/events/:eventId/stalls", async (req, res) => {
+    const stalls = await storage.getStallsByEvent(parseInt(req.params.eventId));
+    res.json(stalls);
+  });
+
+  app.post("/api/stalls", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "vendor") {
+      return res.sendStatus(403);
+    }
+    const stall = await storage.createStall({
+      ...req.body,
+      vendorId: req.user.id,
+    });
+    res.status(201).json(stall);
+  });
+
+  app.patch("/api/stalls/:id/approve", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    const stall = await storage.updateStall(parseInt(req.params.id), {
+      approved: true,
+    });
+    if (!stall) return res.sendStatus(404);
+    res.json(stall);
+  });
+
   // Products
   app.get("/api/products", async (_req, res) => {
     const products = await storage.getProducts();
+    res.json(products);
+  });
+
+  app.get("/api/stalls/:stallId/products", async (req, res) => {
+    const products = await storage.getProductsByStall(parseInt(req.params.stallId));
     res.json(products);
   });
 
@@ -48,7 +86,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const product = await storage.createProduct({
       ...req.body,
-      vendorId: req.user.id,
     });
     res.status(201).json(product);
   });
@@ -78,6 +115,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       userId: req.user.id,
     });
     res.status(201).json(item);
+  });
+
+  app.patch("/api/cart/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const item = await storage.updateCartItem(
+      parseInt(req.params.id),
+      req.body.quantity
+    );
+    if (!item) return res.sendStatus(404);
+    res.json(item);
   });
 
   app.delete("/api/cart/:id", async (req, res) => {
