@@ -52,6 +52,7 @@ export const cartItems = pgTable("cart_items", {
   quantity: integer("quantity").notNull(),
 });
 
+// Create the insert schemas with proper validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -59,10 +60,15 @@ export const insertUserSchema = createInsertSchema(users).pick({
   role: true,
 });
 
-export const insertEventSchema = createInsertSchema(events).omit({
-  id: true,
-  approved: true,
-});
+export const insertEventSchema = createInsertSchema(events)
+  .omit({
+    id: true,
+    approved: true,
+  })
+  .extend({
+    startDate: z.string().transform((str) => new Date(str)),
+    endDate: z.string().transform((str) => new Date(str)),
+  });
 
 export const insertStallSchema = createInsertSchema(stalls).omit({
   id: true,
