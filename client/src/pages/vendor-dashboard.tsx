@@ -301,12 +301,7 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          createEvent.mutate(data, {
-            onSuccess: () => {
-              form.reset();
-              onSuccess();
-            }
-          });
+          createEvent.mutate(data);
         })}
         className="space-y-4"
       >
