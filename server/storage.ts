@@ -8,126 +8,152 @@ import {
   InsertEvent,
   InsertProduct,
   InsertCartItem,
+  users,
+  events,
+  products,
+  cartItems,
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private events: Map<number, Event>;
-  private products: Map<number, Product>;
-  private cartItems: Map<number, CartItem>;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  private currentId: number;
 
   constructor() {
-    this.users = new Map();
-    this.events = new Map();
-    this.products = new Map();
-    this.cartItems = new Map();
-    this.currentId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
     });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getEvents(): Promise<Event[]> {
-    return Array.from(this.events.values());
+    return await db.select().from(events);
   }
 
   async getEvent(id: number): Promise<Event | undefined> {
-    return this.events.get(id);
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
   }
 
   async createEvent(insertEvent: InsertEvent): Promise<Event> {
-    const id = this.currentId++;
-    const event: Event = { ...insertEvent, id, approved: false };
-    this.events.set(id, event);
+    const [event] = await db.insert(events).values(insertEvent).returning();
     return event;
   }
 
   async updateEvent(id: number, event: Partial<Event>): Promise<Event | undefined> {
-    const existing = this.events.get(id);
-    if (!existing) return undefined;
-    const updated = { ...existing, ...event };
-    this.events.set(id, updated);
+    const [updated] = await db
+      .update(events)
+      .set(event)
+      .where(eq(events.id, id))
+      .returning();
     return updated;
   }
 
   async deleteEvent(id: number): Promise<boolean> {
-    return this.events.delete(id);
+    const [deleted] = await db
+      .delete(events)
+      .where(eq(events.id, id))
+      .returning();
+    return !!deleted;
   }
 
   async getProducts(): Promise<Product[]> {
-    return Array.from(this.products.values());
+    return await db.select().from(products);
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
-  }
-
-  async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const id = this.currentId++;
-    const product: Product = { ...insertProduct, id, approved: false };
-    this.products.set(id, product);
+    const [product] = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, id));
     return product;
   }
 
-  async updateProduct(id: number, product: Partial<Product>): Promise<Product | undefined> {
-    const existing = this.products.get(id);
-    if (!existing) return undefined;
-    const updated = { ...existing, ...product };
-    this.products.set(id, updated);
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const [product] = await db
+      .insert(products)
+      .values(insertProduct)
+      .returning();
+    return product;
+  }
+
+  async updateProduct(
+    id: number,
+    product: Partial<Product>,
+  ): Promise<Product | undefined> {
+    const [updated] = await db
+      .update(products)
+      .set(product)
+      .where(eq(products.id, id))
+      .returning();
     return updated;
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    return this.products.delete(id);
+    const [deleted] = await db
+      .delete(products)
+      .where(eq(products.id, id))
+      .returning();
+    return !!deleted;
   }
 
   async getCartItems(userId: number): Promise<CartItem[]> {
-    return Array.from(this.cartItems.values()).filter(
-      (item) => item.userId === userId,
-    );
+    return await db
+      .select()
+      .from(cartItems)
+      .where(eq(cartItems.userId, userId));
   }
 
   async addToCart(insertCartItem: InsertCartItem): Promise<CartItem> {
-    const id = this.currentId++;
-    const cartItem: CartItem = { ...insertCartItem, id };
-    this.cartItems.set(id, cartItem);
+    const [cartItem] = await db
+      .insert(cartItems)
+      .values(insertCartItem)
+      .returning();
     return cartItem;
   }
 
-  async updateCartItem(id: number, quantity: number): Promise<CartItem | undefined> {
-    const existing = this.cartItems.get(id);
-    if (!existing) return undefined;
-    const updated = { ...existing, quantity };
-    this.cartItems.set(id, updated);
+  async updateCartItem(
+    id: number,
+    quantity: number,
+  ): Promise<CartItem | undefined> {
+    const [updated] = await db
+      .update(cartItems)
+      .set({ quantity })
+      .where(eq(cartItems.id, id))
+      .returning();
     return updated;
   }
 
   async removeFromCart(id: number): Promise<boolean> {
-    return this.cartItems.delete(id);
+    const [deleted] = await db
+      .delete(cartItems)
+      .where(eq(cartItems.id, id))
+      .returning();
+    return !!deleted;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
