@@ -1,0 +1,105 @@
+import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { Product, Event } from "@shared/schema";
+import ProductCard from "@/components/product-card";
+import EventCard from "@/components/event-card";
+import CartDrawer from "@/components/cart-drawer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2, ShoppingCart } from "lucide-react";
+import { useState } from "react";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+
+export default function HomePage() {
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
+  const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+  });
+
+  const filteredProducts = products?.filter(
+    (product) =>
+      product.approved &&
+      (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const filteredEvents = events?.filter(
+    (event) =>
+      event.approved &&
+      (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (loadingProducts || loadingEvents) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            EventMarket
+          </h1>
+          <div className="flex items-center gap-4">
+            <Input
+              type="search"
+              placeholder="Search events and products..."
+              className="w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {user?.role === "customer" && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <ShoppingCart className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <CartDrawer />
+              </Sheet>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
+          {filteredEvents?.length === 0 ? (
+            <p className="text-muted-foreground">No events found</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredEvents?.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
+          {filteredProducts?.length === 0 ? (
+            <p className="text-muted-foreground">No products found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredProducts?.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}
