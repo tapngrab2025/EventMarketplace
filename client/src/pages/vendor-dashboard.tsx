@@ -262,12 +262,17 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
 
   const createEvent = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/events", data);
+      const res = await apiRequest("POST", "/api/events", {
+        ...data,
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: new Date(data.endDate).toISOString()
+      });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to create event");
       }
-      return res.json();
+      const result = await res.json();
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -276,11 +281,13 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
         description: "Event created successfully",
       });
       onSuccess();
+      form.reset();
     },
     onError: (error: Error) => {
+      console.error("Event creation error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to create event",
         variant: "destructive",
       });
     },
