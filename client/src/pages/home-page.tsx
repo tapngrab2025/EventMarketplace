@@ -6,12 +6,14 @@ import EventCard from "@/components/event-card";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { Loader2, ShoppingCart, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { useLocation } from "wouter";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
@@ -69,6 +71,22 @@ export default function HomePage() {
                 <CartDrawer />
               </Sheet>
             )}
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => {
+                logoutMutation.mutate(undefined, {
+                  onSuccess: () => setLocation("/auth")
+                });
+              }}
+              disabled={logoutMutation.isPending}
+            >
+              {logoutMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <LogOut className="h-5 w-5" />
+              )}
+            </Button>
           </div>
         </div>
       </header>
