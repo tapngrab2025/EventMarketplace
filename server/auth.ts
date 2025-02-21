@@ -15,18 +15,39 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  const derivedKey = await scryptAsync(password, salt, 64) as Buffer;
+  return salt + ":" + derivedKey.toString("hex"); // Using : as separator
 }
 
-async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+export async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
+  const [salt, hashedPassword] = stored.split(":"); // Match the separator used in hashPassword
+  const derivedKey = await scryptAsync(supplied, salt, 64) as Buffer;
+  return hashedPassword === derivedKey.toString("hex"); // Compare hex strings instead of buffers
 }
+
+// Remove the duplicate comparePasswords function below
+
+export const localStrategy = new LocalStrategy(async (username, password, done) => {
+  try {
+    const user = await storage.getUserByUsername(username);
+    if (!user) {
+      return done(null, false, { message: "Invalid username or password" });
+    }
+
+    const isValid = await comparePasswords(password, user.password);
+    if (!isValid) {
+      return done(null, false, { message: "Invalid username or password" });
+    }
+
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
+});
+
+// Remove the duplicate comparePasswords function here
 
 export function setupAuth(app: Express) {
   if (!process.env.SESSION_SECRET) {
