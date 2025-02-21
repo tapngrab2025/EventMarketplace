@@ -145,10 +145,11 @@ export default function VendorDashboard() {
                           <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold">Stalls</h3>
                             <Dialog
-                              open={stallDialogOpen}
+                              open={stallDialogOpen && selectedEvent?.id === event.id}
                               onOpenChange={(open) => {
                                 setStallDialogOpen(open);
                                 if (open) setSelectedEvent(event);
+                                if (!open) setSelectedEvent(null);
                               }}
                             >
                               <DialogTrigger asChild>
@@ -165,7 +166,10 @@ export default function VendorDashboard() {
                                 </DialogHeader>
                                 <StallForm
                                   event={event}
-                                  onSuccess={() => setStallDialogOpen(false)}
+                                  onSuccess={() => {
+                                    setStallDialogOpen(false);
+                                    setSelectedEvent(null);
+                                  }}
                                 />
                               </DialogContent>
                             </Dialog>
@@ -429,6 +433,8 @@ function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }
       description: "",
       location: "",
       imageUrl: "",
+      eventId: event.id,
+      vendorId: user?.id,
     },
   });
 
@@ -442,6 +448,7 @@ function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }
         ...data,
         eventId: event.id,
         vendorId: user.id,
+        approved: false,
       };
       
       console.log('Submitting stall:', formattedValues);
@@ -551,34 +558,54 @@ function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }
   );
 }
 
-function ProductForm({
-  stall,
-  onSuccess,
-}: {
-  stall: Stall;
-  onSuccess: () => void;
-}) {
+function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () => void }) {
+  const { toast } = useToast();
+  
   const form = useForm({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
+      name: "",
+      description: "",
+      imageUrl: "",
+      category: "souvenir",
       price: 0,
       stock: 0,
+      stallId: stall.id,
     },
   });
 
   const createProduct = useMutation({
     mutationFn: async (data: any) => {
-      const dataWithCents = {
+      const formattedData = {
         ...data,
-        price: Math.round(parseFloat(data.price) * 100),
+        price: Math.round(Number(data.price) * 100), // Convert dollars to cents
+        stock: Math.round(Number(data.stock)),
         stallId: stall.id,
       };
-      const res = await apiRequest("POST", "/api/products", dataWithCents);
+      
+      console.log('Submitting product:', formattedData);
+      const res = await apiRequest("POST", "/api/products", formattedData);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create product");
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({
+        title: "Success",
+        description: "Product created successfully",
+      });
+      form.reset();
       onSuccess();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create product",
+        variant: "destructive",
+      });
     },
   });
 
@@ -617,11 +644,16 @@ function ProductForm({
         <FormField
           control={form.control}
           name="price"
-          render={({ field }) => (
+          render={({ field: { onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Price (in dollars)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01"
+                  onChange={(e) => onChange(Number(e.target.value))}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -663,11 +695,15 @@ function ProductForm({
         <FormField
           control={form.control}
           name="stock"
-          render={({ field }) => (
+          render={({ field: { onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Stock</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input 
+                  type="number"
+                  onChange={(e) => onChange(Number(e.target.value))}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
