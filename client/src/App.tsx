@@ -9,6 +9,8 @@ import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
 import VendorDashboard from "@/pages/vendor-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import { VendorLayout } from "./components/layouts/VendorLayout";
+import { AdminLayout } from "./components/layouts/AdminLayout";
 
 function Router() {
   return (
@@ -17,12 +19,20 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute 
         path="/vendor" 
-        component={VendorDashboard}
+        component={()=> (
+          <VendorLayout>
+            <VendorDashboard />
+          </VendorLayout>
+        )}
         roles={["vendor"]} 
       />
       <ProtectedRoute 
         path="/admin" 
-        component={AdminDashboard}
+        component={()=> (
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
+        )}
         roles={["admin"]} 
       />
       <Route component={NotFound} />
