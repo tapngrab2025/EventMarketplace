@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,6 +8,26 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   role: text("role", { enum: ["admin", "vendor", "customer"] }).notNull().default("customer"),
   name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+});
+
+export const profile = pgTable("profile", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  bio: text("bio"),
+  dob: date("date_of_birth").notNull(),
+  gender: text("gender", { enum: ["male", "female", "other", "not_to_disclose"] }).notNull(),
+  imageUrl: text("image_url").default("/images/default-profile.png"),
+  address: text("address").default(""),
+  contact: text("contact").default("").notNull(),
+  city: text("city").default(""),
+  country: text("country").default(""),
+  postalCode: text("postal_code").default(""),
+  phoneNumber: text("phone_number").default(""),
+  socialMedia: jsonb("social_media").default({}), // Store social media links
+  occupation: text("occupation").default(""),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const events = pgTable("events", {
@@ -52,12 +72,25 @@ export const cartItems = pgTable("cart_items", {
   quantity: integer("quantity").notNull(),
 });
 
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  stallId: integer("stall_id").notNull(),
+  rating: integer("rating").notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Create the insert schemas with proper validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   name: true,
   role: true,
+  email: true,
+})
+.extend({
+  email: z.string().email("Invalid email format"),
 });
 
 export const insertEventSchema = createInsertSchema(events)
@@ -84,6 +117,32 @@ export const insertCartItemSchema = createInsertSchema(cartItems).omit({
   id: true,
 });
 
+export const insertProfileSchema = createInsertSchema(profile)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    contact: z.string()
+      .min(1, "Contact information is required")
+      .max(10, "Contact information must be at most 10 characters")
+      .regex(/^[a-zA-Z0-9]+$/, "Contact information can only contain letters and numbers"),
+    postalCode: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    socialMedia: z.object({
+      facebook: z.string().optional(),
+      twitter: z.string().optional(),
+      instagram: z.string().optional(),
+      linkedin: z.string().optional(),
+    }).optional(),
+  });
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Event = typeof events.$inferSelect;
@@ -94,3 +153,7 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+export type Profile = typeof profile.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;

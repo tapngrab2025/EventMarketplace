@@ -48,65 +48,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            EventMarket
-          </h1>
-          <div className="flex items-center gap-4">
-            <Input
-              type="search"
-              placeholder="Search events and products..."
-              className="w-64"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {!user ? (
-              <Button onClick={() => setLocation("/auth")}>Sign In</Button>
-            ) : (
-              <>
-                {user.role === "vendor" && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setLocation("/vendor")}
-                    title="Vendor Dashboard"
-                  >
-                    <LayoutDashboard className="h-5 w-5" />
-                  </Button>
-                )}
-                {user.role === "customer" && (
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="icon">
-                        <ShoppingCart className="h-5 w-5" />
-                      </Button>
-                    </SheetTrigger>
-                    <CartDrawer />
-                  </Sheet>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  onClick={() => {
-                    logoutMutation.mutate(undefined, {
-                      onSuccess: () => setLocation("/auth")
-                    });
-                  }}
-                  disabled={logoutMutation.isPending}
-                >
-                  {logoutMutation.isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <LogOut className="h-5 w-5" />
-                  )}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <section className="text-center mb-16">

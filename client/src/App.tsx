@@ -11,29 +11,51 @@ import VendorDashboard from "@/pages/vendor-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import { VendorLayout } from "./components/layouts/VendorLayout";
 import { AdminLayout } from "./components/layouts/AdminLayout";
+import { DefaultLayout } from "./components/layouts/DefaultLayout";
+import ProfilePage from "@/pages/profile-page";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute 
-        path="/vendor" 
-        component={()=> (
+      {/* <Route path="/" component={HomePage} /> */}
+      <ProtectedRoute
+        path="/"
+        component={() => (
+          <DefaultLayout>
+            <HomePage />
+          </DefaultLayout>
+        )}
+        roles={["admin", "vendor", "customer"]}
+      />
+      <ProtectedRoute
+        path="/profile"
+        component={
+          () => (
+            <DefaultLayout>
+              <ProfilePage />
+            </DefaultLayout>
+          )
+        }
+        roles={["admin", "vendor", "customer"]}
+      />
+      <ProtectedRoute
+        path="/vendor"
+        component={() => (
           <VendorLayout>
             <VendorDashboard />
           </VendorLayout>
         )}
-        roles={["vendor"]} 
+        roles={["vendor"]}
       />
-      <ProtectedRoute 
-        path="/admin" 
-        component={()=> (
+      <ProtectedRoute
+        path="/admin"
+        component={() => (
           <AdminLayout>
             <AdminDashboard />
           </AdminLayout>
         )}
-        roles={["admin"]} 
+        roles={["admin"]}
       />
       <Route component={NotFound} />
     </Switch>
