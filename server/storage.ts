@@ -53,6 +53,15 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async updateUser(id: number, user: Partial<User>): Promise<User | undefined> {
+    const [updated] = await db
+     .update(users)
+     .set(user)
+     .where(eq(users.id, id))
+     .returning();
+    return updated;
+  }
+
   // Event operations
   async getEvents(): Promise<Event[]> {
     return await db.select().from(events);

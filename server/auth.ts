@@ -149,4 +149,34 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
   });
+
+    // Add new update profile endpoint
+    app.put("/api/user/profile", async (req, res, next) => {
+      if (!req.isAuthenticated()) return res.sendStatus(401);
+      try {
+        const updatedUser = await storage.updateUser(req.user.id, {
+          username: req.body.username,
+          name: req.body.name,
+          email: req.body.email,
+          bio: req.body.bio,
+          dob: req.body.dob,
+          gender: req.body.gender,
+          imageUrl: req.body.imageUrl,
+          address: req.body.address,
+          contact: req.body.contact,
+          city: req.body.city,
+          country: req.body.country,
+          postalCode: req.body.postalCode,
+          phoneNumber: req.body.phoneNumber,
+          socialMedia: req.body.socialMedia,
+          occupation: req.body.occupation,
+        });
+        if (!updatedUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        res.json(updatedUser);
+      } catch (err) {
+        next(err);
+      }
+    });
 }
