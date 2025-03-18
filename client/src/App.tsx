@@ -9,16 +9,17 @@ import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
 import VendorDashboard from "@/pages/vendor-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import ProfilePage from "@/pages/profile-page";
+import OrganizerDashboard from "@/pages/organizer-dashboard";
 import { VendorLayout } from "./components/layouts/VendorLayout";
 import { AdminLayout } from "./components/layouts/AdminLayout";
 import { DefaultLayout } from "./components/layouts/DefaultLayout";
-import ProfilePage from "@/pages/profile-page";
+import { OrganizerLayout } from "./components/layouts/OrganizerLayout";
 
 function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      {/* <Route path="/" component={HomePage} /> */}
       <ProtectedRoute
         path="/"
         component={() => (
@@ -26,7 +27,7 @@ function Router() {
             <HomePage />
           </DefaultLayout>
         )}
-        roles={["admin", "vendor", "customer"]}
+        roles={["admin", "vendor", "customer", "organizer"]}
       />
       <ProtectedRoute
         path="/profile"
@@ -37,7 +38,7 @@ function Router() {
             </DefaultLayout>
           )
         }
-        roles={["admin", "vendor", "customer"]}
+        roles={["admin", "vendor", "customer", "organizer"]}
       />
       <ProtectedRoute
         path="/vendor"
@@ -56,6 +57,15 @@ function Router() {
           </AdminLayout>
         )}
         roles={["admin"]}
+      />
+      <ProtectedRoute
+        path="/organizer"
+        component={() => (
+          <OrganizerLayout>
+            <OrganizerDashboard />
+          </OrganizerLayout>
+        )}
+        roles={["organizer"]}
       />
       <Route component={NotFound} />
     </Switch>

@@ -6,7 +6,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role", { enum: ["admin", "vendor", "customer"] }).notNull().default("customer"),
+  role: text("role", { enum: ["admin", "vendor", "customer", "organizer"] }).notNull().default("customer"),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
 });
@@ -19,7 +19,6 @@ export const profile = pgTable("profile", {
   gender: text("gender", { enum: ["male", "female", "other", "not_to_disclose"] }).notNull(),
   imageUrl: text("image_url").default("/images/default-profile.png"),
   address: text("address").default(""),
-  contact: text("contact").default("").notNull(),
   city: text("city").default(""),
   country: text("country").default(""),
   postalCode: text("postal_code").default(""),

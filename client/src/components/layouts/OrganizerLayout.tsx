@@ -1,17 +1,18 @@
-import  React, { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product, Event } from "@shared/schema";
-import { Loader2, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { RightNavigation } from "@/components/common/RightNavigation";
 import { Logo } from "../common/logo";
 
-
-interface VendorLayoutProps {
+interface OrganizerLayoutProps {
     children: ReactNode;
 }
 
-export function VendorLayout({ children }: VendorLayoutProps) {
+export function OrganizerLayout(
+    { children }: OrganizerLayoutProps
+) {
     const [searchTerm, setSearchTerm] = useState("");
 
     const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
@@ -21,6 +22,20 @@ export function VendorLayout({ children }: VendorLayoutProps) {
     const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
         queryKey: ["/api/events"],
     });
+
+    const filteredProducts = products?.filter(
+        (product) =>
+            product.approved &&
+            (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    const filteredEvents = events?.filter(
+        (event) =>
+            event.approved &&
+            (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                event.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     if (loadingProducts || loadingEvents) {
         return (
@@ -36,7 +51,9 @@ export function VendorLayout({ children }: VendorLayoutProps) {
                     <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                         <Logo/>
                         <div className="flex items-center gap-4">
-                            <RightNavigation searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                            <RightNavigation 
+                            searchTerm={searchTerm} 
+                            setSearchTerm={setSearchTerm} />
                         </div>
                     </div>
                 </header>

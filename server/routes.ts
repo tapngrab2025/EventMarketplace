@@ -33,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/events/:id/approve", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") {
+    if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
     const event = await storage.updateEvent(parseInt(req.params.id), {
@@ -98,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/products/:id/approve", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") {
+    if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
     const product = await storage.updateProduct(parseInt(req.params.id), {

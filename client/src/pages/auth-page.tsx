@@ -185,6 +185,7 @@ function RegisterForm() {
                 >
                   <option value="customer">Customer</option>
                   <option value="vendor">Vendor</option>
+                  <option value="organizer">Organizer</option>
                 </select>
               </FormControl>
               <FormMessage />

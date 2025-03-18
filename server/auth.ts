@@ -1,11 +1,14 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import express, { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import fs from 'fs';
 
 declare global {
   namespace Express {
@@ -150,33 +153,90 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 
-    // Add new update profile endpoint
-    app.put("/api/user/profile", async (req, res, next) => {
-      if (!req.isAuthenticated()) return res.sendStatus(401);
-      try {
-        const updatedUser = await storage.updateUser(req.user.id, {
-          username: req.body.username,
-          name: req.body.name,
-          email: req.body.email,
-          bio: req.body.bio,
-          dob: req.body.dob,
-          gender: req.body.gender,
-          imageUrl: req.body.imageUrl,
-          address: req.body.address,
-          contact: req.body.contact,
-          city: req.body.city,
-          country: req.body.country,
-          postalCode: req.body.postalCode,
-          phoneNumber: req.body.phoneNumber,
-          socialMedia: req.body.socialMedia,
-          occupation: req.body.occupation,
-        });
-        if (!updatedUser) {
-          return res.status(404).json({ message: "User not found" });
-        }
-        res.json(updatedUser);
-      } catch (err) {
-        next(err);
+  app.get("/api/user/profile", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const [userProfile] = await storage.getUserProfile(req.user.id);
+      res.json(userProfile || null);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch user data" });
+    }
+  });
+
+  app.put("/api/user/profile", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      console.log('Update Profile Request:', {
+        userId: req.user.id,
+        body: req.body
+      });
+
+      const [updatedUser, updatedProfile] = await storage.updateUser(req.user.id, {
+        username: req.body.username,
+        name: req.body.name,
+        email: req.body.email
+      },{
+        bio: req.body.bio,
+        dob: req.body.dob,
+        gender: req.body.gender,
+        imageUrl: req.body.imageUrl,
+        address: req.body.address,
+        city: req.body.city,
+        country: req.body.country,
+        postalCode: req.body.postalCode,
+        phoneNumber: req.body.phoneNumber,
+        socialMedia: req.body.socialMedia,
+        occupation: req.body.occupation,
+      });
+      console.log('Update Results:', {
+        user: updatedUser,
+        profile: updatedProfile
+      });
+      if (!updatedUser) {
+        console.error('User update failed');
+        return res.status(404).json({ message: "User not found" });
       }
-    });
+
+      res.json({ user: updatedUser, profile: updatedProfile });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/api/upload", upload.single('file'), (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const file_location = req.body.file_location || '';
+    const uploadPath = path.join(process.env.FILE_UPLOADER_PATH || '', file_location);
+
+    // Ensure directory exists
+    if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    // Define the final file path
+    const filename = (Date.now() + '-' + Math.round(Math.random() * 1E9)) + path.extname(file.originalname);
+    const filePath = path.join(uploadPath, `${filename}`);
+    const fileURLPath = path.join(process.env.SERVER_UPLOAD_PATH || '', `/${file_location}/` ,`${filename}`);
+
+    // Write the file from memory to disk
+    fs.writeFileSync(filePath, file.buffer);
+
+    res.json({ message: "File uploaded successfully!", url: fileURLPath });
+  } catch (error) {
+      res.status(500).json({ error: "File upload failed", details: (error as Error).message });
+  }
+});
+
+// Update static file serving
+app.use(`${process.env.SERVER_UPLOAD_PATH}`, express.static(`${process.env.FILE_UPLOADER_PATH}`));
+// Example
+// FILE_UPLOADER_PATH="e:/xampp8-0/htdocs/EventMarketplace/client/.next/server/uploads"
+// SERVER_UPLOAD_PATH="/_next/server/uploads/"
 }

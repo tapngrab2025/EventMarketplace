@@ -38,8 +38,15 @@ import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 
-export default function VendorDashboard() {
+interface VendorDashboardProps {
+  searchTerm?: string;
+}
+
+export default function VendorDashboard(
+  { searchTerm = "" }:VendorDashboardProps
+) {
   const { user } = useAuth();
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [stallDialogOpen, setStallDialogOpen] = useState(false);
@@ -60,8 +67,52 @@ export default function VendorDashboard() {
     queryKey: ["/api/products"],
   });
 
-  const myEvents = events?.filter((event) => event.vendorId === user?.id);
-  const myStalls = stalls?.filter((stall) => stall.vendorId === user?.id);
+  // const filteredEvents = events?.filter(
+  //   (event) =>
+  //     event.approved &&
+  //     (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //       event.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  // );
+  // console.log(filteredEvents);
+  
+  // const myEvents = events?.filter((event) => event.vendorId === user?.id);
+
+  // First, filter products based on search term
+  const matchedProducts = products?.filter((product) => 
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Get stalls that either match the search term or contain matching products
+  const matchedStalls = stalls?.filter((stall) => {
+    const stallMatches = stall.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stall.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const hasMatchingProduct = matchedProducts?.some(
+      (product) => product.stallId === stall.id
+    );
+
+    return (stallMatches || hasMatchingProduct) && stall.vendorId === user?.id;
+  });
+
+  // Get events that either match the search term or contain matching stalls
+  const myEvents = events?.filter((event) => {
+    const eventMatches = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const hasMatchingStall = matchedStalls?.some(
+      (stall) => stall.eventId === event.id
+    );
+
+    return (eventMatches || hasMatchingStall) && event.vendorId === user?.id;
+  });
+
+  // Filter stalls for display based on matched events
+  const myStalls = matchedStalls?.filter((stall) =>
+    myEvents?.some((event) => event.id === stall.eventId)
+  );
+
+  // Filter products for display based on matched stalls
   const myProducts = products?.filter((product) =>
     myStalls?.some((stall) => stall.id === product.stallId)
   );
@@ -114,11 +165,10 @@ export default function VendorDashboard() {
                       <CardTitle className="flex items-center justify-between">
                         {event.name}
                         <span
-                          className={`text-sm px-2 py-1 rounded-full ${
-                            event.approved
+                          className={`text-sm px-2 py-1 rounded-full ${event.approved
                               ? "bg-green-100 text-green-700"
                               : "bg-yellow-100 text-yellow-700"
-                          }`}
+                            }`}
                         >
                           {event.approved ? "Approved" : "Pending"}
                         </span>
@@ -182,10 +232,11 @@ export default function VendorDashboard() {
                                   <CardTitle className="text-base flex items-center justify-between">
                                     {stall.name}
                                     <Dialog
-                                      open={productDialogOpen}
+                                      open={productDialogOpen && selectedStall?.id === stall.id}
                                       onOpenChange={(open) => {
                                         setProductDialogOpen(open);
                                         if (open) setSelectedStall(stall);
+                                        if (!open) setSelectedStall(null);
                                       }}
                                     >
                                       <DialogTrigger asChild>
@@ -202,8 +253,10 @@ export default function VendorDashboard() {
                                         </DialogHeader>
                                         <ProductForm
                                           stall={stall}
-                                          onSuccess={() =>
-                                            setProductDialogOpen(false)
+                                          onSuccess={() =>{
+                                            setProductDialogOpen(false);
+                                            setSelectedStall(null);
+                                          }
                                           }
                                         />
                                       </DialogContent>
@@ -212,7 +265,7 @@ export default function VendorDashboard() {
                                 </CardHeader>
                                 <CardContent>
                                   <div className="grid grid-cols-2 gap-2">
-                                    {products
+                                    {matchedProducts
                                       ?.filter(
                                         (product) => product.stallId === stall.id
                                       )
@@ -230,6 +283,14 @@ export default function VendorDashboard() {
                                             <h4 className="font-medium">
                                               {product.name}
                                             </h4>
+                                            <span
+                                              className={`text-sm px-2 py-1 rounded-full ${product.approved
+                                                  ? "bg-green-100 text-green-700"
+                                                  : "bg-yellow-100 text-yellow-700"
+                                                }`}
+                                            >
+                                              {product.approved ? "Approved" : "Pending"}
+                                            </span>
                                             <p className="text-sm text-muted-foreground">
                                               ${(product.price / 100).toFixed(2)} -{" "}
                                               {product.stock} left
@@ -258,7 +319,7 @@ export default function VendorDashboard() {
 function EventForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
   const { user } = useAuth();
-  
+
   const form = useForm({
     resolver: zodResolver(insertEventSchema),
     defaultValues: {
@@ -284,15 +345,15 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
       };
-      
+
       console.log('Submitting event:', formattedValues);
       const res = await apiRequest("POST", "/api/events", formattedValues);
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to create event");
       }
-      
+
       return res.json();
     },
     onSuccess: () => {
@@ -373,10 +434,24 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Event Image</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <FileDropzone
+                  onUploadComplete={field.onChange}
+                  accept={{
+                    'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+                  }}
+                />
               </FormControl>
+              {field.value && (
+                <div className="mt-2">
+                  <img
+                    src={field.value}
+                    alt="Preview"
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -425,7 +500,7 @@ function EventForm({ onSuccess }: { onSuccess: () => void }) {
 function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }) {
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
   const form = useForm({
     resolver: zodResolver(insertStallSchema),
     defaultValues: {
@@ -450,15 +525,15 @@ function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }
         vendorId: user.id,
         approved: false,
       };
-      
+
       console.log('Submitting stall:', formattedValues);
       const res = await apiRequest("POST", "/api/stalls", formattedValues);
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to create stall");
       }
-      
+
       return res.json();
     },
     onSuccess: () => {
@@ -539,10 +614,24 @@ function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Image</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <FileDropzone
+                  onUploadComplete={field.onChange}
+                  accept={{
+                    'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+                  }}
+                />
               </FormControl>
+              {field.value && (
+                <div className="mt-2">
+                  <img
+                    src={field.value}
+                    alt="Preview"
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -560,7 +649,7 @@ function StallForm({ event, onSuccess }: { event: Event; onSuccess: () => void }
 
 function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () => void }) {
   const { toast } = useToast();
-  
+
   const form = useForm({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
@@ -582,7 +671,7 @@ function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () => void
         stock: Math.round(Number(data.stock)),
         stallId: stall.id,
       };
-      
+
       console.log('Submitting product:', formattedData);
       const res = await apiRequest("POST", "/api/products", formattedData);
       if (!res.ok) {
@@ -648,8 +737,8 @@ function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () => void
             <FormItem>
               <FormLabel>Price (in dollars)</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   step="0.01"
                   onChange={(e) => onChange(Number(e.target.value))}
                   {...field}
@@ -664,14 +753,30 @@ function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () => void
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Image</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <FileDropzone
+                  onUploadComplete={field.onChange}
+                  accept={{
+                    'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+                  }}
+                  filePath="products"
+                />
               </FormControl>
+              {field.value && (
+                <div className="mt-2">
+                  <img
+                    src={field.value}
+                    alt="Preview"
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="category"
@@ -699,7 +804,7 @@ function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () => void
             <FormItem>
               <FormLabel>Stock</FormLabel>
               <FormControl>
-                <Input 
+                <Input
                   type="number"
                   onChange={(e) => onChange(Number(e.target.value))}
                   {...field}

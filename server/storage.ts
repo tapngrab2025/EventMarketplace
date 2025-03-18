@@ -15,6 +15,8 @@ import {
   stalls,
   products,
   cartItems,
+  Profile,
+  profile,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -40,6 +42,13 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserProfile(userId: number): Promise<Profile[]> {
+    return await db
+      .select()
+      .from(profile)
+      .where(eq(profile.userId, userId));
+  }
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db
       .select()
@@ -53,13 +62,37 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: number, user: Partial<User>): Promise<User | undefined> {
-    const [updated] = await db
-     .update(users)
-     .set(user)
-     .where(eq(users.id, id))
-     .returning();
-    return updated;
+  async updateUser(
+    id: number,
+    user: Partial<User>,
+    userProfile: Partial<Profile>
+  ): Promise<[User | undefined, Profile | undefined]> {
+    // Update user data
+    const [updated] = await db.update(users)
+      .set(user)
+      .where(eq(users.id, id))
+      .returning();
+
+    // Check if profile exists
+    const [existingProfile] = await db.select()
+      .from(profile)
+      .where(eq(profile.userId, id));
+
+    let updatedProfile;
+    if (existingProfile) {
+      // Update existing profile
+      [updatedProfile] = await db.update(profile)
+        .set(userProfile)
+        .where(eq(profile.userId, id))
+        .returning();
+    } else {
+      // Create new profile
+      [updatedProfile] = await db.insert(profile)
+        .values({ ...userProfile, userId: id })
+        .returning();
+    }
+
+    return [updated, updatedProfile];
   }
 
   // Event operations

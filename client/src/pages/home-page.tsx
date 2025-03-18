@@ -3,18 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { Product, Event } from "@shared/schema";
 import ProductCard from "@/components/product-card";
 import EventCard from "@/components/event-card";
-import CartDrawer from "@/components/cart-drawer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 
-export default function HomePage() {
-  const { user, logoutMutation } = useAuth();
-  const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
+interface VendorDashboardProps {
+  searchTerm?: string;
+}
+
+export default function HomePage(
+  { searchTerm = "" }:VendorDashboardProps
+) {
 
   const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
     queryKey: ["/api/products"],

@@ -1,4 +1,4 @@
-import { User, Event, Stall, Product, CartItem, InsertUser, InsertEvent, InsertStall, InsertProduct, InsertCartItem } from "@shared/schema";
+import { User, Event, Stall, Product, CartItem, InsertUser, InsertEvent, InsertStall, InsertProduct, InsertCartItem, Profile } from "@shared/schema";
 import session from "express-session";
 
 export interface IStorage {
@@ -8,7 +8,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  updateUser(id: number, user: Partial<User>, userProfile: Partial<Profile>): Promise<[User | undefined, Profile | undefined]>;
 
   // Event operations
   getEvents(): Promise<Event[]>;

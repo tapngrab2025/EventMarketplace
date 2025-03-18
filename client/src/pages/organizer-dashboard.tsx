@@ -10,8 +10,9 @@ interface VendorDashboardProps {
   searchTerm?: string;
 }
 
-export default function AdminDashboard({ searchTerm = "" }:
-  VendorDashboardProps) {
+export default function OrganizerDashboard(
+  { searchTerm = "" }:VendorDashboardProps
+) {
   const { toast } = useToast();
 
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
@@ -65,7 +66,7 @@ export default function AdminDashboard({ searchTerm = "" }:
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold">Organizer Dashboard</h1>
           <p className="text-muted-foreground">Approve events and products</p>
         </header>
 

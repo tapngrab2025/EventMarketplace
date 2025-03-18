@@ -5,3 +5,5 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
+client/.next/server/uploads/*
+!client/.next/server/uploads/.gitkeep
