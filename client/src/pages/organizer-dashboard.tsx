@@ -3,17 +3,20 @@ import { Product, Event } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PendingEvents from "@/components/pending-events";
-import PendingProducts from "@/components/pending-products";
+import PendingEvents from "@/components/events/pending-events";
+import PendingProducts from "@/components/products/pending-products";
+import { AddEvent } from "@/components/event/add-event";
+import { useState } from "react";
 
 interface VendorDashboardProps {
   searchTerm?: string;
 }
 
 export default function OrganizerDashboard(
-  { searchTerm = "" }:VendorDashboardProps
+  { searchTerm = "" }: VendorDashboardProps
 ) {
   const { toast } = useToast();
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -69,14 +72,23 @@ export default function OrganizerDashboard(
           <h1 className="text-3xl font-bold">Organizer Dashboard</h1>
           <p className="text-muted-foreground">Approve events and products</p>
         </header>
+        <div className="grid gap-8 mb-4">
+          <section>
+            <h2 className="text-2xl font-semibold mb-6">Events</h2>
+            <AddEvent
+            eventDialogOpen={eventDialogOpen}
+            setEventDialogOpen={setEventDialogOpen}
+          />
+          </section>
+        </div>
 
         <div className="grid gap-8">
-          <PendingEvents 
-            pendingEvents={pendingEvents} 
+          <PendingEvents
+            pendingEvents={pendingEvents}
             approveEvent={approveEvent}
           />
-          <PendingProducts 
-            pendingProducts={pendingProducts} 
+          <PendingProducts
+            pendingProducts={pendingProducts}
             approveProduct={approveProduct}
           />
         </div>

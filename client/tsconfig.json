@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
-    "types": ["@types/google.maps"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "jsx": "react-jsx",
+    // "types": ["@types/google.maps"]
   }
 }

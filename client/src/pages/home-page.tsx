@@ -1,11 +1,8 @@
-import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Product, Event } from "@shared/schema";
-import ProductCard from "@/components/product-card";
-import EventCard from "@/components/event-card";
+import ProductCard from "@/components/products/product-card";
+import EventCard from "@/components/events/event-card";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { useLocation } from "wouter";
 
 interface VendorDashboardProps {
   searchTerm?: string;

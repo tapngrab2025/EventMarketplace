@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, ShoppingCart } from "lucide-react";
+import { DEFAULT_IMAGES } from "@/config/constants";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { user } = useAuth();
@@ -35,7 +36,7 @@ export default function ProductCard({ product }: { product: Product }) {
       </CardHeader>
       <CardContent className="flex-grow">
         <img
-          src={product.imageUrl}
+          src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
           alt={product.name}
           className="w-full h-48 object-cover rounded-md mb-4"
         />

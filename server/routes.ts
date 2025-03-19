@@ -15,8 +15,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/events", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "vendor") {
-      return res.status(403).json({ message: "Unauthorized - Vendor access required" });
+    if (!req.isAuthenticated() || !["vendor", "organizer"].includes(req.user.role) ) {
+      return res.status(403).json({ message: "Unauthorized - Vendor/Organizer access required" });
     }
     try {
       const parsedEvent = insertEventSchema.parse({

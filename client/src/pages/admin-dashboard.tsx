@@ -3,8 +3,8 @@ import { Product, Event } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PendingEvents from "@/components/pending-events";
-import PendingProducts from "@/components/pending-products";
+import PendingEvents from "@/components/events/pending-events";
+import PendingProducts from "@/components/products/pending-products";
 
 interface VendorDashboardProps {
   searchTerm?: string;
