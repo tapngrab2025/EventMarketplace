@@ -44,9 +44,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/events/:id", async (req, res) => {
-    if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
-      return res.sendStatus(403);
-    }
     const event = await storage.getEvent(parseInt(req.params.id));
     if (!event) return res.sendStatus(404);
     res.json(event);
@@ -125,11 +122,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const products = await storage.getProducts();
     res.json(products);
   });
-
-  // app.get("/api/events/:eventId/products", async (req, res) =>{
-  //   const products = await storage.getProducts();
-  //   res.json(products);
-  // });
 
   app.get("/api/stalls/:stallId/products", async (req, res) => {
     const products = await storage.getProductsByStall(parseInt(req.params.stallId));
