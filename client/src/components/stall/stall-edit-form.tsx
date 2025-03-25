@@ -52,7 +52,9 @@ export function StallEditForm({ stallId, onClose }: EditStallFormProps) {
         description: "The stall has been updated successfully",
       });
       onClose();
+      // Invalidate both the specific stall and the stalls list
       queryClient.invalidateQueries({ queryKey: [`/api/stalls/${stallId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stalls"] });
     },
   });
 

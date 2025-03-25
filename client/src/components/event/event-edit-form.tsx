@@ -1,4 +1,3 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { FileDropzone } from "@/components/ui/file-dropzone";
-import { Event, Stall, Product, insertEventSchema, insertStallSchema, insertProductSchema } from "@shared/schema";
+import { Event, insertEventSchema } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
@@ -62,10 +61,11 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
       toast({
         title: "Event updated",
         description: "The event has been updated successfully",
-        // variant: "success",
       });
       onClose();
+      // Invalidate both the specific event and the events list
       queryClient.invalidateQueries({ queryKey: [`/api/events/${eventId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
     },
   });
 

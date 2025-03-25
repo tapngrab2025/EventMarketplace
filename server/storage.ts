@@ -125,7 +125,7 @@ export class DatabaseStorage implements IStorage {
 
   // Event operations
   async getEvents(): Promise<Event[]> {
-    return await db.select().from(events);
+    return await db.select().from(events).orderBy(events.id, 'desc');
   }
 
   async getEvent(id: number): Promise<Event | undefined> {
@@ -157,14 +157,48 @@ export class DatabaseStorage implements IStorage {
 
   // Stall operations
   async getStalls(): Promise<Stall[]> {
-    return await db.select().from(stalls);
+    return await db.select().from(stalls).orderBy(stalls.id, 'desc');
   }
 
+  // async getStallsByEvent(eventId: number): Promise<Stall[]> {
+  //   return await db
+  //     .select()
+  //     .from(stalls)
+  //     .where(eq(stalls.eventId, eventId));
+  // }
   async getStallsByEvent(eventId: number): Promise<Stall[]> {
-    return await db
-      .select()
+    const stallsWithProducts = await db
+      .select({
+        id: stalls.id,
+        name: stalls.name,
+        description: stalls.description,
+        location: stalls.location,
+        imageUrl: stalls.imageUrl,
+        vendorId: stalls.vendorId,
+        eventId: stalls.eventId,
+        approved: stalls.approved,
+        products: products
+      })
       .from(stalls)
-      .where(eq(stalls.eventId, eventId));
+      .leftJoin(products, eq(products.stallId, stalls.id))
+      .where(eq(stalls.eventId, eventId))
+      .orderBy(stalls.id);
+
+    // Group products by stall
+    const groupedStalls = stallsWithProducts.reduce((acc, curr) => {
+      const stall = acc.find(s => s.id === curr.id);
+      if (!stall) {
+        acc.push({
+          ...curr,
+          products: curr.products ? [curr.products] : []
+        });
+      } else if (curr.products) {
+        stall.products.push(curr.products);
+      }
+      return acc;
+    }, [] as any[]);
+
+    return groupedStalls;
   }
 
   async getStall(id: number): Promise<Stall | undefined> {
@@ -196,7 +230,7 @@ export class DatabaseStorage implements IStorage {
 
   // Product operations
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products);
+    return await db.select().from(products).orderBy(products.id, 'desc');
   }
 
   async getProductsByStall(stallId: number): Promise<Product[]> {

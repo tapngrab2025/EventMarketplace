@@ -54,7 +54,9 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
         description: "The product has been updated successfully",
       });
       onClose();
+      // Invalidate both the specific product and the products list
       queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
     },
   });
 

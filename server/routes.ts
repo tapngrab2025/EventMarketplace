@@ -126,6 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(products);
   });
 
+  // app.get("/api/events/:eventId/products", async (req, res) =>{
+  //   const products = await storage.getProducts();
+  //   res.json(products);
+  // });
+
   app.get("/api/stalls/:stallId/products", async (req, res) => {
     const products = await storage.getProductsByStall(parseInt(req.params.stallId));
     res.json(products);
