@@ -3,18 +3,14 @@ import { Product, Event } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PendingEvents from "@/components/events/pending-events";
-import PendingProducts from "@/components/products/pending-products";
-import { AddEvent } from "@/components/event/add-event";
 import { useState } from "react";
+import { ApprovalSection } from "@/components/dashboard/approval-section";
 
 interface VendorDashboardProps {
   searchTerm?: string;
 }
 
-export default function OrganizerDashboard(
-  { searchTerm = "" }: VendorDashboardProps
-) {
+export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardProps) {
   const { toast } = useToast();
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
@@ -70,25 +66,16 @@ export default function OrganizerDashboard(
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Organizer Dashboard</h1>
-          <p className="text-muted-foreground">Approve events and products</p>
+          <p className="text-muted-foreground">
+            Manage and approve events
+          </p>
         </header>
-        <div className="grid gap-8 mb-4">
-          <section>
-            <h2 className="text-2xl font-semibold mb-6">Events</h2>
-            <AddEvent
-            eventDialogOpen={eventDialogOpen}
-            setEventDialogOpen={setEventDialogOpen}
-          />
-          </section>
-        </div>
 
         <div className="grid gap-8">
-          <PendingEvents
+          <ApprovalSection
             pendingEvents={pendingEvents}
-            approveEvent={approveEvent}
-          />
-          <PendingProducts
             pendingProducts={pendingProducts}
+            approveEvent={approveEvent}
             approveProduct={approveProduct}
           />
         </div>

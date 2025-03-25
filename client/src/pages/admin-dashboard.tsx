@@ -3,15 +3,13 @@ import { Product, Event } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PendingEvents from "@/components/events/pending-events";
-import PendingProducts from "@/components/products/pending-products";
+import { ApprovalSection } from "@/components/dashboard/approval-section";
 
 interface VendorDashboardProps {
   searchTerm?: string;
 }
 
-export default function AdminDashboard({ searchTerm = "" }:
-  VendorDashboardProps) {
+export default function AdminDashboard({ searchTerm = "" }: VendorDashboardProps) {
   const { toast } = useToast();
 
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
@@ -66,16 +64,16 @@ export default function AdminDashboard({ searchTerm = "" }:
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Approve events and products</p>
+          <p className="text-muted-foreground">
+            Manage events, and products
+          </p>
         </header>
 
         <div className="grid gap-8">
-          <PendingEvents 
-            pendingEvents={pendingEvents} 
+          <ApprovalSection
+            pendingEvents={pendingEvents}
+            pendingProducts={pendingProducts}
             approveEvent={approveEvent}
-          />
-          <PendingProducts 
-            pendingProducts={pendingProducts} 
             approveProduct={approveProduct}
           />
         </div>

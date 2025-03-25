@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
+import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 import { UserCircle } from "lucide-react";
@@ -55,6 +55,7 @@ export function RightNavigation({
                         </Button>
                     )}
                     {user.role === "admin" && (
+                        <>
                         <Button
                             variant="outline"
                             size="icon"
@@ -63,6 +64,16 @@ export function RightNavigation({
                         >
                             <LayoutDashboard className="h-5 w-5" />
                         </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setLocation("/users")}
+                            title="User Dashboard"
+                        >
+                            <UsersRound className="h-5 w-5" />
+                            {/* <LayoutDashboard className="h-5 w-5" /> */}
+                        </Button>
+                        </>
                     )}
                     {user.role === "organizer" && (
                         <Button

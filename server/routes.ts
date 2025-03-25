@@ -15,7 +15,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/events", async (req, res) => {
-    if (!req.isAuthenticated() || !["vendor", "organizer"].includes(req.user.role) ) {
+    if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role) ) {
       return res.status(403).json({ message: "Unauthorized - Vendor/Organizer access required" });
     }
     try {
@@ -41,6 +41,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     if (!event) return res.sendStatus(404);
     res.json(event);
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    const event = await storage.getEvent(parseInt(req.params.id));
+    if (!event) return res.sendStatus(404);
+    res.json(event);
+  })
+
+  // Edit Event
+  app.put("/api/events/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    try {
+      const parsedEvent = insertEventSchema.parse({
+        ...req.body,
+      });
+      const event = await storage.updateEvent(parseInt(req.params.id), parsedEvent);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Event update error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
+    }
   });
 
   // Stalls
@@ -76,6 +102,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(stall);
   });
 
+  app.get("/api/stalls/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    const stalls = await storage.getStall(parseInt(req.params.id));
+    res.json(stalls);
+  });
+
+  // Edit Stall
+  app.put("/api/stalls/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    const stall = await storage.updateStall(parseInt(req.params.id), req.body);
+    if (!stall) return res.sendStatus(404);
+    res.json(stall);
+  });
+
   // Products
   app.get("/api/products", async (_req, res) => {
     const products = await storage.getProducts();
@@ -104,6 +148,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const product = await storage.updateProduct(parseInt(req.params.id), {
       approved: true,
     });
+    if (!product) return res.sendStatus(404);
+    res.json(product);
+  });
+
+  app.get("/api/products/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    const stalls = await storage.getProduct(parseInt(req.params.id));
+    res.json(stalls);
+  });
+
+  // Edit Product
+  app.put("/api/products/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !["admin", "vendor"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    const product = await storage.updateProduct(parseInt(req.params.id), req.body);
     if (!product) return res.sendStatus(404);
     res.json(product);
   });

@@ -18,11 +18,10 @@ import {
   Profile,
   profile,
 } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { db, pool } from "./db";
+import { eq, ne } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { pool } from "./db";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -93,6 +92,35 @@ export class DatabaseStorage implements IStorage {
     }
 
     return [updated, updatedProfile];
+  }
+
+  async getUsers( id: number ): Promise<User[]> {
+    return await db.select().from(users).where(ne(users.id, id));
+  }
+
+  async updateUseRole(
+    id: number,
+    role: "admin" | "organizer" | "vendor" | "customer",
+    // role: any,
+  ): Promise<User | undefined> {
+    const [updated] = await db
+     .update(users)
+     .set({ role })
+     .where(eq(users.id, id))
+     .returning();
+    return updated;
+  }
+
+  async updateUserStatus(
+    id: number,
+    status: "active" | "inactive"
+  ): Promise<User | undefined> {
+    const [updated] = await db
+      .update(users)
+      .set({ status })
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
   }
 
   // Event operations

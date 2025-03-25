@@ -5,14 +5,14 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
+import { User as SelectUser, users } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from 'fs';
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface User extends SelectUser { }
   }
 }
 
@@ -81,6 +81,9 @@ export function setupAuth(app: Express) {
         if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false);
         }
+        if (user.status === "inactive") {
+          return done(null, false, { message: "Account is inactive" });
+        }
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -126,10 +129,12 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user) => {
+    passport.authenticate("local", (err, user, info) => {
       if (err) return next(err);
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({
+          message: info?.message || "Invalid credentials" 
+         });
       }
       req.login(user, (err) => {
         if (err) return next(err);
@@ -175,7 +180,7 @@ export function setupAuth(app: Express) {
         username: req.body.username,
         name: req.body.name,
         email: req.body.email
-      },{
+      }, {
         bio: req.body.bio,
         dob: req.body.dob,
         gender: req.body.gender,
@@ -203,40 +208,65 @@ export function setupAuth(app: Express) {
     }
   });
 
-const upload = multer({ storage: multer.memoryStorage() });
+  app.get("/api/users", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+    const users = await storage.getUsers(req.user.id);
+    res.json(users);
+  });
 
-app.post("/api/upload", upload.single('file'), (req, res) => {
-  try {
-    const file = req.file;
-    if (!file) {
+  app.patch("/api/users/:id/role", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+    const user = await storage.updateUseRole(
+      parseInt(req.params.id), 
+      req.body.role as "admin" | "vendor" | "customer" | "organizer"
+    );
+  });
+
+  app.patch("/api/users/:id/status", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(401);
+    }
+    const user = await storage.updateUserStatus(
+      parseInt(req.params.id),
+      req.body.status as "active" | "inactive"
+    );
+    if (!user) return res.sendStatus(404);
+    res.json(user);
+  });
+  const upload = multer({ storage: multer.memoryStorage() });
+
+  app.post("/api/upload", upload.single('file'), (req, res) => {
+    try {
+      const file = req.file;
+      if (!file) {
         return res.status(400).json({ error: "No file uploaded" });
-    }
+      }
 
-    const file_location = req.body.file_location || '';
-    const uploadPath = path.join(process.env.FILE_UPLOADER_PATH || '', file_location);
+      const file_location = req.body.file_location || '';
+      const uploadPath = path.join(process.env.FILE_UPLOADER_PATH || '', file_location);
 
-    // Ensure directory exists
-    if (!fs.existsSync(uploadPath)) {
+      // Ensure directory exists
+      if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true });
-    }
+      }
 
-    // Define the final file path
-    const filename = (Date.now() + '-' + Math.round(Math.random() * 1E9)) + path.extname(file.originalname);
-    const filePath = path.join(uploadPath, `${filename}`);
-    const fileURLPath = path.join(process.env.SERVER_UPLOAD_PATH || '', `/${file_location}/` ,`${filename}`);
+      // Define the final file path
+      const filename = (Date.now() + '-' + Math.round(Math.random() * 1E9)) + path.extname(file.originalname);
+      const filePath = path.join(uploadPath, `${filename}`);
+      const fileURLPath = path.join(process.env.SERVER_UPLOAD_PATH || '', `/${file_location}/`, `${filename}`);
 
-    // Write the file from memory to disk
-    fs.writeFileSync(filePath, file.buffer);
+      // Write the file from memory to disk
+      fs.writeFileSync(filePath, file.buffer);
 
-    res.json({ message: "File uploaded successfully!", url: fileURLPath });
-  } catch (error) {
+      res.json({ message: "File uploaded successfully!", url: fileURLPath });
+    } catch (error) {
       res.status(500).json({ error: "File upload failed", details: (error as Error).message });
-  }
-});
+    }
+  });
 
-// Update static file serving
-app.use(`${process.env.SERVER_UPLOAD_PATH}`, express.static(`${process.env.FILE_UPLOADER_PATH}`));
-// Example
-// FILE_UPLOADER_PATH="e:/xampp8-0/htdocs/EventMarketplace/client/.next/server/uploads"
-// SERVER_UPLOAD_PATH="/_next/server/uploads/"
+  // Update static file serving
+  app.use(`${process.env.SERVER_UPLOAD_PATH}`, express.static(`${process.env.FILE_UPLOADER_PATH}`));
+  // Example
+  // FILE_UPLOADER_PATH="e:/xampp8-0/htdocs/EventMarketplace/client/.next/server/uploads"
+  // SERVER_UPLOAD_PATH="/_next/server/uploads/"
 }

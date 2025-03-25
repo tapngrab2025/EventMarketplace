@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, date, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   role: text("role", { enum: ["admin", "vendor", "customer", "organizer"] }).notNull().default("customer"),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  status: varchar("status").notNull().default("active"),
 });
 
 export const profile = pgTable("profile", {
@@ -143,7 +144,7 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
 });
 
 export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUser = typeof users.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Stall = typeof stalls.$inferSelect;
