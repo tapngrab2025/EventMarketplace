@@ -160,12 +160,6 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(stalls).orderBy(stalls.id, 'desc');
   }
 
-  // async getStallsByEvent(eventId: number): Promise<Stall[]> {
-  //   return await db
-  //     .select()
-  //     .from(stalls)
-  //     .where(eq(stalls.eventId, eventId));
-  // }
   async getStallsByEvent(eventId: number): Promise<Stall[]> {
     const stallsWithProducts = await db
       .select({
