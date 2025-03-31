@@ -200,6 +200,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(204);
   });
 
+  // Orders endpoints
+  app.post("/api/orders", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const order = await storage.createOrder({
+      ...req.body,
+      user_id: req.user.id,  // Changed from userId to user_id
+    });
+    res.status(201).json(order);
+  });
+
+  app.get("/api/orders/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const order = await storage.getOrder(parseInt(req.params.id));
+      if (!order) return res.sendStatus(404);
+      
+      // Check if the user owns this order or is an admin
+      if (order[0].user_id !== req.user.id && req.user.role !== "admin") {
+        return res.sendStatus(403);
+      }
+
+      res.json(order);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ message: "Failed to fetch order details" });
+    }
+  });
+
+  app.get("/api/orders", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    console.log(req.user.id);
+    try {
+      const orders = await storage.getUserOrders(req.user.id);
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

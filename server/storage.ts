@@ -17,6 +17,10 @@ import {
   cartItems,
   Profile,
   profile,
+  InsertOrder,
+  Order,
+  orders,
+  orderItems,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, ne } from "drizzle-orm";
@@ -304,6 +308,68 @@ export class DatabaseStorage implements IStorage {
       .where(eq(cartItems.id, id))
       .returning();
     return !!deleted;
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    try {
+      // Start a transaction
+      return await db.transaction(async (tx) => {
+        // Create the order
+        const [order] = await tx
+          .insert(orders)
+          .values({
+            userId: insertOrder.userId,
+            fullName: insertOrder.fullName,
+            phone: insertOrder.phone,
+            address: insertOrder.address,
+            total: insertOrder.total,
+            status: "pending",
+            paymentMethod: insertOrder.paymentMethod,
+          })
+          .returning();
+
+        // Insert order items
+        if (insertOrder.items && insertOrder.items.length > 0) {
+          await tx
+            .insert(orderItems)
+            .values(
+              insertOrder.items.map((item) => ({
+                orderId: order.id,
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price,
+              }))
+            );
+        }
+
+        // Clear cart
+        if (insertOrder.userId) {
+          await tx
+            .delete(cartItems)
+            .where(eq(cartItems.userId, insertOrder.userId));
+        }
+
+        return order;
+      });
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw new Error('Failed to create order');
+    }
+  }
+  
+  async getUserOrders(userId: number): Promise<Order[]> {
+      return await db
+        .select()
+        .from(orders)
+        .where(eq(orders.userId, userId))
+        .orderBy(orders.createdAt, 'desc');
+  }
+
+  async getOrder(order_id: number): Promise<Order[]>  {
+    return await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, order_id));
   }
 }
 

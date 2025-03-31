@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { CheckoutForm } from "@/components/checkout-form";
+import { useState } from "react";
 
 export default function CartDrawer() {
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const { toast } = useToast();
 
   const { data: cartItems, isLoading: loadingCart } = useQuery<CartItem[]>({
@@ -73,11 +76,15 @@ export default function CartDrawer() {
   return (
     <SheetContent className="w-full sm:max-w-lg">
       <SheetHeader>
-        <SheetTitle>Shopping Cart</SheetTitle>
+        <SheetTitle>{isCheckingOut ? "Checkout" : "Shopping Cart"}</SheetTitle>
       </SheetHeader>
       <div className="mt-8 space-y-4">
-        {cartItemsWithProducts?.length === 0 ? (
-          <p className="text-center text-muted-foreground">Your cart is empty</p>
+        {isCheckingOut ? (
+          <CheckoutForm 
+            onSuccess={() => setIsCheckingOut(false)}
+            total={total || 0}
+            items={cartItemsWithProducts || []}
+          />
         ) : (
           <>
             {cartItemsWithProducts?.map((item) => (
@@ -151,9 +158,15 @@ export default function CartDrawer() {
             <div className="pt-4 space-y-4">
               <div className="flex justify-between font-medium text-lg">
                 <span>Total</span>
-                <span>${(total / 100).toFixed(2)}</span>
+                <span>${((total || 0) / 100).toFixed(2)}</span>
               </div>
-              <Button className="w-full">Proceed to Checkout</Button>
+              <Button 
+                className="w-full" 
+                onClick={() => setIsCheckingOut(true)}
+                disabled={!cartItemsWithProducts?.length}
+              >
+                Proceed to Checkout
+              </Button>
             </div>
           </>
         )}
