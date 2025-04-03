@@ -205,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const order = await storage.createOrder({
       ...req.body,
-      user_id: req.user.id,  // Changed from userId to user_id
+      user_id: req.user.id,
     });
     res.status(201).json(order);
   });

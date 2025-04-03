@@ -13,8 +13,6 @@ interface AddStallProps {
 }
 
 export function AddStall({ stallDialogOpen, setStallDialogOpen, event, setSelectedEvent, selectedEvent }: AddStallProps) {
-    // console.log(event);
-    // console.log(selectedEvent);
   return (
     <Dialog
     open={stallDialogOpen && selectedEvent?.id === event.id}

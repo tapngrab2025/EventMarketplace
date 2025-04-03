@@ -318,7 +318,7 @@ export class DatabaseStorage implements IStorage {
         const [order] = await tx
           .insert(orders)
           .values({
-            userId: insertOrder.userId,
+            user_id: insertOrder.user_id,
             fullName: insertOrder.fullName,
             phone: insertOrder.phone,
             address: insertOrder.address,
@@ -343,10 +343,10 @@ export class DatabaseStorage implements IStorage {
         }
 
         // Clear cart
-        if (insertOrder.userId) {
+        if (insertOrder.user_id) {
           await tx
             .delete(cartItems)
-            .where(eq(cartItems.userId, insertOrder.userId));
+            .where(eq(cartItems.userId, insertOrder.user_id));
         }
 
         return order;
@@ -361,7 +361,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(orders)
-        .where(eq(orders.userId, userId))
+        .where(eq(orders.user_id, userId))
         .orderBy(orders.createdAt, 'desc');
   }
 

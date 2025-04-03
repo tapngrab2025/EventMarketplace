@@ -1,14 +1,10 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Event,
   Stall,
   Product,
-  insertEventSchema,
-  insertStallSchema,
-  insertProductSchema,
 } from "@shared/schema";
-import { Button } from "@/components/ui/button";
 import { AddEvent } from "@/components/event/add-event";
 import {
   Card,
@@ -19,11 +15,9 @@ import {
 import { Loader2, Plus, Pencil } from "lucide-react";
 import { useState } from "react";
 import { DEFAULT_IMAGES } from "@/config/constants";
-import { EditEvent } from "@/components/event/edit-event";
 import { AddStall } from "@/components/stall/add-stall";
 import { AddProduct } from "@/components/product/add-product";
-import { EditStall } from "@/components/stall/edit-stall";
-import { EditProduct } from "@/components/product/edit-product";
+import { MyEventsSection } from "@/components/dashboard/my-events-section";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -90,11 +84,6 @@ export default function VendorDashboard(
     myEvents?.some((event) => event.id === stall.eventId)
   );
 
-  // Filter products for display based on matched stalls
-  const myProducts = products?.filter((product) =>
-    myStalls?.some((stall) => stall.id === product.stallId)
-  );
-
   const otherEvents = events?.filter((event) => {
     const eventMatches = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -129,12 +118,11 @@ export default function VendorDashboard(
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Vendor Dashboard</h1>
           <p className="text-muted-foreground">
-            Manage your events, stalls, and products
+            Manage events, stalls, and products
           </p>
         </header>
 
         <div className="grid gap-8">
-          {/* Events Section */}
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">My Events</h2>
@@ -143,166 +131,28 @@ export default function VendorDashboard(
                 setEventDialogOpen={setEventDialogOpen}
               />
             </div>
-            <div className="grid gap-6">
-              {myEvents?.length === 0 ? (
-                <p className="text-muted-foreground">No events created yet</p>
-              ) : (
-                myEvents?.map((event) => (
-                  <Card key={event.id}>
-                    <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {event.name}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditEventId(event.id);
-                            setEventEditDialogOpen(true);
-                          }}
-                        >
-                          <Pencil/>
-                          Edit
-                        </Button>
-                        <EditEvent
-                          eventId={editEventId}
-                          setEventId={setEditEventId}
-                          eventDialogOpen={eventEditDialogOpen}
-                          setEventDialogOpen={setEventEditDialogOpen}
-                        />
-                      </div>
-                      <span className={`text-sm px-2 py-1 rounded-full ${event.approved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                        {event.approved ? "Approved" : "Pending"}
-                      </span>
-                    </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <img
-                            src={event.imageUrl || DEFAULT_IMAGES.EVENT}
-                            alt={event.name}
-                            className="w-full h-48 object-cover rounded-md mb-4"
-                          />
-                          <p className="text-muted-foreground">
-                            {event.description}
-                          </p>
-                          <p className="mt-2">Location: {event.location}</p>
-                          <p>
-                            Dates: {new Date(event.startDate).toLocaleDateString()}{" "}
-                            - {new Date(event.endDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold">Stalls</h3>
-                            <AddStall 
-                              stallDialogOpen={stallDialogOpen}
-                              setStallDialogOpen={setStallDialogOpen}
-                              event={event}
-                              selectedEvent={selectedEvent}
-                              setSelectedEvent={setSelectedEvent}
-                            />
-                          </div>
-                          {myStalls
-                            ?.filter((stall) => stall.eventId === event.id)
-                            .map((stall) => (
-                              <Card key={stall.id} className="mb-4">
-                                <CardHeader>
-                                <CardTitle className="text-base flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    {stall.name}
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setEditStallId(stall.id);
-                                        setStallDialogOpen(true);
-                                      }}
-                                    >
-                                      Edit
-                                    </Button>
-                                    <EditStall
-                                      stallId={editStallId}
-                                      setStallId={setEditStallId}
-                                      stallDialogOpen={stallDialogOpen}
-                                      setStallDialogOpen={setStallDialogOpen}
-                                    />
-                                  </div>
-                                    <AddProduct
-                                      productDialogOpen={productDialogOpen}
-                                      setProductDialogOpen={setProductDialogOpen}
-                                      stall={stall}
-                                      selectedStall={selectedStall}
-                                      setSelectedStall={setSelectedStall}
-                                    />
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {matchedProducts
-                                      ?.filter(
-                                        (product) => product.stallId === stall.id
-                                      )
-                                      .map((product) => (
-                                        <Card
-                                          key={product.id}
-                                          className="bg-muted"
-                                        >
-                                          <CardContent className="p-4">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h4 className="font-medium">{product.name}</h4>
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              onClick={() => {
-                                                setEditProductId(product.id);
-                                                setProductDialogOpen(true);
-                                              }}
-                                            >
-                                              Edit
-                                            </Button>
-                                            <EditProduct
-                                              productId={editProductId}
-                                              setProductId={setEditProductId}
-                                              productDialogOpen={productDialogOpen}
-                                              setProductDialogOpen={setProductDialogOpen}
-                                            />
-                                          </div>
-                                            <img
-                                              src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
-                                              alt={product.name}
-                                              className="w-full h-24 object-cover rounded-md mb-2"
-                                            />
-                                            <h4 className="font-medium">
-                                              {product.name}
-                                            </h4>
-                                            <span
-                                              className={`text-sm px-2 py-1 rounded-full ${product.approved
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-yellow-100 text-yellow-700"
-                                                }`}
-                                            >
-                                              {product.approved ? "Approved" : "Pending"}
-                                            </span>
-                                            <p className="text-sm text-muted-foreground">
-                                              ${(product.price / 100).toFixed(2)} -{" "}
-                                              {product.stock} left
-                                            </p>
-                                          </CardContent>
-                                        </Card>
-                                      ))}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+            <MyEventsSection
+              events={myEvents}
+              stalls={myStalls}
+              products={matchedProducts}
+              editEventId={editEventId}
+              setEditEventId={setEditEventId}
+              eventEditDialogOpen={eventEditDialogOpen}
+              setEventEditDialogOpen={setEventEditDialogOpen}
+              stallDialogOpen={stallDialogOpen}
+              setStallDialogOpen={setStallDialogOpen}
+              selectedEvent={selectedEvent}
+              setSelectedEvent={setSelectedEvent}
+              productDialogOpen={productDialogOpen}
+              setProductDialogOpen={setProductDialogOpen}
+              selectedStall={selectedStall}
+              setSelectedStall={setSelectedStall}
+              editStallId={editStallId}
+              setEditStallId={setEditStallId}
+              editProductId={editProductId}
+              setEditProductId={setEditProductId}
+              enableButton={true}
+            />
           </section>
           <section>
             <div className="flex items-center justify-between mb-6">

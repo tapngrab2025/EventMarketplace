@@ -14,20 +14,20 @@ interface AddProductProps {
 
 export function AddProduct({ productDialogOpen, setProductDialogOpen, stall, setSelectedStall, selectedStall }: AddProductProps) {
   return (
-    <Dialog 
-    open={productDialogOpen && selectedStall?.id === stall.id}
-    onOpenChange={(open) => {
-      setProductDialogOpen(open);
-      if (open) setSelectedStall(stall);
-      if (!open) setSelectedStall(null);
-    }}
+    <Dialog
+      open={productDialogOpen && selectedStall?.id === stall.id}
+      onOpenChange={(open) => {
+        setProductDialogOpen(open);
+        if (open) setSelectedStall(stall);
+        if (!open) setSelectedStall(null);
+      }}
     >
-                                            <DialogTrigger asChild>
-                                        <Button size="sm" variant="outline">
-                                          <Plus className="h-4 w-4 mr-2" />
-                                          Add Product
-                                        </Button>
-                                      </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Product
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Product to {selectedStall?.name}</DialogTitle>
