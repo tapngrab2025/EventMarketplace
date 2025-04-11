@@ -12,6 +12,7 @@ import { Event, insertEventSchema } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
+import { LocationPicker } from "@/components/location-picker";
 
 interface EditDialogProps {
   eventId: number;
@@ -78,6 +79,21 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
       });
       return;
     }
+    const missingFields = [];
+      if (!data.name) missingFields.push("Event Name");
+      if (!data.description) missingFields.push("Description");
+      if (!data.location) missingFields.push("Location");
+      if (!data.startDate) missingFields.push("Start Date");
+      if (!data.endDate) missingFields.push("End Date");
+
+      if (missingFields.length > 0) {
+        toast({
+          title: "Error",
+          description: `Please fill in the following fields: ${missingFields.join(", ")}`,
+          variant: "destructive",
+        });
+        return;
+      }
     editEvent.mutate(data);
   });
 
@@ -117,7 +133,13 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input {...field} />
+                {/* <Input {...field} /> */}
+                <LocationPicker
+                    defaultValue={field.value}
+                    onLocationSelect={(location) => {
+                      field.onChange(location.address);
+                    }}
+                  />
               </FormControl>
               <FormMessage />
             </FormItem>

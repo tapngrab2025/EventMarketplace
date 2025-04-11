@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { sub } from "date-fns";
 
 interface EditProductFormProps {
   productId: number;
@@ -60,9 +61,29 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
     },
   });
 
+  const formSubmit = form.handleSubmit((data) => {
+    const missingFields = [];
+      if (!data.name) missingFields.push("Event Name");
+      if (!data.description) missingFields.push("Description");
+      if (!data.price) missingFields.push("Price");
+      if (!data.category) missingFields.push("Category");
+      if (!data.stock) missingFields.push("Stock");
+
+      if (missingFields.length > 0) {
+        toast({
+          title: "Error",
+          description: `Please fill in the following fields: ${missingFields.join(", ")}`,
+          variant: "destructive",
+        });
+        return;
+      }
+    editProduct.mutate(data);
+  });
+
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => editProduct.mutate(data))} className="space-y-4">
+      <form onSubmit={formSubmit} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -96,7 +117,12 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
             <FormItem>
               <FormLabel>Price (in cents)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                {/* <Input type="number" {...field} /> */}
+                <Input 
+                  type="text" 
+                  value={(field.value / 100).toFixed(2)} // Convert cents to dollars
+                  onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

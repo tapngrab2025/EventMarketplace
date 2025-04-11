@@ -81,6 +81,15 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const orderDeliveryStatus = pgTable('order_delivery_status', {
+  id: serial('id').primaryKey(),
+  orderId: integer('order_id').references(() => orders.id),
+  stallId: integer('stall_id').references(() => stalls.id),
+  status: text('status', { enum: ['pending', 'ready', 'delivered'] }).notNull().default('pending'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  notes: text('notes'),
+});
+
 // Create the insert schemas with proper validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,

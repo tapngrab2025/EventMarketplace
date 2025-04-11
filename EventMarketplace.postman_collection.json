@@ -103,7 +103,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"username\": \"testuser\",\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"bio\": \"My bio\",\n    \"dob\": \"1990-01-01\",\n    \"gender\": \"not_to_disclose\",\n    \"address\": \"123 Street\",\n    \"contact\": \"1234567890\",\n    \"city\": \"Test City\",\n    \"country\": \"Test Country\",\n    \"postalCode\": \"12345\",\n    \"phoneNumber\": \"1234567890\",\n    \"occupation\": \"Developer\",\n    \"socialMedia\": {\n        \"facebook\": \"fb.com/test\",\n        \"twitter\": \"twitter.com/test\",\n        \"instagram\": \"instagram.com/test\",\n        \"linkedin\": \"linkedin.com/test\"\n    }\n}"
+              "raw": "{\n    \"bio\": \"My bio\",\n    \"dob\": \"1990-01-01\",\n    \"gender\": \"not_to_disclose\",\n    \"address\": \"123 Street\",\n    \"city\": \"Test City\",\n    \"country\": \"Test Country\",\n    \"postalCode\": \"12345\",\n    \"phoneNumber\": \"1234567890\",\n    \"occupation\": \"Developer\",\n    \"socialMedia\": {\n        \"facebook\": \"fb.com/test\",\n        \"twitter\": \"twitter.com/test\",\n        \"instagram\": \"instagram.com/test\",\n        \"linkedin\": \"linkedin.com/test\"\n    }\n}"
             }
           }
         }
@@ -158,6 +158,273 @@
               "host": ["localhost"],
               "port": "5000",
               "path": ["api", "events", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stalls",
+      "item": [
+        {
+          "name": "Create Stall",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/stalls",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "stalls"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test Stall\",\n    \"description\": \"Test Description\",\n    \"imageUrl\": \"https://example.com/image.jpg\",\n    \"location\": \"A1\",\n    \"eventId\": 1,\n    \"vendorId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Stalls",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/stalls",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "stalls"]
+            }
+          }
+        },
+        {
+          "name": "Get Stalls by Event",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/events/1/stalls",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "events", "1", "stalls"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test Product\",\n    \"description\": \"Test Description\",\n    \"price\": 1000,\n    \"imageUrl\": \"https://example.com/image.jpg\",\n    \"category\": \"souvenir\",\n    \"stallId\": 1,\n    \"stock\": 100\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Products by Stall",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/stalls/1/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "stalls", "1", "products"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/cart",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "cart"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": 1,\n    \"quantity\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Cart Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/cart",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "cart"]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/cart/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "cart", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:5000/api/cart/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "cart", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fullName\": \"John Doe\",\n    \"phone\": \"1234567890\",\n    \"address\": \"123 Street\",\n    \"paymentMethod\": \"cash\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/orders/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delivery Status",
+      "item": [
+        {
+          "name": "Get Stall Order Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/stall-orders/1/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "stall-orders", "1", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Delivery Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/stall-orders/1/1/delivery",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "stall-orders", "1", "1", "delivery"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"ready\",\n    \"notes\": \"Order is ready for pickup\"\n}"
             }
           }
         }

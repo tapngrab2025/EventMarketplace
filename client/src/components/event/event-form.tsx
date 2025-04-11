@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { LocationPicker } from "@/components/location-picker";
 
 interface EventFormProps {
   onSuccess: () => void;
@@ -91,6 +92,21 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
         });
         return;
       }
+      const missingFields = [];
+      if (!data.name) missingFields.push("Event Name");
+      if (!data.description) missingFields.push("Description");
+      if (!data.location) missingFields.push("Location");
+      if (!data.startDate) missingFields.push("Start Date");
+      if (!data.endDate) missingFields.push("End Date");
+
+      if (missingFields.length > 0) {
+        toast({
+          title: "Error",
+          description: `Please fill in the following fields: ${missingFields.join(", ")}`,
+          variant: "destructive",
+        });
+        return;
+      }
       createEvent.mutate(data);
     });
   
@@ -130,7 +146,13 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                {/* <Input {...field} /> */}
+                  <LocationPicker
+                    defaultValue={field.value}
+                    onLocationSelect={(location) => {
+                      field.onChange(location.address);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

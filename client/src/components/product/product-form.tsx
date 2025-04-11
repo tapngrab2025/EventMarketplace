@@ -75,11 +75,29 @@ export function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () 
         });
       },
     });
+    const formSubmit = form.handleSubmit((data) => {
+      const missingFields = [];
+        if (!data.name) missingFields.push("Event Name");
+        if (!data.description) missingFields.push("Description");
+        if (!data.price) missingFields.push("Price");
+        if (!data.category) missingFields.push("Category");
+        if (!data.stock) missingFields.push("Stock");
+  
+        if (missingFields.length > 0) {
+          toast({
+            title: "Error",
+            description: `Please fill in the following fields: ${missingFields.join(", ")}`,
+            variant: "destructive",
+          });
+          return;
+        }
+        createProduct.mutate(data);
+    });
   
     return (
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((data) => createProduct.mutate(data))}
+          onSubmit={formSubmit}
           className="space-y-4"
         >
           <FormField

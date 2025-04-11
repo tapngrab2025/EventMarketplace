@@ -241,6 +241,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get stall-specific order details
+  app.get("/api/stall-orders/:orderId/:stallId", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const stallId = parseInt(req.params.stallId);
+      const orderDetails = await storage.getStallOrder(orderId, stallId);
+      res.json(orderDetails);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stall order details" });
+    }
+  });
+
+  // Update delivery status
+  app.put("/api/stall-orders/:orderId/:stallId/delivery", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const stallId = parseInt(req.params.stallId);
+      const { status, notes } = req.body;
+
+      const updated = await storage.updateDeliveryStatus(orderId, stallId, status, notes);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update delivery status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

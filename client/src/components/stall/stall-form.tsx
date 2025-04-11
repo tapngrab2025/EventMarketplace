@@ -13,6 +13,7 @@ import { Event, Stall, Product, insertEventSchema, insertStallSchema, insertProd
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
+import { LocationPicker } from "@/components/location-picker";
 
 interface AddStallDialogProps {
     event: Event;
@@ -125,7 +126,13 @@ export function  StallForm({ event, onSuccess }: AddStallDialogProps ) {
               <FormItem>
                 <FormLabel>Location in Venue</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  {/* <Input {...field} /> */}
+                  <LocationPicker
+                    defaultValue={field.value}
+                    onLocationSelect={(location) => {
+                      field.onChange(location.address);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

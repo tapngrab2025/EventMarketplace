@@ -365,11 +365,110 @@ export class DatabaseStorage implements IStorage {
         .orderBy(orders.createdAt, 'desc');
   }
 
-  async getOrder(order_id: number): Promise<Order[]>  {
+  async getOrder(order_id: number): Promise<Order[]> {
+      const orderWithItems = await db
+        .select({
+          id: orders.id,
+          user_id: orders.user_id,
+          fullName: orders.fullName,
+          phone: orders.phone,
+          address: orders.address,
+          total: orders.total,
+          status: orders.status,
+          paymentMethod: orders.paymentMethod,
+          createdAt: orders.createdAt,
+          items: {
+            id: orderItems.id,
+            quantity: orderItems.quantity,
+            price: orderItems.price,
+            product: {
+              id: products.id as unknown as number,
+              name: products.name as unknown as string,
+              description: products.description as unknown as string,
+              imageUrl: products.imageUrl as unknown as string,
+              stall: { 
+                id: stalls.id as unknown as number,
+                name: stalls.name as unknown as string,
+              }
+            }
+          }
+        })
+        .from(orders)
+        .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
+        .leftJoin(products, eq(products.id, orderItems.productId))
+        .leftJoin(stalls, eq(stalls.id, products.stallId))
+        .where(eq(orders.id, order_id));
+  
+      // Group items by order
+      const groupedOrders = orderWithItems.reduce((acc, curr) => {
+        const order = acc.find(o => o.id === curr.id);
+        if (!order) {
+          acc.push({
+            ...curr,
+            items: curr.items ? [curr.items] : []
+          });
+        } else if (curr.items) {
+          order.items.push(curr.items);
+        }
+        return acc;
+      }, [] as any[]);
+  
+      return groupedOrders;
+    }
+
+  async getStallOrder(orderId: number, stallId: number): Promise<any> {
+    const orderItems = await db
+      .select({
+        order: orders,
+        items: {
+          id: orderItems.id,
+          quantity: orderItems.quantity,
+          price: orderItems.price,
+          product: products,
+          deliveryStatus: orderDeliveryStatus
+        }
+      })
+      .from(orders)
+      .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .leftJoin(products, eq(products.id, orderItems.productId))
+      .leftJoin(orderDeliveryStatus, and(
+        eq(orderDeliveryStatus.orderId, orders.id),
+        eq(orderDeliveryStatus.stallId, stallId)
+      ))
+      .where(and(
+        eq(orders.id, orderId),
+        eq(products.stallId, stallId)
+      ));
+
+    return orderItems;
+  }
+
+  async updateDeliveryStatus(
+    orderId: number,
+    stallId: number,
+    status: 'pending' | 'ready' | 'delivered',
+    notes?: string
+  ): Promise<any> {
+    const [existing] = await db
+      .select()
+      .from(orderDeliveryStatus)
+      .where(and(
+        eq(orderDeliveryStatus.orderId, orderId),
+        eq(orderDeliveryStatus.stallId, stallId)
+      ));
+
+    if (existing) {
+      return await db
+        .update(orderDeliveryStatus)
+        .set({ status, notes, updatedAt: new Date() })
+        .where(eq(orderDeliveryStatus.id, existing.id))
+        .returning();
+    }
+
     return await db
-    .select()
-    .from(orders)
-    .where(eq(orders.id, order_id));
+      .insert(orderDeliveryStatus)
+      .values({ orderId, stallId, status, notes })
+      .returning();
   }
 }
 

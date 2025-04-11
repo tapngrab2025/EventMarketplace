@@ -11,6 +11,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { LocationPicker } from "@/components/location-picker";
 
 interface EditStallFormProps {
   stallId: number;
@@ -94,7 +95,13 @@ export function StallEditForm({ stallId, onClose }: EditStallFormProps) {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input {...field} />
+                {/* <Input {...field} /> */}
+                <LocationPicker
+                    defaultValue={field.value}
+                    onLocationSelect={(location) => {
+                      field.onChange(location.address);
+                    }}
+                  />
               </FormControl>
               <FormMessage />
             </FormItem>
