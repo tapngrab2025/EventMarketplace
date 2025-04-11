@@ -47,11 +47,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 <header className="border-b">
                     <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                         <Logo/>
-                        <div className="flex items-center gap-4">
+                        {/* <div className="flex items-center gap-4"> */}
                             <RightNavigation 
                             searchTerm={searchTerm} 
                             setSearchTerm={setSearchTerm} />
-                        </div>
+                        {/* </div> */}
                     </div>
                 </header>
                 <main className="p-6">
