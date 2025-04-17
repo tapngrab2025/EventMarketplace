@@ -60,10 +60,10 @@ export function MyEventsSection({
         <p className="text-muted-foreground">No events created yet</p>
       ) : (
         events?.map((event) => (
-          <Card key={event.id}>
+          <Card key={event.id} >
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {event.name}
                   {enableButton && (
                     <Button
@@ -96,13 +96,12 @@ export function MyEventsSection({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Rest of your existing event card content */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <img
                     src={event.imageUrl || DEFAULT_IMAGES.EVENT}
                     alt={event.name}
-                    className="w-full h-48 object-cover rounded-md mb-4"
+                    className="w-full h-48 md:h-64 object-cover rounded-md mb-4"
                   />
                   <p className="text-muted-foreground">{event.description}</p>
                   <p className="mt-2">Location: {event.location}</p>
@@ -115,13 +114,13 @@ export function MyEventsSection({
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Stalls</h3>
                     {enableButton && (
-                        <AddStall
+                      <AddStall
                         stallDialogOpen={stallDialogOpen}
                         setStallDialogOpen={setStallDialogOpen}
                         event={event}
                         selectedEvent={selectedEvent}
                         setSelectedEvent={setSelectedEvent}
-                    />
+                      />
                     )}
                   </div>
                   {stalls
@@ -129,8 +128,8 @@ export function MyEventsSection({
                     .map((stall) => (
                       <Card key={stall.id} className="mb-4">
                         <CardHeader>
-                          <CardTitle className="text-base flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                          <CardTitle className="text-base flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               {stall.name}
                               {enableButton && (
                                 <Button
@@ -152,23 +151,24 @@ export function MyEventsSection({
                               />
                             </div>
                             {enableButton && (
-                                <AddProduct
+                              <AddProduct
                                 productDialogOpen={productDialogOpen}
                                 setProductDialogOpen={setProductDialogOpen}
                                 stall={stall}
                                 selectedStall={selectedStall}
                                 setSelectedStall={setSelectedStall}
-                                />)}
+                              />
+                            )}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                             {products
                               ?.filter((product) => product.stallId === stall.id)
                               .map((product) => (
                                 <Card key={product.id} className="bg-muted">
                                   <CardContent className="p-4">
-                                    <div className="flex items-center justify-between mb-2">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                                       <h4 className="font-medium">
                                         {product.name}
                                       </h4>
@@ -196,21 +196,23 @@ export function MyEventsSection({
                                         product.imageUrl || DEFAULT_IMAGES.PRODUCT
                                       }
                                       alt={product.name}
-                                      className="w-full h-24 object-cover rounded-md mb-2"
+                                      className="w-full h-32 sm:h-24 object-cover rounded-md mb-2"
                                     />
-                                    <span
-                                      className={`text-sm px-2 py-1 rounded-full ${
-                                        product.approved
-                                          ? "bg-green-100 text-green-700"
-                                          : "bg-yellow-100 text-yellow-700"
-                                      }`}
-                                    >
-                                      {product.approved ? "Approved" : "Pending"}
-                                    </span>
-                                    <p className="text-sm text-muted-foreground">
-                                      ${(product.price / 100).toFixed(2)} -{" "}
-                                      {product.stock} left
-                                    </p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span
+                                        className={`text-sm px-2 py-1 rounded-full ${
+                                          product.approved
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-yellow-100 text-yellow-700"
+                                        }`}
+                                      >
+                                        {product.approved ? "Approved" : "Pending"}
+                                      </span>
+                                      <p className="text-sm text-muted-foreground">
+                                        ${(product.price / 100).toFixed(2)} -{" "}
+                                        {product.stock} left
+                                      </p>
+                                    </div>
                                   </CardContent>
                                 </Card>
                               ))}

@@ -4,17 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
-import { UserCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-// import { Input } from "../ui/input";
 import { Input } from "@/components/ui/input";
 
 export function RightNavigation({
-    searchTerm, 
-    setSearchTerm 
+    // searchTerm, 
+    // setSearchTerm,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen
 }: { 
-    searchTerm: string; 
-    setSearchTerm: React.Dispatch<React.SetStateAction<string>> 
+    // searchTerm: string; 
+    // setSearchTerm: React.Dispatch<React.SetStateAction<string>> 
+    isMobileMenuOpen: boolean; 
+    setIsMobileMenuOpen: (value: boolean) => void;
 }) {
     const { user, logoutMutation } = useAuth();
     const [, setLocation] = useLocation();
@@ -29,20 +31,18 @@ export function RightNavigation({
             {!user ? (
                 <Button onClick={() => setLocation("/auth")}>Sign In</Button>
             ) : (
-                <>
-                    <Input
-                        type="search"
-                        placeholder="Search events and products..."
-                        className="w-64"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setLocation("/profile")}
-                        title="User Profile">
-                        <UserCircle className="h-5 w-5" />
+                <div className="flex items-center gap-4">
+                    <div className="hidden md:flex space-x-6">
+                        {/* <Input
+                            type="search"
+                            placeholder="Search events and products..."
+                            className="w-64"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        /> */}
+                    </div>
+                    <Button className="hidden md:block" variant="ghost" size="icon" onClick={() => setLocation("/profile")} title="User Profile">
+                        <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">person</span>
                     </Button>
                     {user.role === "vendor" && (
                         <Button
@@ -116,7 +116,15 @@ export function RightNavigation({
                             <LogOut className="h-5 w-5" />
                         )}
                     </Button>
-                </>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="md:hidden"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    >
+                        <span className="material-icons">menu</span>
+                    </Button>
+                </div>
             )}
         </>
     );

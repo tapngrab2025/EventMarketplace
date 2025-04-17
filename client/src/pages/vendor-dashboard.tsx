@@ -18,13 +18,16 @@ import { DEFAULT_IMAGES } from "@/config/constants";
 import { AddStall } from "@/components/stall/add-stall";
 import { AddProduct } from "@/components/product/add-product";
 import { MyEventsSection } from "@/components/dashboard/my-events-section";
+import { Input } from "@/components/ui/input";
+import { OtherEventsSection } from "@/components/dashboard/other-events-section";
 
 interface VendorDashboardProps {
   searchTerm?: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>> 
 }
 
 export default function VendorDashboard(
-  { searchTerm = "" }: VendorDashboardProps
+  { searchTerm = "", setSearchTerm }: VendorDashboardProps
 ) {
   const { user } = useAuth();
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
@@ -113,14 +116,23 @@ export default function VendorDashboard(
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background md:p-8">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
+        <header className="mb-4 md:mb-8">
           <h1 className="text-3xl font-bold">Vendor Dashboard</h1>
           <p className="text-muted-foreground">
             Manage events, stalls, and products
           </p>
         </header>
+        <div className="flex mb-6">
+            <Input
+                type="search"
+                placeholder="Search events and products..."
+                className="pr-10 w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div> 
 
         <div className="grid gap-8">
           <section>
@@ -158,115 +170,19 @@ export default function VendorDashboard(
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Others Events</h2>
             </div>
-            <div className="grid gap-6">
-              {otherEvents?.length === 0 ? (
-                <p className="text-muted-foreground">No events created yet</p>
-              ) : (
-                otherEvents?.map((event) => (
-                  <Card key={event.id}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        {event.name}
-                        <span
-                          className={`text-sm px-2 py-1 rounded-full ${event.approved
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                            }`}
-                        >
-                          {event.approved ? "Approved" : "Pending"}
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <img
-                            src={event.imageUrl || DEFAULT_IMAGES.EVENT}
-                            alt={event.name}
-                            className="w-full h-48 object-cover rounded-md mb-4"
-                          />
-                          <p className="text-muted-foreground">
-                            {event.description}
-                          </p>
-                          <p className="mt-2">Location: {event.location}</p>
-                          <p>
-                            Dates: {new Date(event.startDate).toLocaleDateString()}{" "}
-                            - {new Date(event.endDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold">Stalls</h3>
-                            <AddStall 
-                              stallDialogOpen={stallDialogOpen}
-                              setStallDialogOpen={setStallDialogOpen}
-                              event={event}
-                              selectedEvent={selectedEvent}
-                              setSelectedEvent={setSelectedEvent}
-                            />
-                          </div>
-                          {otherStalls
-                            ?.filter((stall) => stall.eventId === event.id)
-                            .map((stall) => (
-                              <Card key={stall.id} className="mb-4">
-                                <CardHeader>
-                                  <CardTitle className="text-base flex items-center justify-between">
-                                    {stall.name}
-                                    <AddProduct
-                                      productDialogOpen={productDialogOpen}
-                                      setProductDialogOpen={setProductDialogOpen}
-                                      stall={stall}
-                                      selectedStall={selectedStall}
-                                      setSelectedStall={setSelectedStall}
-                                    />
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {otherProducts
-                                      ?.filter(
-                                        (product) => product.stallId === stall.id
-                                      )
-                                      .map((product) => (
-                                        <Card
-                                          key={product.id}
-                                          className="bg-muted"
-                                        >
-                                          <CardContent className="p-4">
-                                            <img
-                                              src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
-                                              alt={product.name}
-                                              className="w-full h-24 object-cover rounded-md mb-2"
-                                            />
-                                            <h4 className="font-medium">
-                                              {product.name}
-                                            </h4>
-                                            <span
-                                              className={`text-sm px-2 py-1 rounded-full ${product.approved
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-yellow-100 text-yellow-700"
-                                                }`}
-                                            >
-                                              {product.approved ? "Approved" : "Pending"}
-                                            </span>
-                                            <p className="text-sm text-muted-foreground">
-                                              ${(product.price / 100).toFixed(2)} -{" "}
-                                              {product.stock} left
-                                            </p>
-                                          </CardContent>
-                                        </Card>
-                                      ))}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+            <OtherEventsSection
+              events={otherEvents}
+              stalls={otherStalls}
+              products={otherProducts}
+              stallDialogOpen={stallDialogOpen}
+              setStallDialogOpen={setStallDialogOpen}
+              selectedEvent={selectedEvent}
+              setSelectedEvent={setSelectedEvent}
+              productDialogOpen={productDialogOpen}
+              setProductDialogOpen={setProductDialogOpen}
+              selectedStall={selectedStall}
+              setSelectedStall={setSelectedStall}
+            />
           </section>
         </div>
       </div>

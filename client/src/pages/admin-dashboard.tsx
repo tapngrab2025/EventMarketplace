@@ -60,7 +60,7 @@ export default function AdminDashboard({ searchTerm = "" }: VendorDashboardProps
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background md:p-8">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
