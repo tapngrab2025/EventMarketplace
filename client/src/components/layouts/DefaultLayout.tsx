@@ -4,6 +4,7 @@ import { RightNavigation } from "@/components/common/RightNavigation";
 import { Logo } from "../common/logo";
 import { DefaultNavigation } from "../common/DefaultNavigation";
 import { X } from "lucide-react";
+import { DefaultFooter } from "../common/DefaultFooter";
 
 interface DefaultLayoutProps {
     children: ReactNode;
@@ -60,6 +61,7 @@ export function DefaultLayout(
                         return child;
                     })}
                 </main>
+                <DefaultFooter/>
             </div>
         </div>
     );
