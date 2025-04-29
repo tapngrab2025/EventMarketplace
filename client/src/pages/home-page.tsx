@@ -16,7 +16,7 @@ interface VendorDashboardProps {
 }
 
 export default function HomePage(
-  { searchTerm = "" }:VendorDashboardProps
+  { searchTerm = "" }: VendorDashboardProps
 ) {
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState<Date>();
@@ -49,7 +49,7 @@ export default function HomePage(
       (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesLocation = !location || 
+    const matchesLocation = !location ||
       event.location.toLowerCase().includes(location.toLowerCase());
 
     const matchesDateRange = (!startDate || new Date(event.startDate) >= startDate) &&
@@ -71,10 +71,9 @@ export default function HomePage(
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <section className="text-center mb-16">
+    <main className="py-8 min-h-screen">
+      <section className="text-center mb-16 px-4">
+        <div className="container mx-auto">
           <h1 className="text-4xl font-bold mb-4">
             Your One-Stop Event Marketplace
           </h1>
@@ -82,10 +81,146 @@ export default function HomePage(
             Discover unique souvenirs, promotional items, and giveaways for your next event.
             Connect with vendors and event organizers all in one place.
           </p>
-        </section>
+        </div>
+      </section>
+      <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Let's Find Your Grab</h1>
+          <p className="text-gray-600">Discover your favorite entertainment right here</p>
+        </div>
 
-        <section className="mb-12">
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-4 mb-12">
+          <div className="flex-1">
+            <div className="relative bg-white rounded-lg w-full">
+              <Input
+                placeholder="Filter by Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full pl-12 rounded-lg border-none bg-white"
+              />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 bg-white flex items-center justify-center">
+                <MapPin className="h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-1">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full bg-white rounded-lg border-none">
+                  <CalendarRange className="mr-2 h-4 w-4 text-gray-400" />
+                  {startDate && endDate ? (
+                    `${format(startDate, "PP")} - ${format(endDate, "PP")}`
+                  ) : (
+                    "Select Date Range"
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={{
+                    from: startDate,
+                    to: endDate,
+                  }}
+                  onSelect={(range) => {
+                    setStartDate(range?.from);
+                    setEndDate(range?.to);
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex-1">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="bg-white rounded-lg border-none">
+                <SelectValue placeholder="Newest First" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {(location || startDate || endDate) && (
+            <div className="flex-1">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setLocation("");
+                  setStartDate(undefined);
+                  setEndDate(undefined);
+                  setSortBy("newest");
+                }}
+              >
+                Clear filters
+              </Button>
+            </div>
+          )}
+          {/* <button
+            className="w-full sm:w-auto bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition duration-300"
+          >
+            Search
+          </button> */}
+
+        </div>
+
+        <div className="w-full max-w-4xl">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Popular Cities</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img
+                src="https://placehold.co/300x200"
+                alt="Kandy"
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <h3 className="text-white text-2xl font-bold">KANDY</h3>
+              </div>
+            </div>
+
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img
+                src="https://placehold.co/300x200"
+                alt="Colombo"
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <h3 className="text-white text-2xl font-bold">COLOMBO</h3>
+              </div>
+            </div>
+
+
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img
+                src="https://placehold.co/300x200"
+                alt="Galle"
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <h3 className="text-white text-2xl font-bold">GALLE</h3>
+              </div>
+            </div>
+
+
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <img
+                src="https://placehold.co/300x200"
+                alt="Matara"
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <h3 className="text-white text-2xl font-bold">MATARA</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-12 px-4">
+        <div className="container mx-auto">
+          {/* <div className="flex flex-wrap gap-4 mb-6">
             <Input
               placeholder="Filter by location..."
               value={location}
@@ -144,7 +279,7 @@ export default function HomePage(
                 Clear filters
               </Button>
             )}
-          </div>
+          </div> */}
           <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
           {filteredEvents?.length === 0 ? (
             <p className="text-muted-foreground">No events found</p>
@@ -155,9 +290,11 @@ export default function HomePage(
               ))}
             </div>
           )}
-        </section>
+        </div>
+      </section>
 
-        <section>
+      <section className="">
+        <div className="container mx-auto">
           <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
           {filteredProducts?.length === 0 ? (
             <p className="text-muted-foreground">No products found</p>
@@ -168,8 +305,8 @@ export default function HomePage(
               ))}
             </div>
           )}
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 }

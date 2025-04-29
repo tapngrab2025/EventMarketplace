@@ -104,7 +104,7 @@ export default function VendorDashboard(
   );
 
   const otherStalls = matchedStalls?.filter((stall) =>
-    myEvents?.some((event) => event.id != stall.eventId)
+    otherEvents?.some((event) => event.id === stall.eventId)
   );
 
   if (loadingEvents || loadingStalls || loadingProducts) {

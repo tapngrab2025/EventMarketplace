@@ -90,37 +90,40 @@ export default function EventDetailsPage() {
               {/* Products Grid */}
               <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {stall.products?.map((product) => (
-                  <Card key={product.id} className="overflow-hidden">
-                    {product.imageUrl && (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-48 object-cover"
-                      />
-                    )}
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {product.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">
-                          ${(product.price / 100).toFixed(2)}
-                        </span>
-                        {user?.role === "customer" && <Button
-                          size="sm"
-                          onClick={() => addToCart.mutate(product.id)}
-                          disabled={addToCart.isPending}
-                        >
-                          {addToCart.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <ShoppingCart className="h-4 w-4" />
-                          )}
-                        </Button>}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <>
+                    {product.approved && <Card key={product.id} className="overflow-hidden">
+                      {product.imageUrl && (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-48 object-cover"
+                        />
+                      )}
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold mb-2">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {product.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">
+                            ${(product.price / 100).toFixed(2)}
+                          </span>
+                          {user?.role === "customer" && <Button
+                            size="sm"
+                            onClick={() => addToCart.mutate(product.id)}
+                            disabled={addToCart.isPending}
+                          >
+                            {addToCart.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <ShoppingCart className="h-4 w-4" />
+                            )}
+                          </Button>}
+                        </div>
+                      </CardContent>
+                    </Card>}
+                  </>
+
                 ))}
               </div>
             </CardContent>

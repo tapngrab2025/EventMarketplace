@@ -53,14 +53,14 @@ export function DefaultLayout(
                         </div>
                     </div>
                 </header>
-                <main className="p-6">
+                <>
                     {React.Children.map(children, child => {
                         if (React.isValidElement(child)) {
                             return React.cloneElement(child, { searchTerm });
                         }
                         return child;
                     })}
-                </main>
+                </>
                 <DefaultFooter/>
             </div>
         </div>
