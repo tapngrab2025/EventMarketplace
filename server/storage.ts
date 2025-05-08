@@ -21,6 +21,7 @@ import {
   Order,
   orders,
   orderItems,
+  ProductWithDetails,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, ne } from "drizzle-orm";
@@ -227,8 +228,49 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Product operations
+  // Get all products
   async getProducts(): Promise<Product[]> {
     return await db.select().from(products).orderBy(products.id, 'desc');
+  }
+
+  // Get single product with details
+  async getProductDetails(id: number): Promise<ProductWithDetails | { error: string }> {
+    const product = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        imageUrl: products.imageUrl,
+        price: products.price,
+        stock: products.stock,
+        stallId: products.stallId,
+        approved: products.approved,
+        category: products.category,
+        stall: {
+          id: stalls.id,
+          name: stalls.name,
+          description: stalls.description,
+          location: stalls.location,
+          imageUrl: stalls.imageUrl,
+          vendorId: stalls.vendorId,
+          eventId: stalls.eventId,
+        },
+        event: {
+          id: events.id,
+          name: events.name,
+          description: events.description,
+          startDate: events.startDate,
+          endDate: events.endDate,
+          imageUrl: events.imageUrl,
+        },
+      })
+      .from(products)
+      .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(events, eq(events.id, stalls.eventId))
+      .where(eq(products.id, id));
+
+    if (!product) return { error: "Product not found" };
+    return product[0];
   }
 
   async getProductsByStall(stallId: number): Promise<Product[]> {

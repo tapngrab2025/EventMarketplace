@@ -153,8 +153,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    const stalls = await storage.getProduct(parseInt(req.params.id));
-    res.json(stalls);
+    const product = await storage.getProduct(parseInt(req.params.id));
+    res.json(product);
+  });
+
+  app.get("/api/product/:id", async (req, res) => {
+    const product = await storage.getProductDetails(parseInt(req.params.id));
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    res.json(product);
   });
 
   // Edit Product

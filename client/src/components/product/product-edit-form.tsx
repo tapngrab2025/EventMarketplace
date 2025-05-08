@@ -153,11 +153,16 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
         <FormField
           control={form.control}
           name="stock"
-          render={({ field }) => (
+          render={({  field: { onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Stock</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                {/* <Input type="number" {...field} /> */}
+                <Input
+                    type="number"
+                    onChange={(e) => onChange(Number(e.target.value))}
+                    {...field}
+                  />
               </FormControl>
               <FormMessage />
             </FormItem>

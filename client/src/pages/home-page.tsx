@@ -293,7 +293,7 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="">
+      {/* <section className="">
         <div className="container mx-auto">
           <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
           {filteredProducts?.length === 0 ? (
@@ -305,6 +305,35 @@ export default function HomePage(
               ))}
             </div>
           )}
+        </div>
+      </section> */}
+
+      <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6">
+        <div className="">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">Featured Grabs</h1>
+            <p className="text-gray-600">Discover more of the activities with our curated event collections</p>
+          </div>
+        
+          <div className="w-full max-w-7xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                  {filteredProducts?.length === 0 ? (
+                  <p className="text-muted-foreground">No products found</p>
+                ) : (
+                  <>
+                    {filteredProducts?.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </>
+                )}
+
+            </div>
+          </div>
+        
+          <div className="mt-8">
+            <a href="#" className="text-blue-500 font-semibold hover:underline">See All Grabs</a>
+          </div>
         </div>
       </section>
     </main>

@@ -31,11 +31,13 @@ export default function VendorDashboard(
 ) {
   const { user } = useAuth();
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [eventEditDialogOpen, setEventEditDialogOpen] = useState(false);
   const [stallDialogOpen, setStallDialogOpen] = useState(false);
+  const [stallEditDialogOpen, setStallEditDialogOpen] = useState(false);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [productEditDialogOpen, setProductEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedStall, setSelectedStall] = useState<Stall | null>(null);
-  const [eventEditDialogOpen, setEventEditDialogOpen] = useState(false);
   const [editEventId, setEditEventId] = useState<number | null>(null);
   const [editStallId, setEditStallId] = useState<number | null>(null);
   const [editProductId, setEditProductId] = useState<number | null>(null);
@@ -153,10 +155,14 @@ export default function VendorDashboard(
               setEventEditDialogOpen={setEventEditDialogOpen}
               stallDialogOpen={stallDialogOpen}
               setStallDialogOpen={setStallDialogOpen}
+              stallEditDialogOpen={stallEditDialogOpen}
+              setStallEditDialogOpen={setStallEditDialogOpen}
               selectedEvent={selectedEvent}
               setSelectedEvent={setSelectedEvent}
               productDialogOpen={productDialogOpen}
               setProductDialogOpen={setProductDialogOpen}
+              productEditDialogOpen={productEditDialogOpen}
+              setProductEditDialogOpen={setProductEditDialogOpen}
               selectedStall={selectedStall}
               setSelectedStall={setSelectedStall}
               editStallId={editStallId}

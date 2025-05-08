@@ -19,10 +19,14 @@ interface MyEventsSectionProps {
   setEventEditDialogOpen: (open: boolean) => void;
   stallDialogOpen: boolean;
   setStallDialogOpen: (open: boolean) => void;
+  stallEditDialogOpen: boolean;
+  setStallEditDialogOpen: (open: boolean) => void;
   selectedEvent: Event | null;
   setSelectedEvent: (event: Event | null) => void;
   productDialogOpen: boolean;
   setProductDialogOpen: (open: boolean) => void;
+  productEditDialogOpen: boolean;
+  setProductEditDialogOpen: (open: boolean) => void;
   selectedStall: Stall | null;
   setSelectedStall: (stall: Stall | null) => void;
   editStallId: number | null;
@@ -42,10 +46,14 @@ export function MyEventsSection({
   setEventEditDialogOpen,
   stallDialogOpen,
   setStallDialogOpen,
+  stallEditDialogOpen,
+  setStallEditDialogOpen,
   selectedEvent,
   setSelectedEvent,
   productDialogOpen,
   setProductDialogOpen,
+  productEditDialogOpen,
+  setProductEditDialogOpen,
   selectedStall,
   setSelectedStall,
   editStallId,
@@ -137,7 +145,7 @@ export function MyEventsSection({
                                   size="sm"
                                   onClick={() => {
                                     setEditStallId(stall.id);
-                                    setStallDialogOpen(true);
+                                    setStallEditDialogOpen(true);
                                   }}
                                 >
                                   Edit
@@ -146,8 +154,8 @@ export function MyEventsSection({
                               <EditStall
                                 stallId={editStallId}
                                 setStallId={setEditStallId}
-                                stallDialogOpen={stallDialogOpen}
-                                setStallDialogOpen={setStallDialogOpen}
+                                stallDialogOpen={stallEditDialogOpen}
+                                setStallDialogOpen={setStallEditDialogOpen}
                               />
                             </div>
                             {enableButton && (
@@ -178,7 +186,7 @@ export function MyEventsSection({
                                           size="sm"
                                           onClick={() => {
                                             setEditProductId(product.id);
-                                            setProductDialogOpen(true);
+                                            setProductEditDialogOpen(true);
                                           }}
                                         >
                                           Edit
@@ -187,8 +195,8 @@ export function MyEventsSection({
                                       <EditProduct
                                         productId={editProductId}
                                         setProductId={setEditProductId}
-                                        productDialogOpen={productDialogOpen}
-                                        setProductDialogOpen={setProductDialogOpen}
+                                        productDialogOpen={productEditDialogOpen}
+                                        setProductDialogOpen={setProductEditDialogOpen}
                                       />
                                     </div>
                                     <img

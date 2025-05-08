@@ -18,6 +18,7 @@ import { OrganizerLayout } from "./components/layouts/OrganizerLayout";
 import AdminUsersDashboard from "./pages/admin-users";
 import EventDetailsPage from "./pages/event/[id]";
 import ThankYouPage from "./pages/thank-you/[id]";
+import ProductPage from "./pages/product-page";
 
 function Router() {
   return (
@@ -93,6 +94,15 @@ function Router() {
         component={() => (
           <DefaultLayout>
             <ThankYouPage />
+          </DefaultLayout>
+        )}
+        roles={["admin", "vendor", "customer", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/products/:id"
+        component={() => (
+          <DefaultLayout>
+            <ProductPage />
           </DefaultLayout>
         )}
         roles={["admin", "vendor", "customer", "organizer"]}
