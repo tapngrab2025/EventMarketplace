@@ -218,8 +218,8 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="mb-12 px-4">
-        <div className="container mx-auto">
+      {/* <section className="mb-12 px-4"> */}
+        {/* <div className="container mx-auto"> */}
           {/* <div className="flex flex-wrap gap-4 mb-6">
             <Input
               placeholder="Filter by location..."
@@ -280,7 +280,7 @@ export default function HomePage(
               </Button>
             )}
           </div> */}
-          <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
+          {/* <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
           {filteredEvents?.length === 0 ? (
             <p className="text-muted-foreground">No events found</p>
           ) : (
@@ -289,9 +289,9 @@ export default function HomePage(
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
-          )}
-        </div>
-      </section>
+          )} */}
+        {/* </div>
+      </section> */}
 
       {/* <section className="">
         <div className="container mx-auto">
