@@ -24,8 +24,8 @@ export function DefaultNavigation({ isMobileMenuOpen, setIsMobileMenuOpen }: { i
                     <div className="flex items-center gap-4">
                         <div className="hidden md:flex space-x-6">
                             <a href="/" className="text-orange-500 hover:text-orange-600 font-medium">Home</a>
-                            <a href="#" className="text-gray-600 hover:text-gray-800">Events</a>
-                            <a href="#" className="text-gray-600 hover:text-gray-800">Contact</a>
+                            <a href="/events" className="text-gray-600 hover:text-gray-800">Events</a>
+                            <a href="/products" className="text-gray-600 hover:text-gray-800">Grabs</a>
                         </div>
                         <div className="flex items-center space-x-4">
                             <Button className="hidden md:block" variant="ghost" size="icon" onClick={() => setLocation("/profile")} title="User Profile">

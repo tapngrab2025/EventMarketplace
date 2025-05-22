@@ -123,6 +123,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(products);
   });
 
+  app.get("/api/products/paginate", async (req, res) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const searchTerm = req.query.searchTerm as string;
+    const category = req.query.category as string;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
+    const sortBy = req.query.sortBy as string;
+    const sortOrder = req.query.sortOrder as string;
+
+    const products = await storage.getPaginatedProducts(
+      page,
+      pageSize,
+      searchTerm,
+      category,
+      minPrice,
+      maxPrice,
+      sortBy,
+      sortOrder
+    );
+    res.json(products);
+  });
+
   app.get("/api/stalls/:stallId/products", async (req, res) => {
     const products = await storage.getProductsByStall(parseInt(req.params.stallId));
     res.json(products);
@@ -276,3 +299,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
+

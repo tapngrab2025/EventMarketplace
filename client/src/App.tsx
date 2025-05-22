@@ -19,12 +19,21 @@ import AdminUsersDashboard from "./pages/admin-users";
 import EventDetailsPage from "./pages/event/[id]";
 import ThankYouPage from "./pages/thank-you/[id]";
 import ProductPage from "./pages/product-page";
+import AllProducts from "./pages/all-products";
+import EventsPage from "@/pages/events";
 
 function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute
+      <Route path="/" component={
+        () => (
+          <DefaultLayout>
+            <HomePage />
+          </DefaultLayout>
+        )
+      } />
+      {/* <ProtectedRoute
         path="/"
         component={() => (
           <DefaultLayout>
@@ -32,7 +41,7 @@ function Router() {
           </DefaultLayout>
         )}
         roles={["admin", "vendor", "customer", "organizer"]}
-      />
+      /> */}
       <ProtectedRoute
         path="/profile"
         component={
@@ -103,6 +112,24 @@ function Router() {
         component={() => (
           <DefaultLayout>
             <ProductPage />
+          </DefaultLayout>
+        )}
+        roles={["admin", "vendor", "customer", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/products"
+        component={() => (
+          <DefaultLayout>
+            <AllProducts/>
+          </DefaultLayout>
+        )}
+        roles={["admin", "vendor", "customer", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/events"
+        component={() => (
+          <DefaultLayout>
+            <EventsPage/>
           </DefaultLayout>
         )}
         roles={["admin", "vendor", "customer", "organizer"]}

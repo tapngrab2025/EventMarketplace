@@ -21,21 +21,21 @@ export function DefaultFooter() {
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold mb-4">About Us</h3>
-                    {user.role === "customer" && (
+                    {user?.role === "customer" && (
                         <ul className="space-y-2 text-gray-400 text-sm">
                             <li><a href="/profile" className="hover:text-white">My Profile</a></li>
                             <li><a href="#" className="hover:text-white">All Venues</a></li>
                             <li><a href="#" className="hover:text-white">All Locations</a></li>
                         </ul>
                     ) }
-                    {(user.role === "vendor" || user.role === "organizer") && (
+                    {(user?.role === "vendor" || user?.role === "organizer") && (
                     <ul className="space-y-2 text-gray-400 text-sm">
-                        <li><a href={user.role === "vendor" ? "/vendor" : "/organizer"} className="hover:text-white">Dashboard</a></li>
+                        <li><a href={user?.role === "vendor" ? "/vendor" : "/organizer"} className="hover:text-white">Dashboard</a></li>
                         <li><a href="#" className="hover:text-white">Submit Event</a></li>
                         <li><a href="#" className="hover:text-white">All Locations</a></li>
                     </ul>
                     ) }
-                    {user.role === "admin" && (
+                    {user?.role === "admin" && (
                     <ul className="space-y-2 text-gray-400 text-sm">
                         <li><a href="#" className="hover:text-white">Submit Event</a></li>
                         <li><a href="/admin" className="hover:text-white">Admin Dashboard</a></li>

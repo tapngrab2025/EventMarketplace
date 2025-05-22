@@ -10,6 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
+import { Link } from "wouter";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
+import { Images } from "@/config/images";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -23,6 +29,19 @@ export default function HomePage(
   const [endDate, setEndDate] = useState<Date>();
   const [sortBy, setSortBy] = useState("newest");
 
+  const testimonials = [
+    {
+      text: "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      author: "Noa Woolloff",
+      image: "https://placehold.co/200x200"
+    },
+    {
+      text: "Another testimonial about the amazing service. It has been a great experience using this platform.",
+      author: "John Doe",
+      image: "https://placehold.co/200x200"
+    }
+  ];
+
   const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
@@ -31,19 +50,15 @@ export default function HomePage(
     queryKey: ["/api/events"],
   });
 
-  const filteredProducts = products?.filter(
-    (product) =>
+  const filteredProducts = products
+    ?.filter((product) =>
       product.approved &&
       (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+    )
+    .sort((a, b) => b.id - a.id) // Sort by newest first
+    .slice(0, 8);
 
-  // const filteredEvents = events?.filter(
-  //   (event) =>
-  //     event.approved &&
-  //     (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       event.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  // );
   const filteredEvents = events?.filter((event) => {
     const matchesSearch = event.approved &&
       (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -171,22 +186,22 @@ export default function HomePage(
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <img
-                src="https://placehold.co/300x200"
+                src={Images.kandy}
                 alt="Kandy"
                 className="w-full h-48 object-cover"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">KANDY</h3>
               </div>
             </div>
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <img
-                src="https://placehold.co/300x200"
+                src={Images.colombo}
                 alt="Colombo"
                 className="w-full h-48 object-cover"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">COLOMBO</h3>
               </div>
             </div>
@@ -194,11 +209,11 @@ export default function HomePage(
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <img
-                src="https://placehold.co/300x200"
+                src={Images.galle}
                 alt="Galle"
                 className="w-full h-48 object-cover"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">GALLE</h3>
               </div>
             </div>
@@ -206,11 +221,11 @@ export default function HomePage(
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <img
-                src="https://placehold.co/300x200"
+                src={Images.matara}
                 alt="Matara"
                 className="w-full h-48 object-cover"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">MATARA</h3>
               </div>
             </div>
@@ -218,8 +233,8 @@ export default function HomePage(
         </div>
       </section>
 
-      {/* <section className="mb-12 px-4"> */}
-        {/* <div className="container mx-auto"> */}
+      <section className="mb-12 px-4">
+        <div className="container mx-auto">
           {/* <div className="flex flex-wrap gap-4 mb-6">
             <Input
               placeholder="Filter by location..."
@@ -280,7 +295,7 @@ export default function HomePage(
               </Button>
             )}
           </div> */}
-          {/* <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
+          <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
           {filteredEvents?.length === 0 ? (
             <p className="text-muted-foreground">No events found</p>
           ) : (
@@ -289,25 +304,11 @@ export default function HomePage(
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
-          )} */}
-        {/* </div>
-      </section> */}
-
-      {/* <section className="">
-        <div className="container mx-auto">
-          <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
-          {filteredProducts?.length === 0 ? (
-            <p className="text-muted-foreground">No products found</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredProducts?.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
           )}
         </div>
-      </section> */}
+      </section>
 
+      {/* Featured Grabs */}
       <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6">
         <div className="">
           <div className="text-center mb-8">
@@ -331,11 +332,103 @@ export default function HomePage(
             </div>
           </div>
         
-          <div className="mt-8">
-            <a href="#" className="text-blue-500 font-semibold hover:underline">See All Grabs</a>
+          <div className="mt-8 flex justify-center">
+          <Link href="/products" className="text-blue-500 font-semibold hover:underline">
+              View All Grabs
+            </Link>
           </div>
         </div>
       </section>
+
+      <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}>
+        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl">
+          <div className="max-w-md z-10">
+            <h2 className="text-4xl font-bold mb-4">Transfer Your Grabs</h2>
+            <p className="text-lg mb-6">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
+            <Link href="/auth" className="bg-[#F58020] text-white font-medium px-6 py-2 rounded-full hover:bg-orange-600 transition">
+            Register
+            </Link>
+          </div>
+          <div className="flex items-center z-10">
+            <img src={Images.transferGrabsImg} alt="Transfer Grabs" className="max-w-[400px] w-full"/>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}>
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-4">What Makes Us Uncommon</h2>
+          <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+          <div className="flex justify-center gap-12 lg:gap-[300px] flex-col lg:flex-row">
+            <div className="flex flex-col items-center">
+              <img src={Images.trustFundTransfer} alt="Trust Fund Transfer Icon" className="mb-4 max-w-135"/>
+              <p className="text-lg font-semibold">Trust Fund Transfer</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <img src={Images.moneySaver} alt="Money Saver Icon" className="mb-4 max-w-135"/>
+              <p className="text-lg font-semibold">Money Saver</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <img src={Images.userFriendly} alt="User Friendly Icon" className="mb-4 max-w-135"/>
+              <p className="text-lg font-semibold">User Friendly</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* <section className="py-12 testimonial">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-4">What People Say</h2>
+          <p className="text-lg mb-12">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+          <div className="carousel max-w-7xl">
+            <div className="carousel-slide active">
+              <div className="quote-bg mr-6">
+                <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
+                <p className="font-semibold">- Noa Woolloff</p>
+              </div>
+              <img src="https://placehold.co/200x200" alt="Person Placeholder" className="rounded-full" />
+            </div>
+            <div className="carousel-slide">
+              <div className="quote-bg mr-6">
+                <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none">Another testimonial about the amazing service. It has been a great experience using this platform.</p>
+                <p className="font-semibold">- John Doe</p>
+              </div>
+              <img src="https://placehold.co/200x200" alt="Person Placeholder" className="rounded-full" />
+            </div>
+          </div>
+        </div>
+      </section> */}
+
+      <section className="py-12 testimonial">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-4">What People Say</h2>
+          <p className="text-lg mb-12">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+          <Slider
+            dots={true}
+            infinite={true}
+            speed={500}
+            slidesToShow={1}
+            slidesToScroll={1}
+            autoplay={true}
+            autoplaySpeed={5000}
+            className="max-w-5xl mx-auto"
+          >
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="px-4">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                  <div className="quote-bg flex-1">
+                    <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none text-left">{testimonial.text}</p>
+                    <p className="font-semibold text-left">- {testimonial.author}</p>
+                  </div>
+                  <img src={testimonial.image} alt={testimonial.author} className="rounded-full w-[200px] h-[200px]" />
+                </div>
+              </div>
+            ))}
+          </Slider>
+        </div>
+      </section>
+
     </main>
   );
 }

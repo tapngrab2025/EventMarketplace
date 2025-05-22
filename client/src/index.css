@@ -11,3 +11,60 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* @layer components {
+  .testimonial .carousel {
+    width: 100%;
+    overflow: hidden;
+
+  }
+
+  .testimonial .carousel-slide {
+    display: none;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    text-align: left;
+    gap: 2rem;
+    padding: 4rem;
+    position: relative;
+  }
+
+  .testimonial .carousel-slide.active {
+    display: flex;
+  }
+
+  .testimonial .quote-bg::before {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 80px;
+    opacity: 0.5;
+    background-image: url('@/assets/quoteImg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
+    left: 32px;
+    top: 15px;
+  }
+} */
+
+@layer components {
+  .testimonial .quote-bg {
+    background-image: url('@/assets/quoteImg.png');
+    background-size: 60px;
+    background-position: 0 0;
+    padding: 2rem;
+    position: relative;
+    background-repeat: no-repeat;
+  }
+
+  /* Add custom styling for slick carousel */
+  .testimonial .slick-dots li button:before {
+    color: #F58020;
+  }
+
+  .testimonial .slick-dots li.slick-active button:before {
+    color: #F58020;
+  }
+}

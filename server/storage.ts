@@ -24,7 +24,7 @@ import {
   ProductWithDetails,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, ne } from "drizzle-orm";
+import { eq, ne, and, gte, lte, sql } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 
@@ -228,6 +228,54 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Product operations
+  // paginate products
+  async getPaginatedProducts(
+    page: number,
+    pageSize: number,
+    searchTerm?: string,
+    category?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    sortBy?: string,
+    sortOrder?: string
+  ): Promise<{ products: Product[]; total: number }> {
+    const offset = (page - 1) * pageSize;
+    const query = db.select().from(products);
+
+    if (searchTerm) {
+      query.where(
+        eq(products.name, searchTerm)
+      );
+    }
+
+    if (category) {
+      query.where(eq(products.category, category));
+    }
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      query.where(
+        and(
+          gte(products.price, minPrice),
+          lte(products.price, maxPrice)
+        )
+      );
+    } else if (minPrice !== undefined) {
+      query.where(eq(products.price, minPrice));
+    } else if (maxPrice !== undefined) {
+      query.where(eq(products.price, maxPrice));
+    }
+
+    if (sortBy && sortOrder) {
+      query.orderBy(sortBy, sortOrder);
+    }
+
+    const [productsPaginates, total] = await Promise.all([
+      query.limit(pageSize).offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(products)
+    ]);
+
+    return { products: productsPaginates, total: total[0].count };
+  }
   // Get all products
   async getProducts(): Promise<Product[]> {
     return await db.select().from(products).orderBy(products.id, 'desc');
