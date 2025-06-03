@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Product, Event } from "@shared/schema";
 import { useState } from "react";
 import ProductCard from "@/components/products/product-card";
@@ -14,8 +15,8 @@ import { Link } from "wouter";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
 import { Images } from "@/config/images";
+import { toast } from "@/hooks/use-toast";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -25,6 +26,7 @@ export default function HomePage(
   { searchTerm = "" }: VendorDashboardProps
 ) {
   const [location, setLocation] = useState("");
+  const [subscriber, setSubscriber] = useState("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [sortBy, setSortBy] = useState("newest");
@@ -75,6 +77,32 @@ export default function HomePage(
     if (sortBy === "newest") return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
     if (sortBy === "oldest") return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
     return 0;
+  });
+
+  const submitSubscriber = useMutation({
+      mutationFn: async () => {
+        if (!subscriber.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+          throw new Error("Please enter a valid email address");
+        }
+        const res = await apiRequest("POST", "/api/subscribers", {
+          email: subscriber.trim().toLowerCase() // Sanitize and normalize email
+        });
+        return res.json();
+      },
+      onSuccess: () => {
+        toast({
+          title: "Subscribed",
+          description: "You have been subscribed successfully!",
+        });
+        setSubscriber(""); // Clear the input after successful subscription
+      },
+      onError: (error: Error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
   });
 
   if (loadingProducts || loadingEvents) {
@@ -182,7 +210,7 @@ export default function HomePage(
         </div>
 
         <div className="w-full max-w-4xl">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Popular Cities</h2>
+          <h2 className="text-h2 font-semibold text-gray-800 mb-6 text-center">Popular Cities</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <img
@@ -295,7 +323,7 @@ export default function HomePage(
               </Button>
             )}
           </div> */}
-          <h2 className="text-2xl font-semibold mb-6">Upcoming Events</h2>
+          <h2 className="text-h2 font-semibold mb-6">Upcoming Events</h2>
           {filteredEvents?.length === 0 ? (
             <p className="text-muted-foreground">No events found</p>
           ) : (
@@ -340,24 +368,32 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}>
-        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl">
-          <div className="max-w-md z-10">
-            <h2 className="text-4xl font-bold mb-4">Transfer Your Grabs</h2>
-            <p className="text-lg mb-6">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
+      {/* <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}> */}
+      <section className="transferGrabs relative bg-[#1B0164] bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-none bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]" 
+        style={{ '--bg-image': `url(${Images.transferGrabsImg.src || Images.transferGrabsImg})` } as React.CSSProperties}>
+          <div className="lg:max-w-3xl z-10 text-center">
+            <h2 className="text-h2 font-bold mb-4 md:mb-11">Transfer Your Grabs</h2>
+            <p className="text-h5 mb-6 md:mb-11">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
             <Link href="/auth" className="bg-[#F58020] text-white font-medium px-6 py-2 rounded-full hover:bg-orange-600 transition">
             Register
             </Link>
           </div>
-          <div className="flex items-center z-10">
+          <div className="lg:hidden flex items-center z-10">
             <img src={Images.transferGrabsImg} alt="Transfer Grabs" className="max-w-[400px] w-full"/>
           </div>
         </div>
       </section>
 
+      <section className="py-12">
+        <div className="container mx-auto px-6 text-center min-h-80">
+          <h2 className="text-h2 font-bold mb-4">All Events Map</h2>
+        </div>
+      </section>
+
       <section className="relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}>
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-4">What Makes Us Uncommon</h2>
+          <h2 className="text-h2 font-bold mb-4">What Makes Us Uncommon</h2>
           <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
           <div className="flex justify-center gap-12 lg:gap-[300px] flex-col lg:flex-row">
             <div className="flex flex-col items-center">
@@ -376,56 +412,52 @@ export default function HomePage(
         </div>
       </section>
 
-
-      {/* <section className="py-12 testimonial">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-4">What People Say</h2>
-          <p className="text-lg mb-12">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-          <div className="carousel max-w-7xl">
-            <div className="carousel-slide active">
-              <div className="quote-bg mr-6">
-                <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-                <p className="font-semibold">- Noa Woolloff</p>
-              </div>
-              <img src="https://placehold.co/200x200" alt="Person Placeholder" className="rounded-full" />
-            </div>
-            <div className="carousel-slide">
-              <div className="quote-bg mr-6">
-                <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none">Another testimonial about the amazing service. It has been a great experience using this platform.</p>
-                <p className="font-semibold">- John Doe</p>
-              </div>
-              <img src="https://placehold.co/200x200" alt="Person Placeholder" className="rounded-full" />
-            </div>
-          </div>
-        </div>
-      </section> */}
-
       <section className="py-12 testimonial">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-4">What People Say</h2>
+          <h2 className="text-h2 font-bold mb-4">What People Say</h2>
           <p className="text-lg mb-12">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
           <Slider
-            dots={true}
             infinite={true}
             speed={500}
             slidesToShow={1}
             slidesToScroll={1}
             autoplay={true}
             autoplaySpeed={5000}
-            className="max-w-5xl mx-auto"
+            className="w-full max-w-xs sm:max-w-2xl lg:max-w-5xl mx-auto overflow-hidden"
           >
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="px-4">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="quote-bg flex-1">
+              <div key={index} className="px-2 sm:px-4 w-full">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-full">
+                  <div className="quote-bg flex-1 max-w-full">
                     <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none text-left">{testimonial.text}</p>
                     <p className="font-semibold text-left">- {testimonial.author}</p>
                   </div>
-                  <img src={testimonial.image} alt={testimonial.author} className="rounded-full w-[200px] h-[200px]" />
+                  <img src={testimonial.image} alt={testimonial.author} className="rounded-full w-[150px] h-[150px] md:w-[200px] md:h-[200px] flex-shrink-0" />
                 </div>
               </div>
             ))}
           </Slider>
+        </div>
+      </section>
+
+      <section className="relative bg-[#1B0164] bg-cover bg-center text-white py-4">
+        <div className="container mx-auto px-6 flex items-center justify-between">
+          <h2 className="text-h2 font-bold">Sign up for Newsletter!</h2>
+          <div className="flex items-center">
+            <Input
+              placeholder="Enter your email"
+              value={subscriber}
+              onChange={(e) => setSubscriber(e.target.value)}
+              className="bg-transparent border-b-2 border-white text-white placeholder-gray-300 focus:outline-none mr-4 py-2"
+            />
+            <Button
+                variant="outline"
+                onClick={() => submitSubscriber.mutate()}
+                className="bg-[#00C4B4] text-white font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
+              >
+                Subscribe
+              </Button>
+          </div>
         </div>
       </section>
 

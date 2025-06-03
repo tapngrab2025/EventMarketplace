@@ -560,6 +560,12 @@ export class DatabaseStorage implements IStorage {
       .values({ orderId, stallId, status, notes })
       .returning();
   }
+
+
+  async createSuscriber(insertSuscriber: InsertSuscriber): Promise<Suscriber> {
+    // return insertSuscriber;
+    return await db.insert(suscribers).values(insertSuscriber).returning().then((result) => result[0]);
+  }
 }
 
 export const storage = new DatabaseStorage();

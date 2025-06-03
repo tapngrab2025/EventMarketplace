@@ -296,6 +296,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/subscribers", async (req, res) => {
+    const subscriber = await storage.createSuscriber({
+     ...req.body
+    });
+    res.status(201).json(subscriber);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

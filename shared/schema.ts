@@ -179,6 +179,12 @@ export const sessions = pgTable("sessions", {
   expire: timestamp("expire").notNull(),
 });
 
+export const subscribers = pgTable("subscribers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
@@ -197,6 +203,7 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+export type Subscribers = typeof subscribers.$inferInsert;
 
 export type ProductWithDetails = Product & {
   Stall: Stall;

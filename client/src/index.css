@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 16px;
+  }
+  
   * {
     @apply border-border;
   }
@@ -66,5 +70,28 @@
 
   .testimonial .slick-dots li.slick-active button:before {
     color: #F58020;
+  }
+  .transferGrabs::before {
+    content: "";
+    background-image: url('@/assets/transferGrabs-top.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100%;
+    height: 100px;
+    position: absolute;
+    top: -99px;
+  }
+
+  .transferGrabs::after {
+    content: "";
+    background-image: url('@/assets/transferGrabs-bottom.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100%;
+    height: 100px;
+    position: absolute;
+    bottom: -99px;
   }
 }

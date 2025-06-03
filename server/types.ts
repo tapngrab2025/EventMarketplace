@@ -39,4 +39,13 @@ export interface IStorage {
   addToCart(cartItem: InsertCartItem): Promise<CartItem>;
   updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
   removeFromCart(id: number): Promise<boolean>;
+
+  // Order operations
+  createOrder(userId: number, cartItems: CartItem[], paymentMethod: string): Promise<number | undefined>;
+  // Delivery status operations
+  getDeliveryStatus(orderId: number): Promise<{ status: string, notes: string } | undefined>;
+  updateDeliveryStatus(orderId: number, status: string, notes: string): Promise<boolean>;
+
+  // Subscriber operations
+  createSuscriber(email: string): Promise<boolean>;
 }

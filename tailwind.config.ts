@@ -5,6 +5,16 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontSize: {
+        h1: ['3.5rem', { lineHeight: '1.2', fontWeight: '700' }],  // 56px
+        h2: ['3rem', { lineHeight: '1.3', fontWeight: '600' }],    // 48px
+        h3: ['2.75rem', { lineHeight: '1.4', fontWeight: '600' }], // 44px
+        h4: ['2.5rem', { lineHeight: '1.4', fontWeight: '500' }],  // 40px
+        h5: ['1.5rem', { lineHeight: '1.5', fontWeight: '500' }], // 24px
+      },
+      fontFamily: {
+        sans: ['Roboto', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
