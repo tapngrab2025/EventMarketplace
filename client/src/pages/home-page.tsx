@@ -114,7 +114,7 @@ export default function HomePage(
   }
 
   return (
-    <main className="py-8 min-h-screen">
+    <main className="pt-8 min-h-screen">
       <section className="text-center mb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl font-bold mb-4">
@@ -126,7 +126,8 @@ export default function HomePage(
           </p>
         </div>
       </section>
-      <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6">
+      {/* <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
+      <section className="flex flex-col items-center justify-center p-6">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Let's Find Your Grab</h1>
           <p className="text-gray-600">Discover your favorite entertainment right here</p>
@@ -323,7 +324,7 @@ export default function HomePage(
               </Button>
             )}
           </div> */}
-          <h2 className="text-h2 font-semibold mb-6">Upcoming Events</h2>
+          {/* <h2 className="text-h2 font-semibold mb-6">Upcoming Events</h2>
           {filteredEvents?.length === 0 ? (
             <p className="text-muted-foreground">No events found</p>
           ) : (
@@ -332,12 +333,13 @@ export default function HomePage(
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
-          )}
+          )} */}
         </div>
       </section>
 
       {/* Featured Grabs */}
-      <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6">
+      {/* <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
+      <section className="min-h-screen flex flex-col items-center justify-center p-6">
         <div className="">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">Featured Grabs</h1>
@@ -385,13 +387,14 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-12 min-h-[400px]">
         <div className="container mx-auto px-6 text-center min-h-80">
           <h2 className="text-h2 font-bold mb-4">All Events Map</h2>
         </div>
       </section>
 
-      <section className="relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}>
+      {/* <section className="whatMakes relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}> */}
+      <section className="whatMakes  bg-[#1B0164] relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">What Makes Us Uncommon</h2>
           <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
@@ -440,20 +443,20 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="relative bg-[#1B0164] bg-cover bg-center text-white py-4">
-        <div className="container mx-auto px-6 flex items-center justify-between">
-          <h2 className="text-h2 font-bold">Sign up for Newsletter!</h2>
-          <div className="flex items-center">
+      <section className="relative bg-[#1B0164] bg-cover bg-center text-white py-4 md:py-24">
+        <div className="container mx-auto px-6 flex items-center justify-center gap-x-28 flex-col lg:flex-row">
+          <h2 className="text-h2 font-bold text-center">Sign up for Newsletter!</h2>
+          <div className="flex items-center flex-col lg:flex-row gap-y-8 lg:gap-0">
             <Input
               placeholder="Enter your email"
               value={subscriber}
               onChange={(e) => setSubscriber(e.target.value)}
-              className="bg-transparent border-b-2 border-white text-white placeholder-gray-300 focus:outline-none mr-4 py-2"
+              className="lg:w-96 bg-transparent border-0 border-b-2 border-white rounded-none text-white placeholder-gray-300 focus:outline-none mr-4 py-2"
             />
             <Button
                 variant="outline"
                 onClick={() => submitSubscriber.mutate()}
-                className="bg-[#00C4B4] text-white font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
+                className="bg-[#00C4B4] text-white border-none font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
               >
                 Subscribe
               </Button>

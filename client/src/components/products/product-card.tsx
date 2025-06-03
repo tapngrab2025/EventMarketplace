@@ -64,10 +64,10 @@ export default function ProductCard({ product }: { product: Product }) {
             <p>8:00 P.M.</p>
           </div>
         </div>
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-4 gap-x-2">
           {user?.role === "customer" && (
             <Button
-              className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-teal-600 transition duration-300"
+              className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-full"
               onClick={() => addToCart.mutate()}
               disabled={addToCart.isPending || product.stock === 0}
             >
@@ -81,7 +81,7 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
           <Link
             to={`/products/${product.id}`}
-            className="bg-gray-100 text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
+            className="text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
           >
             👁️
           </Link>
