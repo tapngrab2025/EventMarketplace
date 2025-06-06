@@ -203,7 +203,7 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-export type sessions = typeof sessions.$inferInsert;
+export type Sessions = typeof sessions.$inferInsert;
 export type Subscribers = typeof subscribers.$inferInsert;
 
 export type ProductWithDetails = Product & {
