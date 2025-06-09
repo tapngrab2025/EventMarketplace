@@ -21,6 +21,9 @@ export default defineConfig({
         ]
       : []),
   ],
+  define: {
+    'process.env.VITE_GOOGLE_MAPS_API_KEY': JSON.stringify(process.env.VITE_GOOGLE_MAPS_API_KEY)
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
