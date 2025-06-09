@@ -22,6 +22,7 @@ import {
   orders,
   orderItems,
   ProductWithDetails,
+  orderDeliveryStatus,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, ne, and, gte, lte, sql } from "drizzle-orm";
@@ -507,7 +508,7 @@ export class DatabaseStorage implements IStorage {
     }
 
   async getStallOrder(orderId: number, stallId: number): Promise<any> {
-    const orderItems = await db
+    const stallOrderItems = await db
       .select({
         order: orders,
         items: {
@@ -530,7 +531,7 @@ export class DatabaseStorage implements IStorage {
         eq(products.stallId, stallId)
       ));
 
-    return orderItems;
+    return stallOrderItems;
   }
 
   async updateDeliveryStatus(

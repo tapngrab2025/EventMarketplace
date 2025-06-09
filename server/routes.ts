@@ -260,7 +260,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/orders", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    console.log(req.user.id);
     try {
       const orders = await storage.getUserOrders(req.user.id);
       res.json(orders);
@@ -284,11 +283,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update delivery status
   app.put("/api/stall-orders/:orderId/:stallId/delivery", async (req, res) => {
-    try {
-      const orderId = parseInt(req.params.orderId);
-      const stallId = parseInt(req.params.stallId);
-      const { status, notes } = req.body;
+    const orderId = parseInt(req.params.orderId);
+    const stallId = parseInt(req.params.stallId);
+    const { status, notes } = req.body;
 
+    if (!['pending','ready','delivered'].includes(status)) return  res.status(500).json({ error: "Status should be either 'pending' | 'ready' | 'delivered'" });
+    try {
       const updated = await storage.updateDeliveryStatus(orderId, stallId, status, notes);
       res.json(updated);
     } catch (error) {
