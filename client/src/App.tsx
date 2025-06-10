@@ -33,15 +33,6 @@ function Router() {
           </DefaultLayout>
         )
       } />
-      {/* <ProtectedRoute
-        path="/"
-        component={() => (
-          <DefaultLayout>
-            <HomePage />
-          </DefaultLayout>
-        )}
-        roles={["admin", "vendor", "customer", "organizer"]}
-      /> */}
       <ProtectedRoute
         path="/profile"
         component={
@@ -51,6 +42,15 @@ function Router() {
             </DefaultLayout>
           )
         }
+        roles={["admin", "vendor", "customer", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/events"
+        component={() => (
+          <DefaultLayout>
+            <EventsPage/>
+          </DefaultLayout>
+        )}
         roles={["admin", "vendor", "customer", "organizer"]}
       />
       <ProtectedRoute
@@ -121,15 +121,6 @@ function Router() {
         component={() => (
           <DefaultLayout>
             <AllProducts/>
-          </DefaultLayout>
-        )}
-        roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-        path="/events"
-        component={() => (
-          <DefaultLayout>
-            <EventsPage/>
           </DefaultLayout>
         )}
         roles={["admin", "vendor", "customer", "organizer"]}

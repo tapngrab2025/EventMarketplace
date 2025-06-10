@@ -8,10 +8,10 @@ export default function EventCard({ event }: { event: Event }) {
     <Link to={`/event/${event.id}`}>
       <Card className="h-full flex flex-col hover:shadow-lg transition-shadow">
         <CardHeader>
-          <CardTitle className="line-clamp-1">{event.name}</CardTitle>
+          <CardTitle className="line-clamp-1 text-primaryGreen">{event.name}</CardTitle>
         </CardHeader>
         <CardContent className="flex-grow">
-          <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
+          <p className="text-primaryGreen text-sm line-clamp-2 mb-4">
             {event.description}
           </p>
           <div className="space-y-2">

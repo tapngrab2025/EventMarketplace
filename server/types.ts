@@ -1,4 +1,4 @@
-import { User, Event, Stall, Product, CartItem, InsertUser, InsertEvent, InsertStall, InsertProduct, InsertCartItem, Profile, ProductWithDetails } from "@shared/schema";
+import { User, Event, Stall, Product, CartItem, InsertUser, InsertEvent, InsertStall, InsertProduct, InsertCartItem, Profile, ProductWithDetails, Subscriber } from "@shared/schema";
 import session from "express-session";
 
 export interface IStorage {
@@ -47,5 +47,5 @@ export interface IStorage {
   updateDeliveryStatus(orderId: number, status: string, notes: string): Promise<boolean>;
 
   // Subscriber operations
-  createSuscriber(email: string): Promise<boolean>;
+  createSubscriber(email: string): Promise<Subscriber[] | any>;
 }

@@ -23,6 +23,9 @@ import {
   orderItems,
   ProductWithDetails,
   orderDeliveryStatus,
+  Subscriber,
+  InsertSubscriber,
+  subscribers,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, ne, and, gte, lte, sql } from "drizzle-orm";
@@ -100,7 +103,7 @@ export class DatabaseStorage implements IStorage {
     return [updated, updatedProfile];
   }
 
-  async getUsers( id: number ): Promise<User[]> {
+  async getUsers(id: number): Promise<User[]> {
     return await db.select().from(users).where(ne(users.id, id));
   }
 
@@ -110,10 +113,10 @@ export class DatabaseStorage implements IStorage {
     // role: any,
   ): Promise<User | undefined> {
     const [updated] = await db
-     .update(users)
-     .set({ role })
-     .where(eq(users.id, id))
-     .returning();
+      .update(users)
+      .set({ role })
+      .where(eq(users.id, id))
+      .returning();
     return updated;
   }
 
@@ -322,6 +325,27 @@ export class DatabaseStorage implements IStorage {
     return product[0];
   }
 
+  async getProductsByRelative(id: number): Promise<Product[]> {
+    const productStallId = await db
+      .select({ stallId: products.stallId })
+      .from(products)
+      .where(eq(products.id, id));
+
+    if (!productStallId) return [];
+    const relativeProducts = await db
+      .select()
+      .from(products)
+      .where(
+        and(
+          eq(products.stallId, productStallId[0].stallId),
+          ne(products.id, id)
+        )
+      )
+      .limit(4)
+      .orderBy(products.id, 'asc');
+    return relativeProducts;
+  }
+
   async getProductsByStall(stallId: number): Promise<Product[]> {
     return await db
       .select()
@@ -447,65 +471,65 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Failed to create order');
     }
   }
-  
+
   async getUserOrders(userId: number): Promise<Order[]> {
-      return await db
-        .select()
-        .from(orders)
-        .where(eq(orders.user_id, userId))
-        .orderBy(orders.createdAt, 'desc');
+    return await db
+      .select()
+      .from(orders)
+      .where(eq(orders.user_id, userId))
+      .orderBy(orders.createdAt, 'desc');
   }
 
   async getOrder(order_id: number): Promise<Order[]> {
-      const orderWithItems = await db
-        .select({
-          id: orders.id,
-          user_id: orders.user_id,
-          fullName: orders.fullName,
-          phone: orders.phone,
-          address: orders.address,
-          total: orders.total,
-          status: orders.status,
-          paymentMethod: orders.paymentMethod,
-          createdAt: orders.createdAt,
-          items: {
-            id: orderItems.id,
-            quantity: orderItems.quantity,
-            price: orderItems.price,
-            product: {
-              id: products.id as unknown as number,
-              name: products.name as unknown as string,
-              description: products.description as unknown as string,
-              imageUrl: products.imageUrl as unknown as string,
-              stall: { 
-                id: stalls.id as unknown as number,
-                name: stalls.name as unknown as string,
-              }
+    const orderWithItems = await db
+      .select({
+        id: orders.id,
+        user_id: orders.user_id,
+        fullName: orders.fullName,
+        phone: orders.phone,
+        address: orders.address,
+        total: orders.total,
+        status: orders.status,
+        paymentMethod: orders.paymentMethod,
+        createdAt: orders.createdAt,
+        items: {
+          id: orderItems.id,
+          quantity: orderItems.quantity,
+          price: orderItems.price,
+          product: {
+            id: products.id as unknown as number,
+            name: products.name as unknown as string,
+            description: products.description as unknown as string,
+            imageUrl: products.imageUrl as unknown as string,
+            stall: {
+              id: stalls.id as unknown as number,
+              name: stalls.name as unknown as string,
             }
           }
-        })
-        .from(orders)
-        .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
-        .leftJoin(products, eq(products.id, orderItems.productId))
-        .leftJoin(stalls, eq(stalls.id, products.stallId))
-        .where(eq(orders.id, order_id));
-  
-      // Group items by order
-      const groupedOrders = orderWithItems.reduce((acc, curr) => {
-        const order = acc.find(o => o.id === curr.id);
-        if (!order) {
-          acc.push({
-            ...curr,
-            items: curr.items ? [curr.items] : []
-          });
-        } else if (curr.items) {
-          order.items.push(curr.items);
         }
-        return acc;
-      }, [] as any[]);
-  
-      return groupedOrders;
-    }
+      })
+      .from(orders)
+      .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .leftJoin(products, eq(products.id, orderItems.productId))
+      .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .where(eq(orders.id, order_id));
+
+    // Group items by order
+    const groupedOrders = orderWithItems.reduce((acc, curr) => {
+      const order = acc.find(o => o.id === curr.id);
+      if (!order) {
+        acc.push({
+          ...curr,
+          items: curr.items ? [curr.items] : []
+        });
+      } else if (curr.items) {
+        order.items.push(curr.items);
+      }
+      return acc;
+    }, [] as any[]);
+
+    return groupedOrders;
+  }
 
   async getStallOrder(orderId: number, stallId: number): Promise<any> {
     const stallOrderItems = await db
@@ -563,9 +587,17 @@ export class DatabaseStorage implements IStorage {
   }
 
 
-  async createSuscriber(insertSuscriber: InsertSuscriber): Promise<Suscriber> {
-    // return insertSuscriber;
-    return await db.insert(suscribers).values(insertSuscriber).returning().then((result) => result[0]);
+  async createSubscriber(email: string): Promise<Subscriber[] | any> {
+    const existingSubscriber = await db
+      .select()
+      .from(subscribers)
+      .where(eq(subscribers.email, email));
+
+    if (existingSubscriber.length > 0) {
+      throw new Error('User email already subscribed');
+    }
+
+    return await db.insert(subscribers).values({ email }).returning();
   }
 }
 

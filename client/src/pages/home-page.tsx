@@ -1,9 +1,8 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { Product, Event } from "@shared/schema";
 import { useState } from "react";
 import ProductCard from "@/components/products/product-card";
-import EventCard from "@/components/events/event-card";
+import SignUp from "@/components/common/signup";
 import { Loader2, CalendarRange, MapPin } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -13,10 +12,9 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Link } from "wouter";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
 import { Images } from "@/config/images";
-import { toast } from "@/hooks/use-toast";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -26,7 +24,6 @@ export default function HomePage(
   { searchTerm = "" }: VendorDashboardProps
 ) {
   const [location, setLocation] = useState("");
-  const [subscriber, setSubscriber] = useState("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [sortBy, setSortBy] = useState("newest");
@@ -79,31 +76,7 @@ export default function HomePage(
     return 0;
   });
 
-  const submitSubscriber = useMutation({
-      mutationFn: async () => {
-        if (!subscriber.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
-          throw new Error("Please enter a valid email address");
-        }
-        const res = await apiRequest("POST", "/api/subscribers", {
-          email: subscriber.trim().toLowerCase() // Sanitize and normalize email
-        });
-        return res.json();
-      },
-      onSuccess: () => {
-        toast({
-          title: "Subscribed",
-          description: "You have been subscribed successfully!",
-        });
-        setSubscriber(""); // Clear the input after successful subscription
-      },
-      onError: (error: Error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
-      }
-  });
+
 
   if (loadingProducts || loadingEvents) {
     return (
@@ -443,26 +416,7 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="relative bg-[#1B0164] bg-cover bg-center text-white py-4 md:py-24">
-        <div className="container mx-auto px-6 flex items-center justify-center gap-x-28 flex-col lg:flex-row">
-          <h2 className="text-h2 font-bold text-center">Sign up for Newsletter!</h2>
-          <div className="flex items-center flex-col lg:flex-row gap-y-8 lg:gap-0">
-            <Input
-              placeholder="Enter your email"
-              value={subscriber}
-              onChange={(e) => setSubscriber(e.target.value)}
-              className="lg:w-96 bg-transparent border-0 border-b-2 border-white rounded-none text-white placeholder-gray-300 focus:outline-none mr-4 py-2"
-            />
-            <Button
-                variant="outline"
-                onClick={() => submitSubscriber.mutate()}
-                className="bg-[#00C4B4] text-white border-none font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
-              >
-                Subscribe
-              </Button>
-          </div>
-        </div>
-      </section>
+      <SignUp/>
 
     </main>
   );

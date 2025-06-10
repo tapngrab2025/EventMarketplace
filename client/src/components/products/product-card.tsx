@@ -63,6 +63,14 @@ export default function ProductCard({ product }: { product: Product }) {
             }) : 'Date not available'}</p>
             <p>8:00 P.M.</p>
           </div>
+          <div className="flex items-center justify-between">
+              <span className="font-medium">
+                  ${(product.price / 100).toFixed(2)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {product.stock} left
+                </span>
+            </div>
         </div>
         <div className="flex justify-between mt-4 gap-x-2">
           {user?.role === "customer" && (

@@ -90,6 +90,40 @@ export const orderDeliveryStatus = pgTable('order_delivery_status', {
   notes: text('notes'),
 });
 
+
+// Add these types if not already present
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").references(() => users.id), // Keep this as user_id
+  fullName: text("full_name").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  total: integer("total").notNull(),
+  status: text("status").notNull().default("pending"),
+  paymentMethod: text("payment_method").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id),
+  productId: integer("product_id").references(() => products.id),
+  quantity: integer("quantity").notNull(),
+  price: integer("price").notNull(),
+});
+
+export const sessions = pgTable("sessions", {
+  sid: text("sid").primaryKey(),
+  sess: jsonb("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
+
+export const subscribers = pgTable("subscribers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Create the insert schemas with proper validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -152,37 +186,9 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
-// Add these types if not already present
-export const orders = pgTable("orders", {
-  id: serial("id").primaryKey(),
-  user_id: integer("user_id").references(() => users.id), // Keep this as user_id
-  fullName: text("full_name").notNull(),
-  phone: text("phone").notNull(),
-  address: text("address").notNull(),
-  total: integer("total").notNull(),
-  status: text("status").notNull().default("pending"),
-  paymentMethod: text("payment_method").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const orderItems = pgTable("order_items", {
-  id: serial("id").primaryKey(),
-  orderId: integer("order_id").references(() => orders.id),
-  productId: integer("product_id").references(() => products.id),
-  quantity: integer("quantity").notNull(),
-  price: integer("price").notNull(),
-});
-
-export const sessions = pgTable("sessions", {
-  sid: text("sid").primaryKey(),
-  sess: jsonb("sess").notNull(),
-  expire: timestamp("expire").notNull(),
-});
-
-export const subscribers = pgTable("subscribers", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertSubscriber = createInsertSchema(subscribers).omit({
+  id: true,
+  createdAt: true,
 });
 
 export type Order = typeof orders.$inferSelect;
@@ -204,7 +210,8 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Sessions = typeof sessions.$inferInsert;
-export type Subscribers = typeof subscribers.$inferInsert;
+export type Subscriber = typeof subscribers.$inferInsert;
+export type InsertSubscriber = z.infer<typeof insertSubscriber>;
 
 export type ProductWithDetails = Product & {
   Stall: Stall;

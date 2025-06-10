@@ -186,6 +186,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(product);
   });
 
+  app.get("/api/product/:id/relative", async (req, res) => {
+    const product = await storage.getProductsByRelative(parseInt(req.params.id));
+    if (!product) return res.status(404).json({ error: "Products not found" });
+    res.json(product);
+  });
+
   // Edit Product
   app.put("/api/products/:id", async (req, res) => {
     if (!req.isAuthenticated() || !["admin", "vendor"].includes(req.user.role)) {
@@ -297,11 +303,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/subscribers", async (req, res) => {
-    const subscriber = await storage.createSuscriber({
-     ...req.body
-    });
-    res.status(201).json(subscriber);
+    try {
+      const subscriber = await storage.createSubscriber(req.body.email);
+      return res.status(201).json(subscriber);
+    } catch (error) {
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to subscribe"
+      });
+    }
   });
+
+
+  // app.put("/api/events/:id", async (req, res) => {
+  //   if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
+  //     return res.sendStatus(403);
+  //   }
+  //   try {
+  //     const parsedEvent = insertEventSchema.parse({
+  //       ...req.body,
+  //     });
+  //     const event = await storage.updateEvent(parseInt(req.params.id), parsedEvent);
+  //     res.status(201).json(event);
+  //   } catch (error) {
+  //     console.error("Event update error:", error);
+  //     res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
+  //   }
+  // });
 
   const httpServer = createServer(app);
   return httpServer;

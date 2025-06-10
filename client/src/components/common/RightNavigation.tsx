@@ -28,7 +28,8 @@ export function RightNavigation({
             ) : (
                 <div className="flex items-center gap-4">
                     <Button className="hidden md:block" variant="ghost" size="icon" onClick={() => setLocation("/profile")} title="User Profile">
-                        <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">person</span>
+                        {/* <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">person</span> */}
+                        <span className="material-icons-outlined">person</span>
                     </Button>
                     {user.role === "vendor" && (
                         <Button
