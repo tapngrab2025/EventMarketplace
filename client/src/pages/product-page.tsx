@@ -74,7 +74,7 @@ export default function ProductPage() {
                 <div className="space-y-6">
                     <div>
                         <h1 className="text-[32px] font-bold uppercase">{product.name}</h1>
-                        <p className="text-2xl text-primaryGreen mt-7"><span class="material-symbols-outlined">location_on</span> {product.stall?.location}</p>
+                        <p className="text-2xl text-primaryGreen mt-7"><span className="material-icons-outlined">location_on</span> {product.stall?.location}</p>
                         <p className="font-medium mt-5 font-semibold text-primaryGreen text-[2rem]">{product.event?.name} - {product.stall?.name}</p>
                         <div className="grid grid-cols-2 gap-4 text-primaryGreen">
                             <div>
