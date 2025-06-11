@@ -106,14 +106,15 @@ export default function HomePage(
           <p className="text-gray-600">Discover your favorite entertainment right here</p>
         </div>
 
-        <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-4 mb-12">
+        <div className="w-full max-w-6xl flex flex-col sm:flex-row gap-4 mb-12">
           <div className="flex-1">
             <div className="relative bg-white rounded-lg w-full">
               <Input
+                id="location"
                 placeholder="Filter by Location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-12 rounded-lg border-none bg-white"
+                className="w-full pl-12 rounded-[15px] bg-white border-[#A3A3A3]"
               />
               <div className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 bg-white flex items-center justify-center">
                 <MapPin className="h-4 w-4 text-gray-400" />
@@ -123,7 +124,7 @@ export default function HomePage(
           <div className="flex flex-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full bg-white rounded-lg border-none">
+                <Button variant="outline" className="w-full bg-white rounded-[15px] border-[#A3A3A3]">
                   <CalendarRange className="mr-2 h-4 w-4 text-gray-400" />
                   {startDate && endDate ? (
                     `${format(startDate, "PP")} - ${format(endDate, "PP")}`
@@ -150,7 +151,7 @@ export default function HomePage(
           </div>
           <div className="flex-1">
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="bg-white rounded-lg border-none">
+              <SelectTrigger className="bg-white rounded-[15px] border-[#A3A3A3]">
                 <SelectValue placeholder="Newest First" />
               </SelectTrigger>
               <SelectContent>
@@ -160,7 +161,7 @@ export default function HomePage(
             </Select>
           </div>
 
-          {(location || startDate || endDate) && (
+          {/* {(location || startDate || endDate) && (
             <div className="flex-1">
               <Button
                 variant="ghost"
@@ -174,12 +175,18 @@ export default function HomePage(
                 Clear filters
               </Button>
             </div>
-          )}
-          {/* <button
-            className="w-full sm:w-auto bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition duration-300"
+          )} */}
+          <button
+            className="bg-teal-500 text-white text-base py-2 px-16 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full"
+            onClick={() => {
+              setLocation("");
+              setStartDate(undefined);
+              setEndDate(undefined);
+              setSortBy("newest");
+            }}
           >
             Search
-          </button> */}
+          </button>
 
         </div>
 

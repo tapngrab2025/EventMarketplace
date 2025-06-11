@@ -11,6 +11,7 @@ import { DEFAULT_IMAGES } from "@/config/constants";
 import NotFound from "./not-found";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
+import CountDown from "@/components/product/count-down";
 
 export default function ProductPage() {
     const { id } = useParams<{ id: string }>();
@@ -74,19 +75,20 @@ export default function ProductPage() {
                 <div className="space-y-6">
                     <div>
                         <h1 className="text-[32px] font-bold uppercase">{product.name}</h1>
-                        <p className="text-2xl text-primaryGreen mt-7"><span className="material-icons-outlined">location_on</span> {product.stall?.location}</p>
-                        <p className="font-medium mt-5 font-semibold text-primaryGreen text-[2rem]">{product.event?.name} - {product.stall?.name}</p>
-                        <div className="grid grid-cols-2 gap-4 text-primaryGreen">
-                            <div>
+                        <p className="text-2xl text-primaryGreen mt-7"><span className="material-icons">location_on</span> {product.stall?.location}</p>
+                        <p className="font-medium mt-5 font-semibold text-primaryGreen text-[2rem] leading-none">{product.event?.name} - {product.stall?.name}</p>
+                        <div className="grid grid-cols-2 gap-4 text-primaryGreen mt-5">
+                            <CountDown date={product.event?.endDate} className="event_count_down" />
+                            {/* <div>
                                 <span className="text-primaryGreen">Start Date:</span>
                                 <p>{new Date(product.event?.startDate || '').toLocaleDateString()}</p>
                             </div>
                             <div>
                                 <span className="text-primaryGreen">End Date:</span>
                                 <p>{new Date(product.event?.endDate || '').toLocaleDateString()}</p>
-                            </div>
+                            </div> */}
                         </div>
-                        <p className="text-xl font-semibold mt-2">
+                        <p className="text-xl font-semibold mt-5">
                             ${(product.price / 100).toFixed(2)}
                         </p>
                     </div>

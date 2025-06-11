@@ -6,9 +6,6 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 
 export default function AllProducts() {
 
-    // const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
-    //     queryKey: ["/api/products/paginate?page=1&pageSize=10&searchTerm=shirt&category=souvenir&minPrice=10&maxPrice=100&sortBy=price&sortOrder=desc"]
-    // });
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
