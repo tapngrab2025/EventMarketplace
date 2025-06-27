@@ -234,7 +234,7 @@ export default function HomePage(
                     <div className="absolute top-0 left-0 w-full h-full bg-stone-700 opacity-50"></div>
                   </div>
                 </div>
-                <div className="text-3xl md:text-6xl font-bold mb-8 transform -rotate-[20deg] bottom-[2rem] absolute left-[10%] md:left-[20%] text-center">
+                <div className="text-3xl md:text-6xl font-bold mb-8 transform -rotate-[20deg] bottom-[2rem] absolute left-[10%] md:left-[15%] text-center">
                   {item.title} {item.category} <br />
                   {item.promotionalText}
                 </div>
@@ -243,7 +243,7 @@ export default function HomePage(
           </Slider>
         </div>
       </section>
-      <section className="text-center mb-16 px-4">
+      {/* <section className="text-center my-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl font-bold mb-4">
             Your One-Stop Event Marketplace
@@ -253,9 +253,14 @@ export default function HomePage(
             Connect with vendors and event organizers all in one place.
           </p>
         </div>
-      </section>
+      </section> */}
       {/* <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
-      <section className="flex flex-col items-center justify-center p-6">
+      <section className="flex flex-col items-center justify-center py-20 px-6 overflow-hidden relative">
+        <div className="absolute inset-0 opacity-80" 
+            style={{ 
+              background: 'radial-gradient(circle at 0% 37%,rgb(167, 88, 158) 0%, transparent 10%), radial-gradient(circle at 100% 68%, #3d0a91cc 0%, transparent 13%)'
+            }}>
+        </div>
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Let's Find Your Grab</h1>
           <p className="text-gray-600">Discover your favorite entertainment right here</p>
@@ -381,81 +386,6 @@ export default function HomePage(
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="mb-12 px-4">
-        <div className="container mx-auto">
-          {/* <div className="flex flex-wrap gap-4 mb-6">
-            <Input
-              placeholder="Filter by location..."
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="max-w-xs"
-              icon={<MapPin className="h-4 w-4" />}
-            />
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[240px]">
-                  <CalendarRange className="mr-2 h-4 w-4" />
-                  {startDate && endDate ? (
-                    `${format(startDate, "PP")} - ${format(endDate, "PP")}`
-                  ) : (
-                    "Select date range"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={{
-                    from: startDate,
-                    to: endDate,
-                  }}
-                  onSelect={(range) => {
-                    setStartDate(range?.from);
-                    setEndDate(range?.to);
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {(location || startDate || endDate) && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setLocation("");
-                  setStartDate(undefined);
-                  setEndDate(undefined);
-                  setSortBy("newest");
-                }}
-              >
-                Clear filters
-              </Button>
-            )}
-          </div> */}
-          {/* <h2 className="text-h2 font-semibold mb-6">Upcoming Events</h2>
-          {filteredEvents?.length === 0 ? (
-            <p className="text-muted-foreground">No events found</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEvents?.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          )} */}
         </div>
       </section>
 
