@@ -258,7 +258,7 @@ export default function HomePage(
       <section className="flex flex-col items-center justify-center py-20 px-6 overflow-hidden relative">
         <div className="absolute inset-0 opacity-80" 
             style={{ 
-              zIndex: 1,
+              zIndex: -1,
               background: 'radial-gradient(circle at 0% 37%,rgb(167, 88, 158) 0%, transparent 10%), radial-gradient(circle at 100% 60%, #3d0a91cc 0%, transparent 13%)'
             }}>
         </div>
