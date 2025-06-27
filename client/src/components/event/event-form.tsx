@@ -54,7 +54,7 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
           endDate: new Date(values.endDate).toISOString(),
         };
   
-        console.log('Submitting event:', formattedValues);
+        // console.log('Submitting event:', formattedValues);
         const res = await apiRequest("POST", "/api/events", formattedValues);
   
         if (!res.ok) {

@@ -78,7 +78,7 @@ export function DefaultNavigation({ isMobileMenuOpen, setIsMobileMenuOpen }: { i
                                         <Button variant="ghost" size="icon" className="relative">
                                             <ShoppingCart className="h-5 w-5" />
                                             {cartItems?.length > 0 && (
-                                                <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">
+                                                <span className="flex items-center absolute top-0 right-[-3px] justify-center w-[20px] h-[20px] leading-none rounded-full bg-red-800 text-white hover:text-white cursor-pointer">
                                                     {cartItems.length}
                                                 </span>
                                             )}

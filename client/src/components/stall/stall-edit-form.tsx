@@ -39,7 +39,7 @@ export function StallEditForm({ stallId, onClose }: EditStallFormProps) {
     if (stall) {
       form.reset(stall);
     }
-    console.log(stall);
+    // console.log(stall);
   }, [stall, form]);
 
   const editStall = useMutation({

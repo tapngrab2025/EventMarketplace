@@ -28,7 +28,7 @@ import {
   subscribers,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, ne, and, gte, lte, sql } from "drizzle-orm";
+import { eq, ne, and, gte, lte, sql, like, ilike, or, between } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 
@@ -237,6 +237,8 @@ export class DatabaseStorage implements IStorage {
     page: number,
     pageSize: number,
     searchTerm?: string,
+    startDate?: string,
+    endDate?: string,
     category?: string,
     minPrice?: number,
     maxPrice?: number,
@@ -244,12 +246,28 @@ export class DatabaseStorage implements IStorage {
     sortOrder?: string
   ): Promise<{ products: Product[]; total: number }> {
     const offset = (page - 1) * pageSize;
-    const query = db.select().from(products);
+    const query = db.select({ ...products, }).from(products);
 
     if (searchTerm) {
       query.where(
-        eq(products.name, searchTerm)
+        ilike(products.name, `%${searchTerm}%`)
       );
+    }
+
+    if (startDate && endDate) {
+       const start = new Date(startDate);
+      const end = new Date(endDate);
+      // Set start to beginning of day and end to end of day
+      start.setUTCHours(0, 0, 0, 0);
+      end.setUTCHours(23, 59, 59, 999);
+      query
+      .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(events, eq(events.id, stalls.eventId))
+      .where(
+        or(
+          between(events.startDate, start, end), 
+          between(events.endDate, start, end))
+      )
     }
 
     if (category) {
@@ -282,7 +300,17 @@ export class DatabaseStorage implements IStorage {
   }
   // Get all products
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products).orderBy(products.id, 'desc');
+    return await db.select()
+    .from(products)
+    .orderBy(products.id, 'desc');
+  }
+
+  async getProductsFeatured(): Promise<ProductWithDetails[]> {
+    return await db.select()
+    .from(products)
+    .leftJoin(stalls, eq(stalls.id, products.stallId))
+    .leftJoin(events, eq(events.id, stalls.eventId))
+    .orderBy(products.id, 'desc');
   }
 
   // Get single product with details

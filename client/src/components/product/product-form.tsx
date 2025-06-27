@@ -50,7 +50,7 @@ export function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () 
           stallId: stall.id,
         };
   
-        console.log('Submitting product:', formattedData);
+        // console.log('Submitting product:', formattedData);
         const res = await apiRequest("POST", "/api/products", formattedData);
         if (!res.ok) {
           const error = await res.json();

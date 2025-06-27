@@ -32,10 +32,10 @@ export default function Home() {
     return acc;
   }, {} as Record<string, Product[]>);
 
-  console.log('Events:', events); // Debug log
-  console.log('Upcoming Events:', upcomingEvents); // Debug log
-  console.log('Products:', products); // Debug log
-  console.log('Grouped Products:', groupedProducts); // Debug log
+  // console.log('Events:', events); // Debug log
+  // console.log('Upcoming Events:', upcomingEvents); // Debug log
+  // console.log('Products:', products); // Debug log
+  // console.log('Grouped Products:', groupedProducts); // Debug log
 
   // Show message if no events or products
   if (!loadingEvents && !loadingProducts && (!events?.length || !products?.length)) {

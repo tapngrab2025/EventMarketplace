@@ -15,9 +15,23 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import { Images } from "@/config/images";
+import CountDown from "@/components/product/count-down";
 
 interface VendorDashboardProps {
   searchTerm?: string;
+}
+
+interface CarouselItem {
+  id: number;
+  title: string;
+  category: string;
+  promotionalText: string;
+  eventName: string;
+  eventDate: Date;
+  eventEndDate: Date;
+  location: string;
+  imageUrl: string;
+  stallNumber: string;
 }
 
 export default function HomePage(
@@ -45,9 +59,14 @@ export default function HomePage(
     queryKey: ["/api/products"],
   });
 
-  const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
-    queryKey: ["/api/events"],
+  const { data: products_featured } = useQuery<Product[]>({
+    queryKey: ["/api/products/feature"],
   });
+
+  // const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
+  //   queryKey: ["/api/events"],
+  // });
+  // console.log(products_featured);
 
   const filteredProducts = products
     ?.filter((product) =>
@@ -58,27 +77,33 @@ export default function HomePage(
     .sort((a, b) => b.id - a.id) // Sort by newest first
     .slice(0, 8);
 
-  const filteredEvents = events?.filter((event) => {
-    const matchesSearch = event.approved &&
-      (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const productsFeatured = products_featured
+    ?.filter((product) => product.products.approved)
+    .sort((a, b) => b.id - a.id) // Sort by newest first
+    .slice(0, 8);
 
-    const matchesLocation = !location ||
-      event.location.toLowerCase().includes(location.toLowerCase());
+  // const filteredEvents = events?.filter((event) => {
+  //   const matchesSearch = event.approved &&
+  //     (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //       event.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesDateRange = (!startDate || new Date(event.startDate) >= startDate) &&
-      (!endDate || new Date(event.endDate) <= endDate);
+  //   const matchesLocation = !location ||
+  //     event.location.toLowerCase().includes(location.toLowerCase());
 
-    return matchesSearch && matchesLocation && matchesDateRange;
-  }).sort((a, b) => {
-    if (sortBy === "newest") return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-    if (sortBy === "oldest") return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-    return 0;
-  });
+  //   const matchesDateRange = (!startDate || new Date(event.startDate) >= startDate) &&
+  //     (!endDate || new Date(event.endDate) <= endDate);
+
+  //   return matchesSearch && matchesLocation && matchesDateRange;
+  // }).sort((a, b) => {
+  //   if (sortBy === "newest") return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+  //   if (sortBy === "oldest") return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+  //   return 0;
+  // });
 
 
 
-  if (loadingProducts || loadingEvents) {
+  // if (loadingProducts || loadingEvents) {
+  if (loadingProducts) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
@@ -86,8 +111,138 @@ export default function HomePage(
     );
   }
 
+  // Add this function inside the HomePage component
+const carouselItems: CarouselItem[] = productsFeatured
+.map(product => ({
+  id: product.products.id,
+  title: product.products.name,
+  category: product.products.category,
+  promotionalText: `For the 1st 50`,
+  eventName: product.events?.name || '',
+  eventDate: new Date(product.events?.startDate),
+  eventEndDate: new Date(product.events?.endDate),
+  location: product.events?.location || '',
+  imageUrl: product.products.imageUrl,
+  stallNumber: `Stall ${product.stalls?.id || '35'}`
+})) || [];
+
+const heroSliderSettings = {
+  dots: true,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  autoplay: false,
+  autoplaySpeed: 5000,
+  arrows: false,
+  className: "mobile-slider",
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        infinite: true,
+        dots: true
+      }
+    },
+    {
+      breakpoint: 768,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        initialSlide: 1,
+        dots: true
+      }
+    },
+    {
+      breakpoint: 480,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        dots: true
+      }
+    }
+  ]
+};
+
+const testimonialSliderSettings = {
+  dots: false,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  autoplay: true,
+  autoplaySpeed: 5000,
+  arrows: false,
+}
+const carouselStyles = `
+  .mobile-slider {
+    overflow: hidden;
+    width: 100% !important;
+  }
+  .mobile-slider .slick-list {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  @media (max-width: 640px) {
+    .mobile-slider .slick-slide > div {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+  }
+`;
+
   return (
     <main className="pt-8 min-h-screen">
+      <section className="bg-[#1B0164] -mt-8 text-white py-8 md:py-12 overflow-hidden">
+        <style>{carouselStyles}</style>
+        <div className="container mx-auto px-4">
+          <Slider 
+          {...heroSliderSettings}
+          className="w-full max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto featured-carousel"
+          >
+            {carouselItems.map((item) => (
+              // <div key={item.id} className="w-full max-w-6xl px-4 relative lg:pt-[45px]">
+              <div key={item.id} className="px-4 relative lg:pt-[45px] w-[300px] md:w-full">
+                <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto">
+                  <div className="flex-1 w-full md:pr-8 mt-0 mb-auto">
+                    <div className="flex items-center space-x-2 mb-4 text-2xl">
+                      <MapPin className="h-8 w-8" />
+                      <span>{item.location}</span>
+                    </div>
+                    <h2 className="text-4xl font-bold mb-4 text-primaryOrange">
+                      {item.eventName} - {item.stallNumber}
+                    </h2>
+                    <div className="flex space-x-4 mb-8">
+                      <CountDown date={item?.eventEndDate} className="event_count_down" />
+                    </div>
+                    <Button
+                      className="bg-teal-500 text-white px-8 py-2 rounded-full hover:bg-teal-600"
+                      onClick={() => window.location.href = `/products/${item.id}`}
+                    >
+                      Grab This
+                    </Button>
+                  </div>
+                  <div className="flex-1 relative w-full mt-8 md:mt-0">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full object-cover mx-auto h-[300px] md:min-h-[500px] md:max-h-[600px]"
+                    />
+                    <div className="absolute top-0 left-0 w-full h-full bg-stone-700 opacity-50"></div>
+                  </div>
+                </div>
+                <div className="text-3xl md:text-6xl font-bold mb-8 transform -rotate-[20deg] bottom-[2rem] absolute left-[10%] md:left-[20%] text-center">
+                  {item.title} {item.category} <br/>
+                  {item.promotionalText}
+                </div>
+              </div>
+            ))}
+          </Slider>
+        </div>
+      </section>
       <section className="text-center mb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl font-bold mb-4">
@@ -160,29 +315,16 @@ export default function HomePage(
               </SelectContent>
             </Select>
           </div>
-
-          {/* {(location || startDate || endDate) && (
-            <div className="flex-1">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setLocation("");
-                  setStartDate(undefined);
-                  setEndDate(undefined);
-                  setSortBy("newest");
-                }}
-              >
-                Clear filters
-              </Button>
-            </div>
-          )} */}
           <button
             className="bg-teal-500 text-white text-base py-2 px-16 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full"
             onClick={() => {
-              setLocation("");
-              setStartDate(undefined);
-              setEndDate(undefined);
-              setSortBy("newest");
+              const searchParams = new URLSearchParams();
+              if (location) searchParams.set('location', location);
+              if (startDate) searchParams.set('startDate', startDate.toISOString());
+              if (endDate) searchParams.set('endDate', endDate.toISOString());
+              if (sortBy) searchParams.set('sortBy', sortBy);
+              
+              window.location.href = `/search?${searchParams.toString()}`;
             }}
           >
             Search
@@ -400,20 +542,15 @@ export default function HomePage(
           <h2 className="text-h2 font-bold mb-4">What People Say</h2>
           <p className="text-lg mb-12">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
           <Slider
-            infinite={true}
-            speed={500}
-            slidesToShow={1}
-            slidesToScroll={1}
-            autoplay={true}
-            autoplaySpeed={5000}
-            className="w-full max-w-xs sm:max-w-2xl lg:max-w-5xl mx-auto overflow-hidden"
+            {...testimonialSliderSettings}
+            className="w-full max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto overflow-hidden"
           >
             {testimonials.map((testimonial, index) => (
               <div key={index} className="px-2 sm:px-4 w-full">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-full">
                   <div className="quote-bg flex-1 max-w-full">
-                    <p className="text-lg mb-4 line-clamp-5 md:line-clamp-none text-left">{testimonial.text}</p>
-                    <p className="font-semibold text-left">- {testimonial.author}</p>
+                    <p className="text-[20px] lg:text-[32px] mb-4 line-clamp-5 md:line-clamp-none text-left">{testimonial.text}</p>
+                    <p className="text-[20px] lg:text-[32px] font-semibold text-left">- {testimonial.author}</p>
                   </div>
                   <img src={testimonial.image} alt={testimonial.author} className="rounded-full w-[150px] h-[150px] md:w-[200px] md:h-[200px] flex-shrink-0" />
                 </div>

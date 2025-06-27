@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarRange } from 'lucide-react';
 import { format } from "date-fns";
 import { Calendar } from '@/components/ui/calendar';
+import ProductCard from '@/components/products/product-card';
 
 interface Product {
   id: number;
@@ -19,15 +20,62 @@ interface Product {
   stock: number;
 }
 
-const SearchPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-//   const [category, setCategory] = useState('all');
-//   const [minPrice, setMinPrice] = useState<string>('');
-//   const [maxPrice, setMaxPrice] = useState<string>('');
-    const [startDate, setStartDate] = useState<Date>();
-    const [endDate, setEndDate] = useState<Date>();
 
-  const [sortBy, setSortBy] = useState('newest');
+// Add this function outside the component:
+const getProducts = async ({
+  page,
+  pageSize,
+  searchTerm,
+  startDate,
+  endDate,
+  sortBy
+}: {
+  page: number;
+  pageSize: number;
+  searchTerm?: string;
+  startDate?: Date;
+  endDate?: Date;
+  sortBy: string;
+}) => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    pageSize: pageSize.toString(),
+    ...(searchTerm && { searchTerm }),
+    // ...(category && { category }),
+    // ...(minPrice && { minPrice }),
+    // ...(maxPrice && { maxPrice }),
+    ...(startDate && { startDate: startDate instanceof Date ? startDate.toISOString() : startDate }),
+    ...(endDate && { endDate: endDate instanceof Date ? endDate.toISOString() : endDate }),
+    ...(sortBy === 'newest' ? { sortBy: 'id', sortOrder: 'desc' } : { sortBy: 'id', sortOrder: 'asc' })
+  });
+
+  return await apiRequest('GET', `/api/products/paginate?${params}`);
+};
+
+
+const SearchPage = () => {
+  // Get URL parameters
+  const params = new URLSearchParams(window.location.search);
+  
+  const [searchTerm, setSearchTerm] = useState(params.get('location') || '');
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    params.get('startDate') ? new Date(params.get('startDate')!) : undefined
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    params.get('endDate') ? new Date(params.get('endDate')!) : undefined
+  );
+  const [sortBy, setSortBy] = useState(params.get('sortBy') || 'newest');
+  
+  // Trigger initial search if we have URL parameters
+  useEffect(() => {
+    if (params.toString()) {
+      handleSearch.mutate();
+    }
+  }, []);
+  
+  // const [category, setCategory] = useState('all');
+  // const [minPrice, setMinPrice] = useState<string>('');
+  // const [maxPrice, setMaxPrice] = useState<string>('');
   const [page, setPage] = useState(1);
   const pageSize = 12;
 
@@ -35,19 +83,14 @@ const SearchPage = () => {
     // queryKey: ['products', page, searchTerm, category, minPrice, maxPrice, sortBy],
     queryKey: ['products'],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-        ...(searchTerm && { searchTerm }),
-        // ...(startDate && { startDate }),
-        // ...(endDate && { endDate }),
-        // ...(category && { category }),
-        // ...(minPrice && { minPrice }),
-        // ...(maxPrice && { maxPrice }),
-        ...(sortBy === 'newest' ? { sortBy: 'id', sortOrder: 'desc' } : { sortBy: 'id', sortOrder: 'asc' })
+      const response = await getProducts({
+        page: 1,
+        pageSize,
+        searchTerm,
+        startDate,
+        endDate,
+        sortBy
       });
-
-      const response = await apiRequest('GET', `/api/products/paginate?${params}`);
       return response.json();
     }
   });
@@ -57,16 +100,14 @@ const SearchPage = () => {
   const handleSearch = useMutation({
     mutationFn: async () => {
       setPage(1); // Reset to first page when searching
-      const params = new URLSearchParams({
-        page: '1', // Use '1' directly since we're resetting the page
-        pageSize: pageSize.toString(),
-        ...(searchTerm && { searchTerm }),
-        ...(startDate && { startDate: startDate.toISOString() }),
-        ...(endDate && { endDate: endDate.toISOString() }),
-        ...(sortBy === 'newest' ? { sortBy: 'id', sortOrder: 'desc' } : { sortBy: 'id', sortOrder: 'asc' })
+      const response = await getProducts({
+        page: 1,
+        pageSize,
+        searchTerm,
+        startDate,
+        endDate,
+        sortBy
       });
-      
-      const response = await apiRequest('GET', `/api/products/paginate?${params}`);
       const data = await response.json();
       return data;
     },
@@ -77,33 +118,35 @@ const SearchPage = () => {
       console.error('Search failed:', error);
     }
   });
-//   const handleSearch = useMutation();
 
-//   const addToCart = useMutation({
-//     mutationFn: async () => {
-//         const res = await apiRequest("POST", "/api/cart", {
-//             productId: id,
-//             quantity: 1,
-//         });
-//         return res.json();
-//     },
-//     onSuccess: () => {
-//         queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-//         toast({
-//             title: "Added to cart",
-//             description: `${product?.name} has been added to your cart.`,
-//         });
-//     },
-// });
-
-  const handleClear = () => {
-    setSearchTerm('');
-    // setCategory('all');
-    // setMinPrice('');
-    // setMaxPrice('');
-    setSortBy('newest');
-    setPage(1);
-  };
+  const handleClear = useMutation({
+    mutationFn: async () => {
+      setPage(1);
+      setSearchTerm('');
+      // setCategory('all');
+      // setMinPrice('');
+      // setMaxPrice('');
+      setStartDate(undefined);
+      setEndDate(undefined);
+      setSortBy('newest');
+      const response = await getProducts({
+        page: 1,
+        pageSize,
+        searchTerm,
+        startDate,
+        endDate,
+        sortBy
+      });
+      const data = await response.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] }); // Match the query key from useQuery
+    },
+    onError: (error) => {
+      console.error('Search failed:', error);
+    }
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -197,7 +240,7 @@ const SearchPage = () => {
           <Button
             variant="outline"
             className="rounded-[50px] px-8"
-            onClick={handleClear}
+            onClick={() => handleClear.mutate()}
           >
             Clear
           </Button>
@@ -211,7 +254,10 @@ const SearchPage = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {data?.products.map((product: Product) => (
+            {data?.products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+            {/* {data?.products.map((product: Product) => (
               <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <img
                   src={product.imageUrl}
@@ -227,7 +273,7 @@ const SearchPage = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
 
           {totalPages > 1 && (

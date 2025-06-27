@@ -123,10 +123,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(products);
   });
 
+  app.get("/api/products/feature", async (_req, res) => {
+    const products = await storage.getProductsFeatured();
+    res.json(products);
+  });
+
   app.get("/api/products/paginate", async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
     const searchTerm = req.query.searchTerm as string;
+    const startDate = req.query.startDate as string;
+    const endDate = req.query.endDate as string;
     const category = req.query.category as string;
     const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
@@ -137,6 +144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       page,
       pageSize,
       searchTerm,
+      startDate,
+      endDate,
       category,
       minPrice,
       maxPrice,
