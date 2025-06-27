@@ -77,7 +77,7 @@ export default function HomePage(
     .sort((a, b) => b.id - a.id) // Sort by newest first
     .slice(0, 8);
 
-    const productsFeatured = products_featured
+  const productsFeatured = products_featured
     ?.filter((product) => product.products.approved)
     .sort((a, b) => b.id - a.id) // Sort by newest first
     .slice(0, 8);
@@ -112,71 +112,71 @@ export default function HomePage(
   }
 
   // Add this function inside the HomePage component
-const carouselItems: CarouselItem[] = productsFeatured
-.map(product => ({
-  id: product.products.id,
-  title: product.products.name,
-  category: product.products.category,
-  promotionalText: `For the 1st 50`,
-  eventName: product.events?.name || '',
-  eventDate: new Date(product.events?.startDate),
-  eventEndDate: new Date(product.events?.endDate),
-  location: product.events?.location || '',
-  imageUrl: product.products.imageUrl,
-  stallNumber: `Stall ${product.stalls?.id || '35'}`
-})) || [];
+  const carouselItems: CarouselItem[] = productsFeatured
+    ?.map(product => ({
+      id: product.products.id,
+      title: product.products.name,
+      category: product.products.category,
+      promotionalText: `For the 1st 50`,
+      eventName: product.events?.name || '',
+      eventDate: new Date(product.events?.startDate),
+      eventEndDate: new Date(product.events?.endDate),
+      location: product.events?.location || '',
+      imageUrl: product.products.imageUrl,
+      stallNumber: `Stall ${product.stalls?.id || '35'}`
+    })) || [];
 
-const heroSliderSettings = {
-  dots: true,
-  infinite: true,
-  speed: 500,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  autoplay: false,
-  autoplaySpeed: 5000,
-  arrows: false,
-  className: "mobile-slider",
-  responsive: [
-    {
-      breakpoint: 1024,
-      settings: {
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        infinite: true,
-        dots: true
+  const heroSliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: false,
+    autoplaySpeed: 5000,
+    arrows: false,
+    className: "mobile-slider",
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          infinite: true,
+          dots: true
+        }
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          initialSlide: 1,
+          dots: true
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          dots: true
+        }
       }
-    },
-    {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        initialSlide: 1,
-        dots: true
-      }
-    },
-    {
-      breakpoint: 480,
-      settings: {
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        dots: true
-      }
-    }
-  ]
-};
+    ]
+  };
 
-const testimonialSliderSettings = {
-  dots: false,
-  infinite: true,
-  speed: 500,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  autoplay: true,
-  autoplaySpeed: 5000,
-  arrows: false,
-}
-const carouselStyles = `
+  const testimonialSliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 5000,
+    arrows: false,
+  }
+  const carouselStyles = `
   .mobile-slider {
     overflow: hidden;
     width: 100% !important;
@@ -199,9 +199,9 @@ const carouselStyles = `
       <section className="bg-[#1B0164] -mt-8 text-white py-8 md:py-12 overflow-hidden">
         <style>{carouselStyles}</style>
         <div className="container mx-auto px-4">
-          <Slider 
-          {...heroSliderSettings}
-          className="w-full max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto featured-carousel"
+          <Slider
+            {...heroSliderSettings}
+            className="w-full max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto featured-carousel"
           >
             {carouselItems.map((item) => (
               // <div key={item.id} className="w-full max-w-6xl px-4 relative lg:pt-[45px]">
@@ -235,7 +235,7 @@ const carouselStyles = `
                   </div>
                 </div>
                 <div className="text-3xl md:text-6xl font-bold mb-8 transform -rotate-[20deg] bottom-[2rem] absolute left-[10%] md:left-[20%] text-center">
-                  {item.title} {item.category} <br/>
+                  {item.title} {item.category} <br />
                   {item.promotionalText}
                 </div>
               </div>
@@ -323,7 +323,7 @@ const carouselStyles = `
               if (startDate) searchParams.set('startDate', startDate.toISOString());
               if (endDate) searchParams.set('endDate', endDate.toISOString());
               if (sortBy) searchParams.set('sortBy', sortBy);
-              
+
               window.location.href = `/search?${searchParams.toString()}`;
             }}
           >
@@ -467,25 +467,25 @@ const carouselStyles = `
             <h1 className="text-4xl font-bold text-gray-800 mb-2">Featured Grabs</h1>
             <p className="text-gray-600">Discover more of the activities with our curated event collections</p>
           </div>
-        
+
           <div className="w-full max-w-7xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                  {filteredProducts?.length === 0 ? (
-                  <p className="text-muted-foreground">No products found</p>
-                ) : (
-                  <>
-                    {filteredProducts?.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </>
-                )}
+              {filteredProducts?.length === 0 ? (
+                <p className="text-muted-foreground">No products found</p>
+              ) : (
+                <>
+                  {filteredProducts?.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </>
+              )}
 
             </div>
           </div>
-        
+
           <div className="mt-8 flex justify-center">
-          <Link href="/products" className="text-blue-500 font-semibold hover:underline">
+            <Link href="/products" className="text-blue-500 font-semibold hover:underline">
               View All Grabs
             </Link>
           </div>
@@ -494,17 +494,17 @@ const carouselStyles = `
 
       {/* <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}> */}
       <section className="transferGrabs relative bg-[#1B0164] bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
-        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-none bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]" 
-        style={{ '--bg-image': `url(${Images.transferGrabsImg.src || Images.transferGrabsImg})` } as React.CSSProperties}>
+        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-none bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]"
+          style={{ '--bg-image': `url(${Images.transferGrabsImg.src || Images.transferGrabsImg})` } as React.CSSProperties}>
           <div className="lg:max-w-3xl z-10 text-center">
             <h2 className="text-h2 font-bold mb-4 md:mb-11">Transfer Your Grabs</h2>
             <p className="text-h5 mb-6 md:mb-11">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
             <Link href="/auth" className="bg-[#F58020] text-white font-medium px-6 py-2 rounded-full hover:bg-orange-600 transition">
-            Register
+              Register
             </Link>
           </div>
           <div className="lg:hidden flex items-center z-10">
-            <img src={Images.transferGrabsImg} alt="Transfer Grabs" className="max-w-[400px] w-full"/>
+            <img src={Images.transferGrabsImg} alt="Transfer Grabs" className="max-w-[400px] w-full" />
           </div>
         </div>
       </section>
@@ -522,15 +522,15 @@ const carouselStyles = `
           <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
           <div className="flex justify-center gap-12 lg:gap-[300px] flex-col lg:flex-row">
             <div className="flex flex-col items-center">
-              <img src={Images.trustFundTransfer} alt="Trust Fund Transfer Icon" className="mb-4 max-w-135"/>
+              <img src={Images.trustFundTransfer} alt="Trust Fund Transfer Icon" className="mb-4 max-w-135" />
               <p className="text-lg font-semibold">Trust Fund Transfer</p>
             </div>
             <div className="flex flex-col items-center">
-              <img src={Images.moneySaver} alt="Money Saver Icon" className="mb-4 max-w-135"/>
+              <img src={Images.moneySaver} alt="Money Saver Icon" className="mb-4 max-w-135" />
               <p className="text-lg font-semibold">Money Saver</p>
             </div>
             <div className="flex flex-col items-center">
-              <img src={Images.userFriendly} alt="User Friendly Icon" className="mb-4 max-w-135"/>
+              <img src={Images.userFriendly} alt="User Friendly Icon" className="mb-4 max-w-135" />
               <p className="text-lg font-semibold">User Friendly</p>
             </div>
           </div>
@@ -560,7 +560,7 @@ const carouselStyles = `
         </div>
       </section>
 
-      <SignUp/>
+      <SignUp />
 
     </main>
   );
