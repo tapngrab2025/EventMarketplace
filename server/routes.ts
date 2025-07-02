@@ -49,6 +49,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(event);
   })
 
+  app.get("/api/events/city/:city", async (req, res) => {
+    const event = await storage.getCityEvent(req.params.city);
+    if (!event) return res.sendStatus(404);
+    res.json(event);
+  })
+
   // Edit Event
   app.put("/api/events/:id", async (req, res) => {
     if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {

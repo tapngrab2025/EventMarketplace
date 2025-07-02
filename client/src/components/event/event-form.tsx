@@ -34,6 +34,7 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
         name: "",
         description: "",
         location: "",
+        city: "",
         imageUrl: "",
         startDate: new Date().toISOString().split("T")[0],
         endDate: new Date().toISOString().split("T")[0],
@@ -150,7 +151,8 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
                   <LocationPicker
                     defaultValue={field.value}
                     onLocationSelect={(location) => {
-                      field.onChange(location.address);
+                      form.setValue("location", location.address);
+                      form.setValue("city", location.city);
                     }}
                   />
                 </FormControl>

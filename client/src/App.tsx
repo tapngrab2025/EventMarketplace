@@ -22,6 +22,7 @@ import ProductPage from "./pages/product-page";
 import AllProducts from "./pages/all-products";
 import EventsPage from "@/pages/events";
 import SearchPage from "./pages/search-page";
+import EventDetailsCityPage from "./pages/event/[city]";
 
 function Router() {
   return (
@@ -59,6 +60,15 @@ function Router() {
       component={()=>(
         <DefaultLayout>
           <EventDetailsPage/>
+        </DefaultLayout>
+      )}
+      roles={["admin", "vendor", "customer", "organizer"]}
+      />
+      <ProtectedRoute
+      path="/event/city/:city"
+      component={()=>(
+        <DefaultLayout>
+          <EventDetailsCityPage/>
         </DefaultLayout>
       )}
       roles={["admin", "vendor", "customer", "organizer"]}

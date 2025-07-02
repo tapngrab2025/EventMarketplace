@@ -63,9 +63,10 @@ export default function HomePage(
     queryKey: ["/api/products/feature"],
   });
 
-  // const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
-  //   queryKey: ["/api/events"],
-  // });
+  // Uncomment this query to fetch events data
+  const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+  });
   // console.log(products_featured);
 
   const filteredProducts = products
@@ -82,33 +83,129 @@ export default function HomePage(
     .sort((a, b) => b.id - a.id) // Sort by newest first
     .slice(0, 8);
 
-  // const filteredEvents = events?.filter((event) => {
-  //   const matchesSearch = event.approved &&
-  //     (event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       event.description.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  //   const matchesLocation = !location ||
-  //     event.location.toLowerCase().includes(location.toLowerCase());
-
-  //   const matchesDateRange = (!startDate || new Date(event.startDate) >= startDate) &&
-  //     (!endDate || new Date(event.endDate) <= endDate);
-
-  //   return matchesSearch && matchesLocation && matchesDateRange;
-  // }).sort((a, b) => {
-  //   if (sortBy === "newest") return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-  //   if (sortBy === "oldest") return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-  //   return 0;
-  // });
-
-
-
-  // if (loadingProducts || loadingEvents) {
-  if (loadingProducts) {
+  // Update the loading check to include events
+  if (loadingProducts || loadingEvents) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
       </div>
     );
+  }
+
+  // Replace the current initMap function with this implementation
+  async function initMap(): Promise<void> {
+    // Default center position (can be set to a central location in your target area)
+    const defaultPosition = { lat: 7.8731, lng: 80.7718 }; // Center of Sri Lanka
+
+    // Create the map centered at the default position
+    const mapElement = document.getElementById('all_events') as HTMLElement;
+    if (!mapElement) return;
+    
+    const map = new google.maps.Map(mapElement, {
+      zoom: 8, // Adjust zoom level as needed
+      center: defaultPosition,
+      mapTypeControl: true,
+      fullscreenControl: true,
+      streetViewControl: false
+    });
+
+    // Check if events data is available
+    if (events && events.length > 0) {
+      // Create bounds to fit all markers
+      const bounds = new google.maps.LatLngBounds();
+      
+      // Process each event to create markers
+      events.forEach(event => {
+        // You need to geocode the location string to get coordinates
+        getCoordinatesFromAddress(event.location)
+          .then(position => {
+            if (position) {
+              // For customization, you can set the info window options here
+              // https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
+              const infoWindow = new google.maps.InfoWindow({
+                // content: `
+                //   <div style="max-width: 250px; padding: 10px; background-color:#1B0164">
+                //     <h3 style="margin-top: 0; color: #3D0A91;">${event.name}</h3>
+                //     <p>${event.description.substring(0, 100)}${event.description.length > 100 ? '...' : ''}</p>
+                //     <p><strong>Location:</strong> ${event.location}</p>
+                //     <p><strong>Date:</strong> ${new Date(event.startDate).toLocaleDateString()} - ${new Date(event.endDate).toLocaleDateString()}</p>
+                //     <a href="/event/${event.id}" style="color: #F58020; text-decoration: none; font-weight: bold;">View Details</a>
+                //   </div>
+                // `
+                content: `
+                <div style="min-height:50px;">
+                  <h3 style="margin-top: 0; margin-bottom:10px;">${event.name}</h3>
+                  <a href="/event/${event.id}" style="padding:5px;background-color: #0296A4; color: #FFFFFF; text-decoration: none; font-weight: bold;border-radius:10px;margin-bottom:10px;">View Details</a>
+                </div>
+              `,
+              disableAutoPan: true,
+              minWidth: 250,
+              headerDisabled: true
+              });
+
+              // Create the marker
+              const marker = new google.maps.Marker({
+                map,
+                position,
+                title: event.name,
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  fillColor: '#1B0164',
+                  fillOpacity: 1,
+                  strokeColor: '#ffffff',
+                  strokeWeight: 2,
+                  scale: 8
+                },
+                animation: google.maps.Animation.DROP
+              });
+
+              // Add click event to show info window
+              marker.addListener('click', () => {
+                infoWindow.open({
+                  anchor: marker,
+                  map,
+                });
+              });
+
+              // Extend bounds to include this marker
+              bounds.extend(position);
+            }
+          });
+      });
+
+      // Fit the map to the bounds after a short delay to ensure all geocoding is complete
+      setTimeout(() => {
+        if (!bounds.isEmpty()) {
+          map.fitBounds(bounds);
+        }
+      }, 1000);
+    }
+  }
+  if(events){
+    initMap();
+  }
+
+  // Helper function to get coordinates from address string
+  // In a real implementation, you would use the Google Geocoding API
+  function getCoordinatesFromAddress(address: string): Promise<google.maps.LatLngLiteral | null> {
+    return new Promise((resolve) => {
+      // Create a geocoder instance
+      const geocoder = new google.maps.Geocoder();
+      
+      // Geocode the address
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+          const location = results[0].geometry.location;
+          resolve({
+            lat: location.lat(),
+            lng: location.lng()
+          });
+        } else {
+          console.error(`Geocoding failed for address: ${address}`, status);
+          resolve(null);
+        }
+      });
+    });
   }
 
   // Add this function inside the HomePage component
@@ -243,17 +340,6 @@ export default function HomePage(
           </Slider>
         </div>
       </section>
-      {/* <section className="text-center my-16 px-4">
-        <div className="container mx-auto">
-          <h1 className="text-4xl font-bold mb-4">
-            Your One-Stop Event Marketplace
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Discover unique souvenirs, promotional items, and giveaways for your next event.
-            Connect with vendors and event organizers all in one place.
-          </p>
-        </div>
-      </section> */}
       {/* <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
       <section className="flex flex-col items-center justify-center py-20 px-6 overflow-hidden relative">
         <div className="absolute inset-0 opacity-80" 
@@ -342,17 +428,20 @@ export default function HomePage(
           <h2 className="text-h2 font-semibold text-gray-800 mb-6 text-center">Popular Cities</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <img
-                src={Images.kandy}
-                alt="Kandy"
-                className="w-full h-48 object-cover"
-              />
-              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold">KANDY</h3>
-              </div>
+              <Link href="/event/city/kandy">
+                <img
+                  src={Images.kandy}
+                  alt="Kandy"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
+                  <h3 className="text-white text-2xl font-bold">KANDY</h3>
+                </div>
+              </Link>
             </div>
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
+            <Link href="/event/city/colombo">
               <img
                 src={Images.colombo}
                 alt="Colombo"
@@ -361,10 +450,12 @@ export default function HomePage(
               <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">COLOMBO</h3>
               </div>
+              </Link>
             </div>
 
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
+            <Link href="/event/city/galle">
               <img
                 src={Images.galle}
                 alt="Galle"
@@ -373,10 +464,12 @@ export default function HomePage(
               <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">GALLE</h3>
               </div>
+              </Link>
             </div>
 
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
+            <Link href="/event/city/matara">
               <img
                 src={Images.matara}
                 alt="Matara"
@@ -385,6 +478,7 @@ export default function HomePage(
               <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
                 <h3 className="text-white text-2xl font-bold">MATARA</h3>
               </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -440,11 +534,13 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="py-12 min-h-[400px]">
-        <div className="container mx-auto px-6 text-center min-h-80">
+      {/* <section className="py-12 min-h-[400px]">
+        <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">All Events Map</h2>
+          <p className="text-gray-600 mb-6">Explore events happening near you</p>
+          <div id="all_events" className="w-full h-[500px] rounded-lg shadow-lg"></div>
         </div>
-      </section>
+      </section> */}
 
       {/* <section className="whatMakes relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}> */}
       <section className="whatMakes  bg-[#1B0164] relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">

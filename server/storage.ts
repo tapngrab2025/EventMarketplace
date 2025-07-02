@@ -31,8 +31,13 @@ import { db, pool } from "./db";
 import { eq, ne, and, gte, lte, sql, like, ilike, or, between } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
+import { PgColumn } from "drizzle-orm/pg-core";
 
 const PostgresSessionStore = connectPg(session);
+
+function lower(column: PgColumn<any, any, any>): any {
+  return sql`LOWER(${column})`;
+}
 
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
@@ -43,6 +48,7 @@ export class DatabaseStorage implements IStorage {
       createTableIfMissing: true,
     });
   }
+  
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
@@ -140,6 +146,30 @@ export class DatabaseStorage implements IStorage {
   async getEvent(id: number): Promise<Event | undefined> {
     const [event] = await db.select().from(events).where(eq(events.id, id));
     return event;
+  }
+
+  async getCityEvent(city: string): Promise<any | undefined> {
+    // First get the event
+    const eventResults = await db.select()
+    .from(events)
+    .where(eq(lower(events.city), city.toLowerCase()));
+
+
+    if (eventResults.length === 0) return {};
+
+    const event = eventResults[0];
+
+    // Then get all products related to this event
+    const productsResults = await db.select({products})
+    .from(products)
+    .innerJoin(stalls, eq(stalls.id, products.stallId))
+    .where(eq(stalls.eventId, event.id));
+
+    // Return the event with its products
+    return {
+      ...event,
+      products: productsResults
+    };
   }
 
   async createEvent(insertEvent: InsertEvent): Promise<Event> {

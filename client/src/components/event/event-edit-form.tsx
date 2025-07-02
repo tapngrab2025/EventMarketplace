@@ -33,6 +33,7 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
       name: "",
       description: "",
       location: "",
+      city: "",
       imageUrl: "",
       startDate: "",
       endDate: "",
@@ -137,7 +138,8 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
                 <LocationPicker
                     defaultValue={field.value}
                     onLocationSelect={(location) => {
-                      field.onChange(location.address);
+                      form.setValue("location", location.address);
+                      form.setValue("city", location.city);
                     }}
                   />
               </FormControl>

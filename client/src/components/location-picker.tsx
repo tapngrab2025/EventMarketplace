@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
 interface LocationPickerProps {
-  onLocationSelect: (location: { address: string; lat: number; lng: number }) => void;
+  onLocationSelect: (location: { address: string; lat: number; lng: number, city: string }) => void;
   defaultValue?: string;
 }
 
@@ -29,53 +29,20 @@ export function LocationPicker({ onLocationSelect, defaultValue }: LocationPicke
           inputRef.current.value = address;
         }
 
+
         // Notify parent component
         onLocationSelect({
           address,
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
+          city: place.address_components?.find((component) => component.types.includes('locality'))?.short_name || '',
         });
       }
     });
-
     setIsLoading(false);
-
-    //   const pacContainer = document.querySelector('.pac-container');
-    //   const pacItem = (e.target as Element)?.closest('.pac-item');
-      
-    //   if (pacContainer && (pacItem || pacContainer.contains(e.target as Node))) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //     return false;
-    //   }
-    // };
-
-    // // Add both click and mousedown handlers
-    // document.addEventListener('click', handleDocumentClick, true);
-    // document.addEventListener('mousedown', handleDocumentClick, true);
-
-    // // Clean up event listeners when component unmounts
-    // return () => {
-    //   document.removeEventListener('click', handleDocumentClick, true);
-    //   document.removeEventListener('mousedown', handleDocumentClick, true);
-    // };
   };
 
   useEffect(() => {
-      // Add global styles for Google Places dropdown
-      // const style = document.createElement('style');
-      // style.textContent = `
-      //   .pac-container {
-      //     z-index: 99999 !important;
-      //     pointer-events: auto !important;
-      //   }
-      //   .pac-item {
-      //     cursor: pointer !important;
-      //     padding: 8px !important;
-      //   }
-      // `;
-      // document.head.appendChild(style);
-
     if (window.google?.maps) {
       initializePlacesWidget();
     } else {
