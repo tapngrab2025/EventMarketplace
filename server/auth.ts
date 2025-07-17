@@ -9,6 +9,7 @@ import { User as SelectUser, users } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from 'fs';
+import { error } from "console";
 
 declare global {
   namespace Express {
@@ -63,8 +64,8 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      // secure: process.env.NODE_ENV === "production",
-      secure: process.env.COOKIE_SECURE === "true",
+      secure: process.env.NODE_ENV === "production",
+      // secure: process.env.COOKIE_SECURE === "true",
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
@@ -108,18 +109,55 @@ export function setupAuth(app: Express) {
     }
   });
 
+  app.get("/api/check-email", async (req, res) => {
+    // Email should be in query params for GET request
+    const email = req.query.email as string;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    const existingUser = await storage.getUserByUserEmail(email);
+    if (existingUser) {
+      return res.status(200).json({ exists: true });
+    }
+    return res.status(200).json({ exists: false });
+  });
+
   app.post("/api/register", async (req, res, next) => {
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
+        return res.status(400).json({ message: "User name exists" });
       }
-
+  
+      // Extract profile-related fields
+      const { firstName, middleName, lastName, address, city, phoneNumber, birthDay, ...userData } = req.body;
+      
+      // Always set role to customer
+      userData.role = "customer";
+      
+      // Create the user
       const user = await storage.createUser({
-        ...req.body,
-        password: await hashPassword(req.body.password),
+        ...userData,
+        password: await hashPassword(userData.password),
       });
-
+  
+      // Create profile with additional fields if needed
+      if (user && user.id) {
+        await storage.createOrUpdateProfile(user.id, {
+          userId: user.id,
+          // Combine name parts if needed
+          firstName: firstName || "",
+          middleName: middleName || "",
+          lastName: lastName || "",
+          bio: "",
+          dob: birthDay || new Date().toISOString(),
+          gender: "not_to_disclose",
+          address: address || "",
+          city: city || "",
+          phoneNumber: phoneNumber || "",
+        });
+      }
+  
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(201).json(user);
@@ -146,10 +184,15 @@ export function setupAuth(app: Express) {
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
-      if (err) return next(err);
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
       req.session.destroy((err) => {
-        if (err) return next(err);
-        res.sendStatus(200);
+        if (err) {
+          return res.status(500).json({ message: "Session destruction failed" });
+        }
+        res.clearCookie('connect.sid'); // Clear the session cookie
+        return res.status(200).json({ message: "Logged out successfully" });
       });
     });
   });
@@ -169,6 +212,7 @@ export function setupAuth(app: Express) {
     }
   });
 
+  //Need to update profile logic
   app.put("/api/user/profile", async (req, res, next) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
@@ -179,7 +223,7 @@ export function setupAuth(app: Express) {
 
       const [updatedUser, updatedProfile] = await storage.updateUser(req.user.id, {
         username: req.body.username,
-        name: req.body.name,
+        // name: req.body.name,
         email: req.body.email
       }, {
         bio: req.body.bio,

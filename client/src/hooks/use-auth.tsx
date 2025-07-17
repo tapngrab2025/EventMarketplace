@@ -58,8 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
+      const response = await apiRequest("POST", "/api/register", credentials);
+
+      if (!response) {
+        const error = await response.json();
+        throw new Error(error.message || 'Username already exists');
+      }
+
+      return response.json();
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
@@ -79,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
+      queryClient.setQueryData(["/api/user/profile"], null);
     },
     onError: (error: Error) => {
       toast({

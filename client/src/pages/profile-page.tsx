@@ -1,11 +1,14 @@
 import { useAuth } from "@/hooks/use-auth";
-import { Pencil, Save, X } from 'lucide-react';
+import { Pencil, Save, X, Download, Eye, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function ProfilePage() {
   const { user, profile } = useAuth();
@@ -37,6 +40,16 @@ export default function ProfilePage() {
       [e.target.name]: e.target.value
     });
   };
+
+  // Fetch user orders
+  const { data: orders, isLoading: ordersLoading } = useQuery({
+    queryKey: ["/api/user/orders"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/user/orders");
+      return res.json();
+    },
+    enabled: !!user,
+  });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -125,7 +138,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-6 rounded-lg shadow mb-8">
         <div className="space-y-4 grid grid-cols-2 gap-4">
           {/* Basic Information */}
           <div className="col-span-2">
@@ -334,6 +347,87 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* My Grabs Section */}
+      <div className="bg-white p-6 rounded-lg shadow mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">My Grabs</h2>
+          <div className="flex items-center">
+            <span className="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">
+              {orders?.length || 0}
+            </span>
+          </div>
+        </div>
+
+        {ordersLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+          </div>
+        ) : orders?.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p>You haven't made any purchases yet.</p>
+            <Button className="mt-4" asChild>
+              <Link href="/">Browse Events</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <tbody>
+                {orders?.map((order) => {
+                  // Get the first item to display event/stall info
+                  const orderDate = new Date(order.createdAt);
+                  
+                  return (
+                    <tr key={order.id} className="border-b hover:bg-gray-50">
+                      <td className="py-4">
+                        <div className="flex items-center text-gray-500">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {orderDate.toLocaleDateString('en-US', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </div>
+                      </td>
+                      <td className="py-4">
+                        <div className="flex items-center">
+                          <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
+                          Order #{order?.id} - {order?.event?.description.substring(0, 20)}{order?.event?.description.length > 20 ? '...' : ''}
+                        </div>
+                      </td>
+                      <td className="py-4">
+                        <div className="flex items-center">
+                          <div className="h-6 w-6 bg-orange-100 rounded-full flex items-center justify-center mr-2 text-orange-500">
+                            <span className="text-xs">N</span>
+                          </div>
+                          {order?.event?.name}
+                        </div>
+                      </td>
+                      <td className="py-4 text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/thank-you/${order.id}`}>
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        
+        <div className="mt-6 flex justify-center">
+          <Button className="bg-teal-500 hover:bg-teal-600 text-white" asChild>
+            <Link href="/">
+              Grab On
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

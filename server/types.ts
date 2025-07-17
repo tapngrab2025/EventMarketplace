@@ -48,4 +48,7 @@ export interface IStorage {
 
   // Subscriber operations
   createSubscriber(email: string): Promise<Subscriber[] | any>;
+  getArchivedEvents(): Promise<Event[]>;
+  getArchivedStalls(): Promise<Stall[]>;
+  getArchivedProducts(): Promise<Product[]>;
 }

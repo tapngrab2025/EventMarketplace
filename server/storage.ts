@@ -26,9 +26,10 @@ import {
   Subscriber,
   InsertSubscriber,
   subscribers,
+  InsertProfile,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, ne, and, gte, lte, sql, like, ilike, or, between } from "drizzle-orm";
+import { eq, ne, and, gte, lte, sql, like, ilike, or, between, inArray } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { PgColumn } from "drizzle-orm/pg-core";
@@ -48,7 +49,7 @@ export class DatabaseStorage implements IStorage {
       createTableIfMissing: true,
     });
   }
-  
+
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
@@ -68,6 +69,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByUserEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
     return user;
   }
 
@@ -109,6 +118,28 @@ export class DatabaseStorage implements IStorage {
     return [updated, updatedProfile];
   }
 
+  // Add this method to your storage interface
+  async createOrUpdateProfile(userId: number, profileData: Partial<InsertProfile>): Promise<Profile> {
+    // Check if profile exists
+    const existingProfile = await db.select().from(profile).where(eq(profile.userId, userId));
+
+    if (existingProfile.length > 0) {
+      // Update existing profile
+      return (await db.update(profile)
+        .set(profileData)
+        .where(eq(profile.userId, userId))
+        .returning())[0];
+    } else {
+      // Create new profile
+      return (await db.insert(profile)
+        .values([{
+          userId,
+          ...profileData,
+        }])
+        .returning())[0];
+    }
+  }
+
   async getUsers(id: number): Promise<User[]> {
     return await db.select().from(users).where(ne(users.id, id));
   }
@@ -140,19 +171,20 @@ export class DatabaseStorage implements IStorage {
 
   // Event operations
   async getEvents(): Promise<Event[]> {
-    return await db.select().from(events).orderBy(events.id, 'desc');
+    return await db.select().from(events).where(eq(events.archived, false)).orderBy(events.id, 'desc');
   }
 
   async getEvent(id: number): Promise<Event | undefined> {
-    const [event] = await db.select().from(events).where(eq(events.id, id));
+    const [event] = await db.select().from(events)
+    .where(eq(events.id, id));
     return event;
   }
 
   async getCityEvent(city: string): Promise<any | undefined> {
     // First get the event
     const eventResults = await db.select()
-    .from(events)
-    .where(eq(lower(events.city), city.toLowerCase()));
+      .from(events)
+      .where(and(eq(events.archived, false), eq(lower(events.city), city.toLowerCase())));
 
 
     if (eventResults.length === 0) return {};
@@ -160,10 +192,10 @@ export class DatabaseStorage implements IStorage {
     const event = eventResults[0];
 
     // Then get all products related to this event
-    const productsResults = await db.select({products})
-    .from(products)
-    .innerJoin(stalls, eq(stalls.id, products.stallId))
-    .where(eq(stalls.eventId, event.id));
+    const productsResults = await db.select({ products })
+      .from(products)
+      .innerJoin(stalls, eq(stalls.id, products.stallId))
+      .where(eq(stalls.eventId, event.id));
 
     // Return the event with its products
     return {
@@ -196,7 +228,7 @@ export class DatabaseStorage implements IStorage {
 
   // Stall operations
   async getStalls(): Promise<Stall[]> {
-    return await db.select().from(stalls).orderBy(stalls.id, 'desc');
+    return await db.select().from(stalls).where(eq(stalls.archived, false)).orderBy(stalls.id, 'desc');
   }
 
   async getStallsByEvent(eventId: number): Promise<Stall[]> {
@@ -214,7 +246,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(stalls)
       .leftJoin(products, eq(products.stallId, stalls.id))
-      .where(eq(stalls.eventId, eventId))
+      .where(and(eq(stalls.archived, false), eq(stalls.eventId, eventId)))
       .orderBy(stalls.id);
 
     // Group products by stall
@@ -285,19 +317,19 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (startDate && endDate) {
-       const start = new Date(startDate);
+      const start = new Date(startDate);
       const end = new Date(endDate);
       // Set start to beginning of day and end to end of day
       start.setUTCHours(0, 0, 0, 0);
       end.setUTCHours(23, 59, 59, 999);
       query
-      .leftJoin(stalls, eq(stalls.id, products.stallId))
-      .leftJoin(events, eq(events.id, stalls.eventId))
-      .where(
-        or(
-          between(events.startDate, start, end), 
-          between(events.endDate, start, end))
-      )
+        .leftJoin(stalls, eq(stalls.id, products.stallId))
+        .leftJoin(events, eq(events.id, stalls.eventId))
+        .where(
+          or(
+            between(events.startDate, start, end),
+            between(events.endDate, start, end))
+        )
     }
 
     if (category) {
@@ -323,24 +355,23 @@ export class DatabaseStorage implements IStorage {
 
     const [productsPaginates, total] = await Promise.all([
       query.limit(pageSize).offset(offset),
-      db.select({ count: sql<number>`count(*)` }).from(products)
+      db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.archived, false))
     ]);
 
     return { products: productsPaginates, total: total[0].count };
   }
   // Get all products
   async getProducts(): Promise<Product[]> {
-    return await db.select()
-    .from(products)
-    .orderBy(products.id, 'desc');
+    return await db.select().from(products).where(eq(products.archived, false)).orderBy(products.id, 'desc');
   }
 
   async getProductsFeatured(): Promise<ProductWithDetails[]> {
     return await db.select()
-    .from(products)
-    .leftJoin(stalls, eq(stalls.id, products.stallId))
-    .leftJoin(events, eq(events.id, stalls.eventId))
-    .orderBy(products.id, 'desc');
+      .from(products)
+      .where(eq(products.archived, false))
+      .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(events, eq(events.id, stalls.eventId))
+      .orderBy(products.id, 'desc');
   }
 
   // Get single product with details
@@ -530,10 +561,30 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getUserOrders(userId: number): Promise<Order[]> {
+  // async getUserOrders(userId: number): Promise<Order[]> {
+  async getUserOrders(userId: number): Promise<any[]> {
     return await db
-      .select()
+      .select({
+        id: orders.id,
+        user_id: orders.user_id,
+        fullName: orders.fullName,
+        phone: orders.phone,
+        address: orders.address,
+        total: orders.total,
+        status: orders.status,
+        paymentMethod: orders.paymentMethod,
+        createdAt: orders.createdAt,
+        event: {
+          id: events.id,
+          name: events.name,
+          description: events.description
+        },
+      })
       .from(orders)
+      .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .leftJoin(products, eq(products.id, orderItems.productId))
+      .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(events, eq(events.id, stalls.eventId))
       .where(eq(orders.user_id, userId))
       .orderBy(orders.createdAt, 'desc');
   }
@@ -644,7 +695,6 @@ export class DatabaseStorage implements IStorage {
       .returning();
   }
 
-
   async createSubscriber(email: string): Promise<Subscriber[] | any> {
     const existingSubscriber = await db
       .select()
@@ -656,6 +706,99 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await db.insert(subscribers).values({ email }).returning();
+  }
+
+  // Get archived events
+  async getArchivedEvents(): Promise<Event[]> {
+    return await db
+      .select()
+      .from(events)
+      .where(eq(events.archived, true))
+      .orderBy(events.endDate, 'desc');
+  }
+
+  // Get archived stalls
+  async getArchivedStalls(): Promise<Stall[]> {
+    return await db
+      .select()
+      .from(stalls)
+      .where(eq(stalls.archived, true))
+      .orderBy(stalls.id, 'desc');
+  }
+
+  // Get archived products
+  async getArchivedProducts(): Promise<Product[]> {
+    return await db
+      .select()
+      .from(products)
+      .where(eq(products.archived, true))
+      .orderBy(products.id, 'desc');
+  }
+  
+  // Archive expired events, stalls, and products
+  async archiveExpiredEvents(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // First, get all expired events that aren't already archived
+    const expiredEvents = await db
+      .select({ id: events.id })
+      .from(events)
+      .where(
+        and(
+          lte(events.endDate, today),
+          eq(events.archived, false)
+        )
+      );
+      
+    if (expiredEvents.length === 0) {
+      return 0;
+    }
+
+    console.log('Expired events:', expiredEvents);
+    
+    const eventIds = expiredEvents.map(event => event.id);
+    
+    console.log('eventIds:', eventIds);
+    // Archive the events
+    await db
+      .update(events)
+      .set({ archived: true })
+      .where(inArray(events.id, eventIds));
+      
+    // Get stalls for these events
+    const stallsToArchive = await db
+      .select({ id: stalls.id })
+      .from(stalls)
+      .where(
+        and(
+          inArray(events.id, eventIds),
+          eq(stalls.archived, false)
+        )
+      );
+      
+    if (stallsToArchive.length > 0) {
+      const stallIds = stallsToArchive.map(stall => stall.id);
+      
+      // Archive the stalls
+      await db
+        .update(stalls)
+        .set({ archived: true })
+        .where(inArray(stalls.id, stallIds));
+        
+      // Archive products in these stalls
+      await db
+        .update(products)
+        .set({ archived: true })
+        .where(
+          and(
+            inArray(products.id, stallIds),
+            eq(products.archived, false)
+          )
+        );
+    }
+    
+    return eventIds.length;
   }
 }
 

@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound } from "lucide-react";
+import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound, FileArchive } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -28,8 +28,8 @@ export function RightNavigation({
             ) : (
                 <div className="flex items-center gap-4">
                     <Button className="hidden md:block" variant="ghost" size="icon" onClick={() => setLocation("/profile")} title="User Profile">
-                        {/* <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">person</span> */}
-                        <span className="material-icons-outlined">person</span>
+                        <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">person</span>
+
                     </Button>
                     {user.role === "vendor" && (
                         <Button
@@ -58,6 +58,14 @@ export function RightNavigation({
                             title="User Dashboard"
                         >
                             <UsersRound className="h-5 w-5" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setLocation("/admin/archives")}
+                            title="Event Achieves"
+                        >
+                            <FileArchive className="h-5 w-5" />
                         </Button>
                         </>
                     )}

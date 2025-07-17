@@ -534,13 +534,13 @@ export default function HomePage(
         </div>
       </section>
 
-      {/* <section className="py-12 min-h-[400px]">
+      <section className="py-12 min-h-[400px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">All Events Map</h2>
           <p className="text-gray-600 mb-6">Explore events happening near you</p>
           <div id="all_events" className="w-full h-[500px] rounded-lg shadow-lg"></div>
         </div>
-      </section> */}
+      </section>
 
       {/* <section className="whatMakes relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}> */}
       <section className="whatMakes  bg-[#1B0164] relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">

@@ -7,7 +7,6 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   role: text("role", { enum: ["admin", "vendor", "customer", "organizer"] }).notNull().default("customer"),
-  name: text("name").notNull(),
   email: text("email").notNull().unique(),
   status: varchar("status").notNull().default("active"),
 });
@@ -15,6 +14,9 @@ export const users = pgTable("users", {
 export const profile = pgTable("profile", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
+  firstName: text("first_name"),
+  middleName: text("middle_name"),
+  lastName: text("last_name"),
   bio: text("bio"),
   dob: date("date_of_birth").notNull(),
   gender: text("gender", { enum: ["male", "female", "other", "not_to_disclose"] }).notNull(),
@@ -41,6 +43,7 @@ export const events = pgTable("events", {
   endDate: timestamp("end_date").notNull(),
   vendorId: integer("vendor_id").notNull(),
   approved: boolean("approved").notNull().default(false),
+  archived: boolean("archived").notNull().default(false),
 });
 
 export const stalls = pgTable("stalls", {
@@ -52,6 +55,7 @@ export const stalls = pgTable("stalls", {
   eventId: integer("event_id").notNull(),
   vendorId: integer("vendor_id").notNull(),
   approved: boolean("approved").notNull().default(false),
+  archived: boolean("archived").notNull().default(false),
 });
 
 export const products = pgTable("products", {
@@ -64,6 +68,7 @@ export const products = pgTable("products", {
   stallId: integer("stall_id").notNull(),
   approved: boolean("approved").notNull().default(false),
   stock: integer("stock").notNull(),
+  archived: boolean("archived").notNull().default(false),
 });
 
 export const cartItems = pgTable("cart_items", {
@@ -126,15 +131,22 @@ export const subscribers = pgTable("subscribers", {
 });
 
 // Create the insert schemas with proper validation
+// Update the insertUserSchema to include the new fields
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
-  name: true,
   role: true,
   email: true,
 })
 .extend({
   email: z.string().email("Invalid email format"),
+  first_name: z.string().optional(),
+  middle_name: z.string().optional(),
+  last_name: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  birthDay: z.string().optional(),
 });
 
 export const insertEventSchema = createInsertSchema(events)

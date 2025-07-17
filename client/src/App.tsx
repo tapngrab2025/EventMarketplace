@@ -23,11 +23,11 @@ import AllProducts from "./pages/all-products";
 import EventsPage from "@/pages/events";
 import SearchPage from "./pages/search-page";
 import EventDetailsCityPage from "./pages/event/[city]";
+import AdminArchives from "./pages/admin-archives";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/auth" component={AuthPage} />
       <Route path="/" component={
         () => (
           <DefaultLayout>
@@ -35,6 +35,22 @@ function Router() {
           </DefaultLayout>
         )
       } />
+      <Route path="/auth" component={
+        () => (
+          <DefaultLayout>
+            <AuthPage />
+          </DefaultLayout>
+        )
+      } />
+      <ProtectedRoute
+        path="/admin/archives"
+        component={() => (
+          <DefaultLayout>
+            <AdminArchives />
+          </DefaultLayout>
+        )}
+        roles={["admin"]}
+      />
       <ProtectedRoute
         path="/profile"
         component={

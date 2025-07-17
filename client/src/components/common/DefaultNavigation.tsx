@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound } from "lucide-react";
+import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound, FileArchive } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -59,6 +59,14 @@ export function DefaultNavigation({ isMobileMenuOpen, setIsMobileMenuOpen }: { i
                                         title="User Dashboard"
                                     >
                                         <UsersRound className="h-5 w-5" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setLocation("/admin/archives")}
+                                        title="Event Achieves"
+                                    >
+                                        <FileArchive className="h-5 w-5" />
                                     </Button>
                                 </>
                             )}

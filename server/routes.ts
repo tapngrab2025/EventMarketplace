@@ -2,8 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { z } from "zod";
-import { insertEventSchema, insertStallSchema, insertProductSchema, insertCartItemSchema } from "@shared/schema";
+import { insertEventSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
@@ -32,6 +31,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get archived events
+  app.get("/api/events/archived", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    const archivedEvents = await storage.getArchivedEvents();
+    res.json(archivedEvents);
+  });
+
   app.patch("/api/events/:id/approve", async (req, res) => {
     if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
@@ -44,10 +52,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/events/:id", async (req, res) => {
-    const event = await storage.getEvent(parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+    }
+    const event = await storage.getEvent(id);
     if (!event) return res.sendStatus(404);
     res.json(event);
-  })
+})
 
   app.get("/api/events/city/:city", async (req, res) => {
     const event = await storage.getCityEvent(req.params.city);
@@ -76,6 +88,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stalls", async (_req, res) => {
     const stalls = await storage.getStalls();
     res.json(stalls);
+  });
+
+  // Get archived stalls
+  app.get("/api/stalls/archived", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    const archivedStalls = await storage.getArchivedStalls();
+    res.json(archivedStalls);
   });
 
   app.get("/api/events/:eventId/stalls", async (req, res) => {
@@ -108,6 +129,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stalls/:id", async (req, res) => {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
+    }
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid stall ID" });
     }
     const stalls = await storage.getStall(parseInt(req.params.id));
     res.json(stalls);
@@ -161,6 +186,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(products);
   });
 
+  // Get archived products
+  app.get("/api/products/archived", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    const archivedProducts = await storage.getArchivedProducts();
+    res.json(archivedProducts);
+  });
+
   app.get("/api/stalls/:stallId/products", async (req, res) => {
     const products = await storage.getProductsByStall(parseInt(req.params.stallId));
     res.json(products);
@@ -191,6 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
+    if(isNaN(parseInt(req.params.id))) return res.status(400).json({ message: "Invalid product ID" });
     const product = await storage.getProduct(parseInt(req.params.id));
     res.json(product);
   });
@@ -279,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/orders", async (req, res) => {
+  app.get("/api/user/orders", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
       const orders = await storage.getUserOrders(req.user.id);
@@ -327,23 +362,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
 
-
-  // app.put("/api/events/:id", async (req, res) => {
-  //   if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
-  //     return res.sendStatus(403);
-  //   }
-  //   try {
-  //     const parsedEvent = insertEventSchema.parse({
-  //       ...req.body,
-  //     });
-  //     const event = await storage.updateEvent(parseInt(req.params.id), parsedEvent);
-  //     res.status(201).json(event);
-  //   } catch (error) {
-  //     console.error("Event update error:", error);
-  //     res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
-  //   }
-  // });
+  // Cron job endpoint to archive expired events
+  app.post("/api/cron/archive-expired-events", async (req, res) => {
+    try {
+      // Optional: Add some basic security with a secret key
+      const { secret } = req.body;
+      if (secret !== process.env.CRON_SECRET) {
+        return res.status(401).json({ message: "Unauthorized: Invalid secret key" });
+      }
+      
+      // Archive expired events
+      const archivedCount = await storage.archiveExpiredEvents();
+      
+      return res.status(200).json({
+        success: true,
+        message: `Successfully archived ${archivedCount} expired events and their associated stalls and products.`,
+        archivedCount
+      });
+    } catch (error) {
+      console.error("Error archiving expired events:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to archive expired events",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
