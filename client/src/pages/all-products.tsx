@@ -20,15 +20,15 @@ export default function AllProducts() {
     const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
 
     return (
-        <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6">
+        <section className="min-h-screen flex flex-col items-center justify-center p-6 my-16">
             <div className="">
-                <div className="text-center mb-8">
+                <div className="text-center mb-20">
                     <h1 className="text-4xl font-bold text-gray-800 mb-2">All Grabs</h1>
                     <p className="text-gray-600">Discover more of the activities with our curated event collections</p>
                 </div>
 
                 <div className="w-full max-w-7xl">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                         {data?.products?.length === 0 ? (
                             <p className="text-muted-foreground">No products found</p>
                         ) : (
@@ -41,7 +41,7 @@ export default function AllProducts() {
                     </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-20">
                     <Pagination>
                         <PaginationContent>
                             {currentPage > 1 && (

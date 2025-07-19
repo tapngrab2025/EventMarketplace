@@ -47,11 +47,11 @@ export default function ProductCard({ product }: { product: Product }) {
           {product.name} @ {productDetail?.event.name}
         </h3>
         <div className="space-y-1 flex-1">
-          <p className="text-gray-600 font-medium line-clamp-3">
+          <p className="text-gray-500 font-medium line-clamp-3 text-sm my-3 text-teal-500">
             {product.description}
           </p>
           <p className="text-gray-600 line-clamp-1">
-            <span className="font-semibold">Stall:</span> #{product.stallId}
+            <span className="font-semibold text-gray-800">Stall:</span> #{product.stallId}
           </p>
           <p className="text-gray-600 line-clamp-1">{productDetail?.event.name}</p>
           <div className="flex items-center justify-between text-sm text-gray-600">
@@ -63,7 +63,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p>8:00 P.M.</p>
           </div>
           <div className="flex items-center justify-between">
-              <span className="font-medium">
+              <span className="font-bold text-2xl my-3">
                   ${(product.price / 100).toFixed(2)}
                 </span>
                 <span className="text-sm text-muted-foreground">
@@ -71,10 +71,10 @@ export default function ProductCard({ product }: { product: Product }) {
                 </span>
             </div>
         </div>
-        <div className="flex justify-between mt-4 gap-x-2">
+        <div className="flex justify-between items-center mt-4 gap-x-2">
           {user?.role === "customer" && (
             <Button
-              className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-full"
+              className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-fit"
               onClick={() => addToCart.mutate()}
               disabled={addToCart.isPending || product.stock === 0}
             >
@@ -88,9 +88,9 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
           <Link
             to={`/products/${product.id}`}
-            className="text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
+            className="text-gray-600 font-semibold rounded-lg transition duration-300"
           >
-            👁️
+           <img src="../src/assets/view.png" alt="view product" className="w-7 h-7 inline-block" />
           </Link>
         </div>
       </div>

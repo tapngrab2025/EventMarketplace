@@ -40,18 +40,18 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex flex-wrap gap-4">
+    <div className="container mx-auto px-4 py-32">
+      <div className="mb-16 flex flex-wrap gap-4 justify-center">
         <Input
           placeholder="Filter by location..."
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="max-w-xs"
+          className="max-w-xs rounded-[15px] bg-white"
         />
         
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[240px]">
+            <Button variant="outline" className="w-[240px] rounded-[15px] bg-teal-500 text-white">
               <CalendarIcon className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : <span>Pick a date</span>}
             </Button>
@@ -67,7 +67,7 @@ export default function EventsPage() {
         </Popover>
 
         {(location || date) && (
-          <Button variant="ghost" onClick={() => {
+          <Button variant="ghost" className="bg-teal-500 text-white py-2 px-6 rounded-[50px] transition duration-300 max-w-full w-fit" onClick={() => {
             setLocation("");
             setDate(undefined);
           }}>

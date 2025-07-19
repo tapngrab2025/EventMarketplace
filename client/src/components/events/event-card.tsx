@@ -11,16 +11,16 @@ export default function EventCard({ event }: { event: Event }) {
           <CardTitle className="line-clamp-1 text-primaryGreen">{event.name}</CardTitle>
         </CardHeader>
         <CardContent className="flex-grow">
-          <p className="text-primaryGreen text-sm line-clamp-2 mb-4">
+          <p className="text-primaryGreen text-sm line-clamp-2 mb-4 ml-7">
             {event.description}
           </p>
           <div className="space-y-2">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 mr-2" />
+            <div className="flex text-sm text-muted-foreground">
+              <MapPin className="h-6 w-6 mr-2 text-teal-500" />
               <span>{event.location}</span>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
-              <CalendarDays className="h-4 w-4 mr-2" />
+              <CalendarDays className="h-5 w-5 mr-2 text-teal-500" />
               <span>
                 {new Date(event.startDate).toLocaleDateString()} -{" "}
                 {new Date(event.endDate).toLocaleDateString()}

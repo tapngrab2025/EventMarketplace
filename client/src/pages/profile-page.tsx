@@ -114,9 +114,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Profile</h1>
+    <div className="w-max mx-auto py-8 my-16">
+      <div className="flex justify-between items-center mb-20">
+        <h1 className="text-2xl font-bold uppercase">Profile</h1>
         <div className="space-x-2">
           {isEditing ? (
             <>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
         <div className="space-y-4 grid grid-cols-2 gap-4">
           {/* Basic Information */}
           <div className="col-span-2">
-            <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+            <h2 className="text-md font-semibold mb-4 text-teal-500">Basic Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="username">Username <span className="text-red-500 ml-1">*</span></Label>
@@ -177,7 +177,7 @@ export default function ProfilePage() {
 
           {/* Contact Information */}
           <div className="col-span-2">
-            <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+            <h2 className="text-md font-semibold mb-4 text-teal-500">Contact Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="email">Email <span className="text-red-500 ml-1">*</span></Label>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
 
           {/* Personal Information */}
           <div className="col-span-2">
-            <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+            <h2 className="text-md font-semibold mb-4 text-teal-500">Personal Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="dob">Date of Birth <span className="text-red-500 ml-1">*</span></Label>
@@ -270,7 +270,7 @@ export default function ProfilePage() {
 
           {/* Address Information */}
           <div className="col-span-2">
-            <h2 className="text-xl font-semibold mb-4">Address Information</h2>
+            <h2 className="text-md font-semibold mb-4 text-teal-500">Address Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="address">Street Address</Label>
@@ -329,7 +329,7 @@ export default function ProfilePage() {
 
           {/* Professional Information */}
           <div className="col-span-2">
-            <h2 className="text-xl font-semibold mb-4">Professional Information</h2>
+            <h2 className="text-md font-semibold mb-4 text-teal-500">Professional Information</h2>
             <div>
               <Label htmlFor="occupation">Occupation</Label>
               {isEditing ? (

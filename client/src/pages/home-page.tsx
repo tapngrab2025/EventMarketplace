@@ -302,11 +302,11 @@ export default function HomePage(
           >
             {carouselItems.map((item) => (
               // <div key={item.id} className="w-full max-w-6xl px-4 relative lg:pt-[45px]">
-              <div key={item.id} className="px-4 relative lg:pt-[45px] w-[300px] md:w-full">
+              <div key={item.id} className="py-4 relative lg:pt-[45px] w-[300px] md:w-full">
                 <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto">
                   <div className="flex-1 w-full md:pr-8 mt-0 mb-auto">
-                    <div className="flex items-center space-x-2 mb-4 text-2xl">
-                      <MapPin className="h-8 w-8" />
+                    <div className="flex space-x-2 mb-4 text-md">
+                      <MapPin className="h-5 w-5" />
                       <span>{item.location}</span>
                     </div>
                     <h2 className="text-4xl font-bold mb-4 text-primaryOrange">
@@ -331,24 +331,29 @@ export default function HomePage(
                     <div className="absolute top-0 left-0 w-full h-full bg-stone-700 opacity-50"></div>
                   </div>
                 </div>
-                <div className="text-3xl md:text-6xl font-bold mb-8 transform -rotate-[20deg] bottom-[2rem] absolute left-[10%] md:left-[15%] text-center">
-                  {item.title} {item.category} <br />
-                  {item.promotionalText}
+                <div className="font-bold uppercase flex">
+                  <p className="font-bold uppercase">Type : </p>
+                  <p className="font-bold uppercase text-primaryOrange mx-2"> {item.category} </p> : 
+                  <p className="font-bold uppercase text-teal-500 mx-2">{item.promotionalText}</p> 
                 </div>
+                <div className="text-3xl md:text-5xl font-bold mb-8 transform bottom-[5rem] absolute w-full">
+                  {item.title}
+                </div>
+                
               </div>
             ))}
           </Slider>
         </div>
       </section>
       {/* <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
-      <section className="flex flex-col items-center justify-center py-20 px-6 overflow-hidden relative">
+      <section className="flex flex-col items-center justify-center py-20 px-6 my-32 overflow-hidden relative">
         <div className="absolute inset-0 opacity-80" 
             style={{ 
               zIndex: -1,
               background: 'radial-gradient(circle at 0% 37%,rgb(167, 88, 158) 0%, transparent 10%), radial-gradient(circle at 100% 60%, #3d0a91cc 0%, transparent 13%)'
             }}>
         </div>
-        <div className="text-center mb-8">
+        <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Let's Find Your Grab</h1>
           <p className="text-gray-600">Discover your favorite entertainment right here</p>
         </div>
@@ -372,7 +377,7 @@ export default function HomePage(
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full bg-white rounded-[15px] border-[#A3A3A3]">
-                  <CalendarRange className="mr-2 h-4 w-4 text-gray-400" />
+                  <CalendarRange className="h-4 w-4 text-gray-400" />
                   {startDate && endDate ? (
                     `${format(startDate, "PP")} - ${format(endDate, "PP")}`
                   ) : (
@@ -486,15 +491,15 @@ export default function HomePage(
 
       {/* Featured Grabs */}
       {/* <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
-      <section className="min-h-screen flex flex-col items-center justify-center p-6">
+      <section className="min-h-screen flex flex-col items-center justify-center p-6 mb-32">
         <div className="">
-          <div className="text-center mb-8">
+          <div className="text-center mb-20">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">Featured Grabs</h1>
             <p className="text-gray-600">Discover more of the activities with our curated event collections</p>
           </div>
 
           <div className="w-full max-w-7xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
               {filteredProducts?.length === 0 ? (
                 <p className="text-muted-foreground">No products found</p>
@@ -518,7 +523,7 @@ export default function HomePage(
       </section>
 
       {/* <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}> */}
-      <section className="transferGrabs relative bg-[#1B0164] bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+      <section className="transferGrabs py-32 relative bg-[#1B0164] bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-none bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]"
           style={{ '--bg-image': `url(${Images.transferGrabsImg.src || Images.transferGrabsImg})` } as React.CSSProperties}>
           <div className="lg:max-w-3xl z-10 text-center">
@@ -537,13 +542,13 @@ export default function HomePage(
       <section className="py-12 min-h-[400px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">All Events Map</h2>
-          <p className="text-gray-600 mb-6">Explore events happening near you</p>
+          <p className="text-gray-600 mb-16">Explore events happening near you</p>
           <div id="all_events" className="w-full h-[500px] rounded-lg shadow-lg"></div>
         </div>
       </section>
 
       {/* <section className="whatMakes relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}> */}
-      <section className="whatMakes  bg-[#1B0164] relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+      <section className="whatMakes py-32 my-32 bg-[#1B0164] relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">What Makes Us Uncommon</h2>
           <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
@@ -564,10 +569,10 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="py-12 testimonial">
-        <div className="container mx-auto px-6 text-center">
+      <section className="py-12 testimonial mt-32">
+        <div className="container mx-auto px-6 text-center mb-12">
           <h2 className="text-h2 font-bold mb-4">What People Say</h2>
-          <p className="text-lg mb-12">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+          <p className="text-lg mb-32">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
           <Slider
             {...testimonialSliderSettings}
             className="w-full max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto overflow-hidden"

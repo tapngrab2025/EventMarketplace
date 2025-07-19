@@ -95,7 +95,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Products Grid */}
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
                 {stall.products?.map((product) => (
                   <>
                     {product.approved && <Card key={product.id} className="overflow-hidden">
@@ -112,17 +112,17 @@ export default function EventDetailsPage() {
                           {product.description}
                         </p>
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">
+                          <span className="font-bold text-1xl my-3">
                               ${(product.price / 100).toFixed(2)}
                             </span>
                             <span className="text-sm text-muted-foreground">
                               {product.stock} left
                             </span>
                         </div>
-                        <div className="flex justify-between mt-4 gap-x-2">
+                        <div className="flex justify-between mt-4 gap-x-2 items-center">
                             {user?.role === "customer" && (
                               <Button
-                                className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-full"
+                                className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-fit"
                                 onClick={() => addToCart.mutate(product.id)}
                                 disabled={addToCart.isPending || product.stock === 0}
                               >
@@ -138,7 +138,7 @@ export default function EventDetailsPage() {
                               to={`/products/${product.id}`}
                               className="text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
                             >
-                              👁️
+                              <img src="../src/assets/view.png" alt="view product" className="w-7 h-7 inline-block" />
                             </Link>
                         </div>
                       </CardContent>

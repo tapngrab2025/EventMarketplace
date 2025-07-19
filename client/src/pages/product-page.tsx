@@ -59,7 +59,7 @@ export default function ProductPage() {
 
     return (
         <>
-        <main className="container mx-auto py-8 px-4">
+        <main className="container mx-auto py-20 px-4">
             {/* <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(product, null, 2)}</pre> */}
             <section className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
@@ -74,10 +74,10 @@ export default function ProductPage() {
 
                 <div className="space-y-6">
                     <div>
-                        <h1 className="text-[32px] font-bold uppercase">{product.name}</h1>
-                        <p className="text-2xl text-primaryGreen mt-7"><span className="material-icons">location_on</span> {product.stall?.location}</p>
-                        <p className="font-medium mt-5 font-semibold text-primaryGreen text-[2rem] leading-none">{product.event?.name} - {product.stall?.name}</p>
-                        <div className="grid grid-cols-2 gap-4 text-primaryGreen mt-5">
+                        <h1 className="text-[36px] font-bold uppercase text-primaryGreen">{product.name}</h1>
+                        <p className="text-lg mt-3 text-gray-500"><span className="material-icons text-xl">location_on</span> {product.stall?.location}</p>
+                        <p className="font-medium mt-5 font-semibold text-xl leading-none">{product.event?.name} - {product.stall?.name}</p>
+                        <div className="grid grid-cols-2 gap-4 text-primaryGreen my-12">
                             <CountDown date={product.event?.endDate} className="event_count_down" />
                             {/* <div>
                                 <span className="text-primaryGreen">Start Date:</span>
@@ -88,7 +88,7 @@ export default function ProductPage() {
                                 <p>{new Date(product.event?.endDate || '').toLocaleDateString()}</p>
                             </div> */}
                         </div>
-                        <p className="text-xl font-semibold mt-5">
+                        <p className="text-2xl font-semibold mt-5">
                             ${(product.price / 100).toFixed(2)}
                         </p>
                     </div>
@@ -123,7 +123,7 @@ export default function ProductPage() {
                     </div>
                 </div>
             </section>
-            <section className="border-t pt-6 mt-6 space-y-4">
+            <section className="border-t pt-6 mt-6 space-y-4 my-20">
                 <h2 className="text-2xl font-semibold">Event Details</h2>
                 <div className="grid gap-4 text-2xl">
                     <p className="text-xl">{product.event?.description}</p>
@@ -132,10 +132,10 @@ export default function ProductPage() {
             {products?.length === 0 ? (
                 <></>
             ) : (
-                <section className="pt-6 mt-6 space-y-4 text-center">
+                <section className="pt-6 mt-6 space-y-4 text-center my-20">
                     <h2 className="text-2xl font-semibold">Stalls Grabs</h2>
                     <p className="">Discover more of the activities with our curated event collections</p>
-                    <div className="w-full max-w-7xl">
+                    <div className="w-full max-w-7xl flex text-center">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14">
                         {products?.map((product) => (
                             <ProductCard key={product.id} product={product} />

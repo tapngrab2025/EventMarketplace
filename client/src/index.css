@@ -56,7 +56,7 @@
 @layer components {
   .testimonial .quote-bg {
     background-image: url('@/assets/quoteImg.png');
-    background-size: 60px;
+    background-size: 140px;
     background-position: 0 0;
     padding: 2rem;
     position: relative;
