@@ -206,6 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const product = await storage.createProduct({
       ...req.body,
+      availableStock: req.body.stock,
     });
     res.status(201).json(product);
   });
@@ -247,7 +248,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    const product = await storage.updateProduct(parseInt(req.params.id), req.body);
+    const updatedBody = {
+      ...req.body,
+      availableStock: req.body.stock !== undefined ? req.body.stock : req.body.availableStock
+    };
+    const product = await storage.updateProduct(parseInt(req.params.id), updatedBody);
     if (!product) return res.sendStatus(404);
     res.json(product);
   });

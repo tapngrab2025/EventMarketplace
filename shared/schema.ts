@@ -68,6 +68,8 @@ export const products = pgTable("products", {
   stallId: integer("stall_id").notNull(),
   approved: boolean("approved").notNull().default(false),
   stock: integer("stock").notNull(),
+  availableStock: integer("available_stock").notNull().default(0),
+  dispatchStock: integer("dispatch_stock").default(0),
   archived: boolean("archived").notNull().default(false),
 });
 

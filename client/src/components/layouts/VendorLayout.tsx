@@ -4,6 +4,7 @@ import { RightNavigation } from "@/components/common/RightNavigation";
 import { Logo } from "../common/logo";
 import { X } from "lucide-react";
 import { DefaultFooter } from "../common/DefaultFooter";
+import { Link } from "wouter";
 
 
 interface VendorLayoutProps {
@@ -35,7 +36,7 @@ export function VendorLayout({ children }: VendorLayoutProps) {
                                 <X className="h-6 w-6" />
                             </button>
                             <div className="flex flex-col space-y-6 mt-12">
-                                <a href="/profile" className="text-gray-600 hover:text-gray-800 text-center">Profile</a>
+                                <Link href="/profile" className="text-gray-600 hover:text-gray-800 text-center">Profile</Link>
                             </div>
                         </div>
                     </div>

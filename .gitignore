@@ -7,3 +7,4 @@ vite.config.ts.*
 .env
 client/.next/server/uploads/*
 !client/.next/server/uploads/.gitkeep
+bash.exe.stackdump

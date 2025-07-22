@@ -8,6 +8,7 @@ import { Logo } from "@/components/common/logo";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { DefaultFooter } from "../common/DefaultFooter";
+import { Link } from "wouter";
 
 interface OrganizerLayoutProps {
     children: ReactNode;
@@ -40,7 +41,7 @@ export function OrganizerLayout(
                                 <X className="h-6 w-6" />
                             </button>
                             <div className="flex flex-col space-y-6 mt-12">
-                                <a href="/profile" className="text-gray-600 hover:text-gray-800 text-center">Profile</a>
+                                <Link href="/profile" className="text-gray-600 hover:text-gray-800 text-center">Profile</Link>
                             </div>
                         </div>
                     </div>

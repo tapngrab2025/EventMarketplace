@@ -384,6 +384,8 @@ export class DatabaseStorage implements IStorage {
         imageUrl: products.imageUrl,
         price: products.price,
         stock: products.stock,
+        availableStock: products.availableStock,
+        dispatchStock: products.dispatchStock,
         stallId: products.stallId,
         approved: products.approved,
         category: products.category,
@@ -551,6 +553,16 @@ export class DatabaseStorage implements IStorage {
           await tx
             .delete(cartItems)
             .where(eq(cartItems.userId, insertOrder.user_id));
+
+          // Update product stock
+          for (const item of insertOrder.items) {
+            await tx
+             .update(products)
+             .set({
+                availableStock: sql<number>`${products.stock} - ${item.quantity}`,
+             })
+            .where(eq(products.id, item.productId));
+          }
         }
 
         return order;
@@ -680,6 +692,30 @@ export class DatabaseStorage implements IStorage {
         eq(orderDeliveryStatus.orderId, orderId),
         eq(orderDeliveryStatus.stallId, stallId)
       ));
+      console.log("existing", existing);
+      const orderIds = await db
+      .select()
+      .from(orderItems)
+      .where(and(
+        eq(orderItems.orderId, orderId)
+      ));
+
+    console.log("orderIds", orderIds);
+
+    if (orderIds) {
+      await db.transaction(async (tx) => {
+        for (const orderId of orderIds) {
+          return await tx
+          .update(products)
+         .set({
+            availableStock: sql<number>`${products.availableStock} - ${orderId.quantity}`,
+            dispatchStock: sql<number>`${products.dispatchStock} + ${orderId.quantity}`, 
+         })
+        .where(eq(products.id, orderId.productId))
+        .returning();
+        }
+      });
+    }
 
     if (existing) {
       return await db
@@ -765,11 +801,12 @@ export class DatabaseStorage implements IStorage {
       .update(events)
       .set({ archived: true })
       .where(inArray(events.id, eventIds));
-      
+
     // Get stalls for these events
     const stallsToArchive = await db
       .select({ id: stalls.id })
       .from(stalls)
+      .innerJoin(events, eq(events.id, stalls.eventId))
       .where(
         and(
           inArray(events.id, eventIds),
@@ -785,6 +822,7 @@ export class DatabaseStorage implements IStorage {
         .update(stalls)
         .set({ archived: true })
         .where(inArray(stalls.id, stallIds));
+        console.log('stallIds:', stallIds);
         
       // Archive products in these stalls
       await db
@@ -792,7 +830,7 @@ export class DatabaseStorage implements IStorage {
         .set({ archived: true })
         .where(
           and(
-            inArray(products.id, stallIds),
+            inArray(products.stallId, stallIds),
             eq(products.archived, false)
           )
         );

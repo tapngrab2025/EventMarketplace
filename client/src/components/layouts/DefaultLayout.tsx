@@ -5,6 +5,7 @@ import { Logo } from "../common/logo";
 import { DefaultNavigation } from "../common/DefaultNavigation";
 import { X } from "lucide-react";
 import { DefaultFooter } from "../common/DefaultFooter";
+import { Link } from "wouter";
 
 interface DefaultLayoutProps {
     children: ReactNode;
@@ -37,18 +38,18 @@ export function DefaultLayout(
                                 <X className="h-6 w-6" />
                             </button>
                             <div className="flex flex-col space-y-6 mt-12">
-                                <a href="/" className="text-orange-500 hover:text-orange-600 font-medium text-center text-lg">
+                                <Link href="/" className="text-orange-500 hover:text-orange-600 font-medium text-center text-lg">
                                     Home
-                                </a>
-                                <a href="#" className="text-gray-600 hover:text-gray-800 text-center text-lg">
+                                </Link>
+                                <Link href="#" className="text-gray-600 hover:text-gray-800 text-center text-lg">
                                     Events
-                                </a>
-                                <a href="#" className="text-gray-600 hover:text-gray-800 text-center text-lg">
+                                </Link>
+                                <Link href="#" className="text-gray-600 hover:text-gray-800 text-center text-lg">
                                     Contact
-                                </a>
-                                <a href="/profile" className="text-gray-600 hover:text-gray-800 text-center text-lg">
+                                </Link>
+                                <Link href="/profile" className="text-gray-600 hover:text-gray-800 text-center text-lg">
                                     Profile
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
