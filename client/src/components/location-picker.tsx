@@ -54,7 +54,9 @@ export function LocationPicker({ onLocationSelect, defaultValue }: LocationPicke
 
   return (
     <div 
-      className="relative z-[100]"
+      className="relative z-[9999]"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
     >
       <Input
         ref={inputRef}

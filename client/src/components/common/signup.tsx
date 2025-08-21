@@ -48,7 +48,7 @@ export default function SignUp() {
     });
 
     return (
-        <section className="relative bg-[#1B0164] bg-cover bg-center text-white py-4 md:py-24">
+        <section className="relative bg-primaryGreen bg-cover bg-center text-white py-4 md:py-24">
             <div className="container mx-auto px-6 flex items-center justify-center gap-x-28 flex-col lg:flex-row">
                 <h2 className="text-h2 font-bold text-center">Sign up for Newsletter!</h2>
                 <div className="flex items-center flex-col lg:flex-row gap-y-8 lg:gap-0">
@@ -61,7 +61,7 @@ export default function SignUp() {
                     <Button
                         variant="outline"
                         onClick={() => submitSubscriber.mutate()}
-                        className="bg-[#00C4B4] text-white border-none font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
+                        className="bg-white text-primaryGreen border-none font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
                     >
                         Subscribe
                     </Button>

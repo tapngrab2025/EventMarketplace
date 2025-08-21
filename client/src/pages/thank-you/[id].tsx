@@ -53,7 +53,6 @@ export default function ThankYouPage() {
     const qrElement = document.getElementById(`qr-${sanitizedId}`);
     
     if (!qrElement) {
-      console.error('QR element not found');
       return;
     }
 

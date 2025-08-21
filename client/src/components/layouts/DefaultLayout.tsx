@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 import { useState } from "react";
-import { RightNavigation } from "@/components/common/RightNavigation";
 import { Logo } from "../common/logo";
 import { DefaultNavigation } from "../common/DefaultNavigation";
 import { X } from "lucide-react";
@@ -41,15 +40,15 @@ export function DefaultLayout(
                                 <Link href="/" className="text-orange-500 hover:text-orange-600 font-medium text-center text-lg">
                                     Home
                                 </Link>
-                                <Link href="#" className="text-gray-600 hover:text-gray-800 text-center text-lg">
+                                <Link href="/events" className="text-gray-600 hover:text-gray-800 text-center text-lg">
                                     Events
                                 </Link>
-                                <Link href="#" className="text-gray-600 hover:text-gray-800 text-center text-lg">
-                                    Contact
+                                <Link href="/products" className="text-gray-600 hover:text-gray-800 text-center text-lg">
+                                    Grabs
                                 </Link>
-                                <Link href="/profile" className="text-gray-600 hover:text-gray-800 text-center text-lg">
+                                {/* <Link href="/profile" className="text-gray-600 hover:text-gray-800 text-center text-lg">
                                     Profile
-                                </Link>
+                                </Link> */}
                             </div>
                         </div>
                     </div>

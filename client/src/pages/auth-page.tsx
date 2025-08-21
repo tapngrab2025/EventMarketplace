@@ -166,7 +166,7 @@ const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
         onSubmit={form.handleSubmit((data) => registerMutation.mutate({ ...data, role: "customer" }))}
         className="space-y-4"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="firstName"
@@ -206,9 +206,9 @@ const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="address"
@@ -235,7 +235,7 @@ const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -269,7 +269,7 @@ const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
           />
         </div>
         
-        <FormField
+        {/* <FormField
           control={form.control}
           name="birthDay"
           render={({ field }) => (
@@ -281,7 +281,7 @@ const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
         
         <FormField
           control={form.control}

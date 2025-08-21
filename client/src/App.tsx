@@ -42,6 +42,48 @@ function Router() {
           </DefaultLayout>
         )
       } />
+      <Route path="/products" component={
+        () => (
+          <DefaultLayout>
+            <AllProducts />
+          </DefaultLayout>
+        )
+      } />
+      <Route path="/products/:id" component={
+        () => (
+          <DefaultLayout>
+            <ProductPage />
+          </DefaultLayout>
+        )
+      } />
+      <Route path="/events" component={
+        () => (
+          <DefaultLayout>
+            <EventsPage />
+          </DefaultLayout>
+        )
+      } />
+      <Route path="/event/:id" component={
+        () => (
+          <DefaultLayout>
+            <EventDetailsPage />
+          </DefaultLayout>
+        )
+      } />
+      <Route path="/event/city/:city" component={
+        () => (
+          <DefaultLayout>
+            <EventDetailsCityPage />
+          </DefaultLayout>
+        )
+      } />
+      <Route path="/search" component={
+        () => (
+          <DefaultLayout>
+            <SearchPage />
+          </DefaultLayout>
+        )
+      } />
       <ProtectedRoute
         path="/admin/archives"
         component={() => (
@@ -61,33 +103,6 @@ function Router() {
           )
         }
         roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-        path="/events"
-        component={() => (
-          <DefaultLayout>
-            <EventsPage/>
-          </DefaultLayout>
-        )}
-        roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-      path="/event/:id"
-      component={()=>(
-        <DefaultLayout>
-          <EventDetailsPage/>
-        </DefaultLayout>
-      )}
-      roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-      path="/event/city/:city"
-      component={()=>(
-        <DefaultLayout>
-          <EventDetailsCityPage/>
-        </DefaultLayout>
-      )}
-      roles={["admin", "vendor", "customer", "organizer"]}
       />
       <ProtectedRoute
         path="/vendor"
@@ -130,33 +145,6 @@ function Router() {
         component={() => (
           <DefaultLayout>
             <ThankYouPage />
-          </DefaultLayout>
-        )}
-        roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-        path="/products/:id"
-        component={() => (
-          <DefaultLayout>
-            <ProductPage />
-          </DefaultLayout>
-        )}
-        roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-        path="/products"
-        component={() => (
-          <DefaultLayout>
-            <AllProducts/>
-          </DefaultLayout>
-        )}
-        roles={["admin", "vendor", "customer", "organizer"]}
-      />
-      <ProtectedRoute
-        path="/search"
-        component={() => (
-          <DefaultLayout>
-            <SearchPage/>
           </DefaultLayout>
         )}
         roles={["admin", "vendor", "customer", "organizer"]}

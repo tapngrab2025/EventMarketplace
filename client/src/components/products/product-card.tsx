@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
+import { useCart } from "@/hooks/use-cart";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { user } = useAuth();
@@ -17,22 +18,7 @@ export default function ProductCard({ product }: { product: Product }) {
     queryKey: [`/api/product/${product.id}`],
 });
 
-  const addToCart = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/cart", {
-        productId: product.id,
-        quantity: 1,
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Added to cart",
-        description: `${product.name} has been added to your cart.`,
-      });
-    },
-  });
+const { addToCart } = useCart();
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col">
@@ -72,20 +58,19 @@ export default function ProductCard({ product }: { product: Product }) {
             </div>
         </div>
         <div className="flex justify-between items-center mt-4 gap-x-2">
-          {user?.role === "customer" && (
-            <Button
-              className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-fit"
-              onClick={() => addToCart.mutate()}
-              disabled={addToCart.isPending || product.stock === 0}
-            >
-              {addToCart.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <ShoppingCart className="h-4 w-4 mr-2" />
-              )}
-              Grab It
-            </Button>
-          )}
+          <Button
+            className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-fit"
+            onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
+
+            disabled={addToCart.isPending || product.stock === 0}
+          >
+            {addToCart.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <ShoppingCart className="h-4 w-4 mr-2" />
+            )}
+            Grab It
+          </Button>
           <Link
             to={`/products/${product.id}`}
             className="text-gray-600 font-semibold rounded-lg transition duration-300"

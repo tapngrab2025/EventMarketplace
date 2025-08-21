@@ -7,6 +7,8 @@ import {
 import { Profile, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import Cookies from 'js-cookie';
+import { v4 as uuidv4 } from 'uuid';
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -41,11 +43,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
+      const cartToken = Cookies.get('cart_token');
+      credentials['X-Cart-Token'] = cartToken ?? null;
       const res = await apiRequest("POST", "/api/login", credentials);
+      // Only remove cart token after successful login
+      if (cartToken) {
+        Cookies.remove('cart_token');
+      }
       return await res.json();
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Invalidate cart query to fetch merged cart
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
     onError: (error: Error) => {
       toast({
@@ -58,13 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
+      const cartToken = Cookies.get('cart_token');
+      credentials['X-Cart-Token'] = cartToken ?? null;
       const response = await apiRequest("POST", "/api/register", credentials);
 
       if (!response) {
         const error = await response.json();
         throw new Error(error.message || 'Username already exists');
       }
-
+      // Only remove cart token after successful login
+      if (cartToken) {
+        Cookies.remove('cart_token');
+      }
       return response.json();
     },
     onSuccess: (user: SelectUser) => {
@@ -86,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.setQueryData(["/api/user/profile"], null);
+      // Set new cart token for anonymous user
+      Cookies.set('cart_token', uuidv4());
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
     onError: (error: Error) => {
       toast({

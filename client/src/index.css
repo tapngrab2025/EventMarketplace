@@ -137,4 +137,8 @@
   #all_events .gm-style .gm-style-iw-d {
     padding: 0 !important;
   }
+
+  .pac-container {
+    z-index: 999999999999 !important; /* higher than your Dialog overlay (e.g., z-50) */
+  }
 }

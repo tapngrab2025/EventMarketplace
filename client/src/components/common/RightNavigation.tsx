@@ -1,30 +1,65 @@
 import { useAuth } from "@/hooks/use-auth";
+import { CartItem } from "@shared/schema";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound, FileArchive } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import Cookies from 'js-cookie';
+import { apiRequest } from "@/lib/queryClient";
+import { useCart } from "@/hooks/use-cart";
 
 export function RightNavigation({
     isMobileMenuOpen,
     setIsMobileMenuOpen
-}: { 
-    isMobileMenuOpen: boolean; 
+}: {
+    isMobileMenuOpen: boolean;
     setIsMobileMenuOpen: (value: boolean) => void;
 }) {
     const { user, logoutMutation } = useAuth();
     const [, setLocation] = useLocation();
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    // const cartItems = [];
+    const { cartItems } = useCart();
 
-    const { data: cartItems } = useQuery({
-        queryKey: ["/api/cart"],
-        enabled: user?.role === "customer",
-    });
+    // const cartToken = !user ? Cookies.get('cart_token') : undefined;
+    // const headers: Record<string, string> = {};
+    // if (cartToken) {
+    //     headers['x-cart-token'] = cartToken;
+    // }
+    // const { data: cartItems } = useQuery<CartItem[]>({
+    //     queryKey: ["/api/cart"],
+    //     queryFn: async () => {
+    //         const response = await apiRequest(
+    //             "GET",
+    //             "/api/cart",
+    //             { userId: user?.id },
+    //             headers
+    //         );
+    //         if (!response.ok) {
+    //             throw new Error('Failed to fetch cart items');
+    //         }
+    //         return response.json();
+    //     }
+    // });
+
 
     return (
         <>
             {!user ? (
-                <Button onClick={() => setLocation("/auth")}>Sign In</Button>
+                <>
+                    <Button onClick={() => setLocation("/auth")}>Sign In</Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="md:hidden"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    >
+                        <span className="material-icons">menu</span>
+                    </Button>
+                </>
             ) : (
                 <div className="flex items-center gap-4">
                     <Button className="hidden md:block" variant="ghost" size="icon" onClick={() => setLocation("/profile")} title="User Profile">
@@ -43,30 +78,30 @@ export function RightNavigation({
                     )}
                     {user.role === "admin" && (
                         <>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setLocation("/admin")}
-                            title="Admin Dashboard"
-                        >
-                            <LayoutDashboard className="h-5 w-5" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setLocation("/users")}
-                            title="User Dashboard"
-                        >
-                            <UsersRound className="h-5 w-5" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setLocation("/admin/archives")}
-                            title="Event Achieves"
-                        >
-                            <FileArchive className="h-5 w-5" />
-                        </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setLocation("/admin")}
+                                title="Admin Dashboard"
+                            >
+                                <LayoutDashboard className="h-5 w-5" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setLocation("/users")}
+                                title="User Dashboard"
+                            >
+                                <UsersRound className="h-5 w-5" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setLocation("/admin/archives")}
+                                title="Event Achieves"
+                            >
+                                <FileArchive className="h-5 w-5" />
+                            </Button>
                         </>
                     )}
                     {user.role === "organizer" && (
@@ -91,7 +126,10 @@ export function RightNavigation({
                                     )}
                                 </Button>
                             </SheetTrigger>
-                            <CartDrawer />
+                            <CartDrawer
+                                isCheckingOut={isCheckingOut}
+                                setIsCheckingOut={setIsCheckingOut}
+                            />
                         </Sheet>
                     )}
                     <Button

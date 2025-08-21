@@ -35,10 +35,10 @@ export interface IStorage {
   deleteProduct(id: number): Promise<boolean>;
 
   // Cart operations
-  getCartItems(userId: number): Promise<CartItem[]>;
-  addToCart(cartItem: InsertCartItem): Promise<CartItem>;
-  updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
-  removeFromCart(id: number): Promise<boolean>;
+  getCartItems(userId: number, cartToken?: string): Promise<CartItem[]>;
+  addToCart(cartItem: InsertCartItem, userId?: number, cartToken?: string): Promise<CartItem>;
+  updateCartItem(id: number, quantity: number, userId?: number, cartToken?: string): Promise<CartItem | undefined>;
+  removeFromCart(id: number, userId?: number, cartToken?: string): Promise<boolean>;
 
   // Order operations
   createOrder(userId: number, cartItems: CartItem[], paymentMethod: string): Promise<number | undefined>;

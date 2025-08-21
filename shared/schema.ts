@@ -18,7 +18,7 @@ export const profile = pgTable("profile", {
   middleName: text("middle_name"),
   lastName: text("last_name"),
   bio: text("bio"),
-  dob: date("date_of_birth").notNull(),
+  dob: date("date_of_birth"),
   gender: text("gender", { enum: ["male", "female", "other", "not_to_disclose"] }).notNull(),
   imageUrl: text("image_url").default("/images/default-profile.png"),
   address: text("address").default(""),
@@ -68,14 +68,17 @@ export const products = pgTable("products", {
   stallId: integer("stall_id").notNull(),
   approved: boolean("approved").notNull().default(false),
   stock: integer("stock").notNull(),
-  availableStock: integer("available_stock").notNull().default(0),
+  availableToDispatch: integer("available_dispatch_stock").notNull().default(0),
   dispatchStock: integer("dispatch_stock").default(0),
   archived: boolean("archived").notNull().default(false),
 });
 
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "set null" }) // nullable foreign key
+    .$type<number | null>(), 
+  cartToken: text("cart_token"),
   productId: integer("product_id").notNull(),
   quantity: integer("quantity").notNull(),
 });
@@ -105,7 +108,7 @@ export const orders = pgTable("orders", {
   user_id: integer("user_id").references(() => users.id), // Keep this as user_id
   fullName: text("full_name").notNull(),
   phone: text("phone").notNull(),
-  address: text("address").notNull(),
+  // address: text("address").notNull(),
   total: integer("total").notNull(),
   status: text("status").notNull().default("pending"),
   paymentMethod: text("payment_method").notNull(),

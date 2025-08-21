@@ -14,7 +14,6 @@ async function createAdmin() {
     });
 
     if (existingAdmin) {
-      // console.log("Admin user already exists");
       process.exit(0);
     }
 
@@ -27,9 +26,6 @@ async function createAdmin() {
       email: "admin@mail.com",
     });
 
-    // console.log("Admin user created successfully");
-    // console.log("Username: admin");
-    // console.log("Password: admin123");
   } catch (error) {
     console.error("Error creating admin user:", error);
   } finally {

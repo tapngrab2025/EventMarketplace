@@ -6,29 +6,18 @@ import {
   Product,
 } from "@shared/schema";
 import { AddEvent } from "@/components/event/add-event";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Loader2, Plus, Pencil } from "lucide-react";
+import { Loader2} from "lucide-react";
 import { useState } from "react";
-import { DEFAULT_IMAGES } from "@/config/constants";
-import { AddStall } from "@/components/stall/add-stall";
-import { AddProduct } from "@/components/product/add-product";
 import { MyEventsSection } from "@/components/dashboard/my-events-section";
 import { Input } from "@/components/ui/input";
 import { OtherEventsSection } from "@/components/dashboard/other-events-section";
 
 interface VendorDashboardProps {
   searchTerm?: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>> 
+  setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default function VendorDashboard(
-  { searchTerm = "", setSearchTerm }: VendorDashboardProps
-) {
+export default function VendorDashboard({ searchTerm = "", setSearchTerm }: VendorDashboardProps) {
   const { user } = useAuth();
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [eventEditDialogOpen, setEventEditDialogOpen] = useState(false);

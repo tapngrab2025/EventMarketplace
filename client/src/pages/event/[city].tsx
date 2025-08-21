@@ -1,42 +1,19 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
-import { Event, Product, Stall } from "@shared/schema";
+import { Event } from "@shared/schema";
 import { Loader2, CalendarDays, MapPin, ShoppingCart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-// import NotFound from "../not-found";
-import NotFound from "@/pages/not-found";
+import { useCart } from "@/hooks/use-cart";
 
 export default function EventDetailsCityPage() {
-    const { user } = useAuth();
-    const { toast } = useToast();
+    const { addToCart } = useCart();
     const [, params] = useRoute("/event/city/:city");
     const city = params?.city;
 
     const { data: event, isLoading: loadingEvent } = useQuery<Event>({
         queryKey: [`/api/events/city/${city}`],
         enabled: !!city,
-    });
-    console.log(event);
-
-    const addToCart = useMutation({
-        mutationFn: async (productId: number) => {
-            const res = await apiRequest("POST", "/api/cart", {
-                productId,
-                quantity: 1,
-            });
-            return res.json();
-        },
-        onSuccess: () => {
-            toast({
-                title: "Added to cart",
-                description: "Product has been added to your cart",
-            });
-            queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-        },
     });
 
     if (loadingEvent) {
@@ -118,10 +95,9 @@ export default function EventDetailsCityPage() {
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between mt-4 gap-x-2">
-                                                    {user?.role === "customer" && (
                                                         <Button
                                                             className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-full"
-                                                            onClick={() => addToCart.mutate(product?.products?.id)}
+                                                            onClick={() => addToCart.mutate({productId: product?.products?.id, quantity: 1})}
                                                             disabled={addToCart.isPending || product?.products?.stock === 0}
                                                         >
                                                             {addToCart.isPending ? (
@@ -131,7 +107,6 @@ export default function EventDetailsCityPage() {
                                                             )}
                                                             Grab It
                                                         </Button>
-                                                    )}
                                                     <Link
                                                         to={`/products/${product?.products?.id}`}
                                                         className="text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"

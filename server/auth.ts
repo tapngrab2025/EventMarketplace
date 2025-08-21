@@ -2,14 +2,13 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import express, { Express } from "express";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser, users } from "@shared/schema";
+import { User as SelectUser } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from 'fs';
-import { error } from "console";
 
 declare global {
   namespace Express {
@@ -122,41 +121,37 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/register", async (req, res, next) => {
+    const cartToken = req.body['X-Cart-Token'] as any;
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "User name exists" });
       }
   
-      // Extract profile-related fields
-      const { firstName, middleName, lastName, address, city, phoneNumber, birthDay, ...userData } = req.body;
+      // Only extract essential user data and phone number
+      const { username, password, email, phoneNumber } = req.body;
       
-      // Always set role to customer
-      userData.role = "customer";
-      
-      // Create the user
+      // Create the user with minimal data
       const user = await storage.createUser({
-        ...userData,
-        password: await hashPassword(userData.password),
+        username,
+        email,
+        password: await hashPassword(password),
+        role: "customer", // Default role
       });
   
-      // Create profile with additional fields if needed
+      // Create minimal profile with phone number
       if (user && user.id) {
         await storage.createOrUpdateProfile(user.id, {
           userId: user.id,
-          // Combine name parts if needed
-          firstName: firstName || "",
-          middleName: middleName || "",
-          lastName: lastName || "",
-          bio: "",
-          dob: birthDay || new Date().toISOString(),
-          gender: "not_to_disclose",
-          address: address || "",
-          city: city || "",
-          phoneNumber: phoneNumber || "",
+          gender: "not_to_disclose", // Default gender
+          phoneNumber: phoneNumber || "", // Include phone number
+          // Remove the incorrect default date
         });
       }
-  
+      // If there's a cart token, merge the anonymous cart with the user's cart
+      if (cartToken) {
+        await storage.mergeAnonymousCart(user.id, cartToken);
+      }
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(201).json(user);
@@ -164,20 +159,31 @@ export function setupAuth(app: Express) {
     } catch (err) {
       next(err);
     }
-  });
+});
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    const cartToken = req.body['X-Cart-Token'] as any;
+    passport.authenticate("local", async (err, user, info) => {
       if (err) return next(err);
       if (!user) {
         return res.status(401).json({
           message: info?.message || "Invalid credentials" 
-         });
+        });
       }
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.json(user);
-      });
+      
+      try {
+        // If there's a cart token, merge the anonymous cart with the user's cart
+        if (cartToken) {
+          await storage.mergeAnonymousCart(user.id, cartToken);
+        }
+        
+        req.login(user, (err) => {
+          if (err) return next(err);
+          res.json(user);
+        });
+      } catch (err) {
+        next(err);
+      }
     })(req, res, next);
   });
 
@@ -215,10 +221,6 @@ export function setupAuth(app: Express) {
   app.put("/api/user/profile", async (req, res, next) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      console.log('Update Profile Request:', {
-        userId: req.user.id,
-        body: req.body
-      });
 
       const [updatedUser, updatedProfile] = await storage.updateUser(req.user.id, {
         username: req.body.username,
@@ -237,12 +239,8 @@ export function setupAuth(app: Express) {
         socialMedia: req.body.socialMedia,
         occupation: req.body.occupation,
       });
-      console.log('Update Results:', {
-        user: updatedUser,
-        profile: updatedProfile
-      });
+
       if (!updatedUser) {
-        console.error('User update failed');
         return res.status(404).json({ message: "User not found" });
       }
 

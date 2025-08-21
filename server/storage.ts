@@ -33,6 +33,8 @@ import { eq, ne, and, gte, lte, sql, like, ilike, or, between, inArray } from "d
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { PgColumn } from "drizzle-orm/pg-core";
+import fs from 'fs';
+import path from 'path';
 
 const PostgresSessionStore = connectPg(session);
 
@@ -176,7 +178,7 @@ export class DatabaseStorage implements IStorage {
 
   async getEvent(id: number): Promise<Event | undefined> {
     const [event] = await db.select().from(events)
-    .where(eq(events.id, id));
+      .where(eq(events.id, id));
     return event;
   }
 
@@ -384,7 +386,7 @@ export class DatabaseStorage implements IStorage {
         imageUrl: products.imageUrl,
         price: products.price,
         stock: products.stock,
-        availableStock: products.availableStock,
+        availableToDispatch: products.availableToDispatch,
         dispatchStock: products.dispatchStock,
         stallId: products.stallId,
         approved: products.approved,
@@ -481,37 +483,221 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Cart operations
-  async getCartItems(userId: number): Promise<CartItem[]> {
-    return await db
-      .select()
-      .from(cartItems)
-      .where(eq(cartItems.userId, userId));
+  async getCartItems(userId?: number, cartToken?: string | null): Promise<CartItem[]> {
+    if (userId && cartToken) {
+      return await db
+        .select()
+        .from(cartItems)
+        .where(or(
+          eq(cartItems.userId, userId),
+          eq(cartItems.cartToken, cartToken)
+        ));
+    } else if (userId && userId > 0 && !cartToken) {
+      return await db
+        .select()
+        .from(cartItems)
+        .where(eq(cartItems.userId, userId));
+    } else if (cartToken) {
+      return await db
+        .select()
+        .from(cartItems)
+        .where(eq(cartItems.cartToken, cartToken));
+    }
+    return [];
   }
 
   async addToCart(insertCartItem: InsertCartItem): Promise<CartItem> {
-    const [cartItem] = await db
-      .insert(cartItems)
-      .values(insertCartItem)
-      .returning();
-    return cartItem;
+    return await db.transaction(async (tx) => {
+      // Get product stock information
+      const [product] = await tx
+        .select()
+        .from(products)
+        .where(eq(products.id, insertCartItem.productId));
+
+      if (!product) {
+        throw new Error('Product not found');
+      }
+
+      // Check if the product already exists in the cart
+      const existingItem = await tx
+        .select()
+        .from(cartItems)
+        .where(
+          and(
+            eq(cartItems.productId, insertCartItem.productId),
+            insertCartItem.userId
+              ? eq(cartItems.userId, insertCartItem.userId)
+              : eq(cartItems.cartToken, insertCartItem.cartToken)
+          )
+        )
+        .limit(1);
+
+      const newQuantity = existingItem.length > 0
+        ? existingItem[0].quantity + insertCartItem.quantity
+        : insertCartItem.quantity;
+
+      // Validate stock
+      if (newQuantity > product.stock) {
+        throw new Error(`Only ${product.stock} items available in stock`);
+      }
+
+      if (existingItem.length > 0) {
+        // Update quantity of existing item
+        const [updated] = await tx
+          .update(cartItems)
+          .set({
+            quantity: newQuantity
+          })
+          .where(eq(cartItems.id, existingItem[0].id))
+          .returning();
+        return updated;
+      } else {
+        // Insert new item if it doesn't exist
+        const [cartItem] = await tx
+          .insert(cartItems)
+          .values(insertCartItem)
+          .returning();
+        return cartItem;
+      }
+    });
   }
 
+
+  // When user logs in, merge anonymous cart with user cart
+  async mergeAnonymousCart(userId: number, cartToken: string | null): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Get anonymous cart items
+      const anonymousItems = await tx
+        .select()
+        .from(cartItems)
+        .where(eq(cartItems.cartToken, cartToken));
+
+      // Update each item to associate with the user
+      for (const item of anonymousItems) {
+        // Get product stock information
+        const [product] = await tx
+          .select()
+          .from(products)
+          .where(eq(products.id, item.productId));
+
+        if (!product) {
+          // Skip this item if product not found
+          continue;
+        }
+
+        // Check if user already has this product in cart
+        const existingItem = await tx
+          .select()
+          .from(cartItems)
+          .where(and(
+            eq(cartItems.userId, userId),
+            eq(cartItems.productId, item.productId)
+          ))
+          .limit(1);
+
+        if (existingItem.length > 0) {
+          const newQuantity = existingItem[0].quantity + item.quantity;
+
+          // Validate stock
+          if (newQuantity > product.stock) {
+            // If merged quantity exceeds stock, set to maximum available
+            await tx
+              .update(cartItems)
+              .set({ quantity: product.stock })
+              .where(eq(cartItems.id, existingItem[0].id));
+          } else {
+            // Update quantity of existing item
+            await tx
+              .update(cartItems)
+              .set({ quantity: newQuantity })
+              .where(eq(cartItems.id, existingItem[0].id));
+          }
+
+          // Delete anonymous item
+          await tx
+            .delete(cartItems)
+            .where(eq(cartItems.id, item.id));
+        } else {
+          // Validate stock for anonymous item
+          if (item.quantity > product.stock) {
+            // If quantity exceeds stock, set to maximum available
+            await tx
+              .update(cartItems)
+              .set({ 
+                userId, 
+                cartToken: null,
+                quantity: product.stock 
+              })
+              .where(eq(cartItems.id, item.id));
+          } else {
+            // Associate anonymous item with user
+            await tx
+              .update(cartItems)
+              .set({ userId, cartToken: null })
+              .where(eq(cartItems.id, item.id));
+          }
+        }
+      }
+    });
+  }
   async updateCartItem(
     id: number,
     quantity: number,
+    userId?: number,
+    cartToken?: string | null
   ): Promise<CartItem | undefined> {
-    const [updated] = await db
-      .update(cartItems)
-      .set({ quantity })
-      .where(eq(cartItems.id, id))
-      .returning();
-    return updated;
+    return await db.transaction(async (tx) => {
+      // Get cart item and product information
+      const [cartItem] = await tx
+        .select()
+        .from(cartItems)
+        .where(eq(cartItems.id, id));
+
+      if (!cartItem) {
+        throw new Error('Cart item not found');
+      }
+
+      const [product] = await tx
+        .select()
+        .from(products)
+        .where(eq(products.id, cartItem.productId));
+
+      if (!product) {
+        throw new Error('Product not found');
+      }
+
+      // Validate stock
+      if (quantity > product.stock) {
+        throw new Error(`Only ${product.stock} items available in stock`);
+      }
+
+      const [updated] = await tx
+        .update(cartItems)
+        .set({ quantity })
+        .where(
+          and(
+            eq(cartItems.id, id),
+            userId ? eq(cartItems.userId, userId) : eq(cartItems.cartToken, cartToken)
+          )
+        )
+        .returning();
+      return updated;
+    });
   }
 
-  async removeFromCart(id: number): Promise<boolean> {
+  async removeFromCart(
+    id: number,
+    userId?: number,
+    cartToken?: string | null
+  ): Promise<boolean> {
     const [deleted] = await db
       .delete(cartItems)
-      .where(eq(cartItems.id, id))
+      .where(
+        and(
+          eq(cartItems.id, id),
+          userId ? eq(cartItems.userId, userId) : eq(cartItems.cartToken, cartToken)
+        )
+      )
       .returning();
     return !!deleted;
   }
@@ -527,7 +713,7 @@ export class DatabaseStorage implements IStorage {
             user_id: insertOrder.user_id,
             fullName: insertOrder.fullName,
             phone: insertOrder.phone,
-            address: insertOrder.address,
+            // address: insertOrder.address,
             total: insertOrder.total,
             status: "pending",
             paymentMethod: insertOrder.paymentMethod,
@@ -557,18 +743,18 @@ export class DatabaseStorage implements IStorage {
           // Update product stock
           for (const item of insertOrder.items) {
             await tx
-             .update(products)
-             .set({
-                availableStock: sql<number>`${products.stock} - ${item.quantity}`,
-             })
-            .where(eq(products.id, item.productId));
+              .update(products)
+              .set({
+                stock: sql<number>`${products.stock} - ${item.quantity}`,
+                availableToDispatch: sql<number>`${item.quantity}`,
+              })
+              .where(eq(products.id, item.productId));
           }
         }
 
         return order;
       });
     } catch (error) {
-      console.error('Error creating order:', error);
       throw new Error('Failed to create order');
     }
   }
@@ -581,7 +767,7 @@ export class DatabaseStorage implements IStorage {
         user_id: orders.user_id,
         fullName: orders.fullName,
         phone: orders.phone,
-        address: orders.address,
+        // address: orders.address,
         total: orders.total,
         status: orders.status,
         paymentMethod: orders.paymentMethod,
@@ -608,7 +794,7 @@ export class DatabaseStorage implements IStorage {
         user_id: orders.user_id,
         fullName: orders.fullName,
         phone: orders.phone,
-        address: orders.address,
+        // address: orders.address,
         total: orders.total,
         status: orders.status,
         paymentMethod: orders.paymentMethod,
@@ -692,27 +878,24 @@ export class DatabaseStorage implements IStorage {
         eq(orderDeliveryStatus.orderId, orderId),
         eq(orderDeliveryStatus.stallId, stallId)
       ));
-      console.log("existing", existing);
-      const orderIds = await db
+    const orderIds = await db
       .select()
       .from(orderItems)
       .where(and(
         eq(orderItems.orderId, orderId)
       ));
 
-    console.log("orderIds", orderIds);
-
     if (orderIds) {
       await db.transaction(async (tx) => {
         for (const orderId of orderIds) {
           return await tx
-          .update(products)
-         .set({
-            availableStock: sql<number>`${products.availableStock} - ${orderId.quantity}`,
-            dispatchStock: sql<number>`${products.dispatchStock} + ${orderId.quantity}`, 
-         })
-        .where(eq(products.id, orderId.productId))
-        .returning();
+            .update(products)
+            .set({
+              availableToDispatch: sql<number>`${products.availableToDispatch} - ${orderId.quantity}`,
+              dispatchStock: sql<number>`${products.dispatchStock} + ${orderId.quantity}`,
+            })
+            .where(eq(products.id, orderId.productId))
+            .returning();
         }
       });
     }
@@ -770,15 +953,18 @@ export class DatabaseStorage implements IStorage {
       .where(eq(products.archived, true))
       .orderBy(products.id, 'desc');
   }
-  
+
   // Archive expired events, stalls, and products
   async archiveExpiredEvents(): Promise<number> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // First, get all expired events that aren't already archived
     const expiredEvents = await db
-      .select({ id: events.id })
+      .select({
+        id: events.id,
+        imageUrl: events.imageUrl
+      })
       .from(events)
       .where(
         and(
@@ -786,16 +972,25 @@ export class DatabaseStorage implements IStorage {
           eq(events.archived, false)
         )
       );
-      
+
     if (expiredEvents.length === 0) {
       return 0;
     }
 
-    console.log('Expired events:', expiredEvents);
-    
     const eventIds = expiredEvents.map(event => event.id);
-    
-    console.log('eventIds:', eventIds);
+
+    // Delete event images
+    for (const event of expiredEvents) {
+      if (event.imageUrl && event.imageUrl !== '/images/default-event.png') {
+        try {
+          const imagePath = path.join(process.cwd(), 'client', '.next', 'server', 'uploads', path.basename(event.imageUrl));
+          await fs.promises.unlink(imagePath);
+        } catch (error) {
+          console.error(`Failed to delete event image: ${event.imageUrl}`, error);
+        }
+      }
+    }
+
     // Archive the events
     await db
       .update(events)
@@ -804,7 +999,10 @@ export class DatabaseStorage implements IStorage {
 
     // Get stalls for these events
     const stallsToArchive = await db
-      .select({ id: stalls.id })
+      .select({
+        id: stalls.id,
+        imageUrl: stalls.imageUrl
+      })
       .from(stalls)
       .innerJoin(events, eq(events.id, stalls.eventId))
       .where(
@@ -813,18 +1011,55 @@ export class DatabaseStorage implements IStorage {
           eq(stalls.archived, false)
         )
       );
-      
+
     if (stallsToArchive.length > 0) {
       const stallIds = stallsToArchive.map(stall => stall.id);
-      
+
+      // Delete stall images
+      for (const stall of stallsToArchive) {
+        if (stall.imageUrl && stall.imageUrl !== '/images/default-stall.png') {
+          try {
+            const imagePath = path.join(process.cwd(), 'client', '.next', 'server', 'uploads', path.basename(stall.imageUrl));
+            await fs.promises.unlink(imagePath);
+          } catch (error) {
+            console.error(`Failed to delete stall image: ${stall.imageUrl}`, error);
+          }
+        }
+      }
+
       // Archive the stalls
       await db
         .update(stalls)
         .set({ archived: true })
         .where(inArray(stalls.id, stallIds));
-        console.log('stallIds:', stallIds);
-        
-      // Archive products in these stalls
+
+      // Get and archive products in these stalls
+      const productsToArchive = await db
+        .select({
+          id: products.id,
+          imageUrl: products.imageUrl
+        })
+        .from(products)
+        .where(
+          and(
+            inArray(products.stallId, stallIds),
+            eq(products.archived, false)
+          )
+        );
+
+      // Delete product images
+      for (const product of productsToArchive) {
+        if (product.imageUrl && product.imageUrl !== '/images/default-product.png') {
+          try {
+            const imagePath = path.join(process.cwd(), 'client', '.next', 'server', 'uploads', 'products', path.basename(product.imageUrl));
+            await fs.promises.unlink(imagePath);
+          } catch (error) {
+            console.error(`Failed to delete product image: ${product.imageUrl}`, error);
+          }
+        }
+      }
+
+      // Archive the products
       await db
         .update(products)
         .set({ archived: true })
@@ -835,7 +1070,7 @@ export class DatabaseStorage implements IStorage {
           )
         );
     }
-    
+
     return eventIds.length;
   }
 }

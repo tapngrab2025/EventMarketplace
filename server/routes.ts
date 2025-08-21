@@ -2,10 +2,16 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
+import { useAuth } from '@/hooks/use-auth';
+import Cookies from 'js-cookie';
 import { insertEventSchema } from "@shared/schema";
+const CART_TOKEN_COOKIE = 'cart_token';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // const { user } = useAuth();
   setupAuth(app);
+
+  // const cartToken = !user ? Cookies.get(CART_TOKEN_COOKIE) : undefined;
 
   // Events
   app.get("/api/events", async (_req, res) => {
@@ -26,7 +32,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const event = await storage.createEvent(parsedEvent);
       res.status(201).json(event);
     } catch (error) {
-      console.error("Event creation error:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
     }
   });
@@ -79,7 +84,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const event = await storage.updateEvent(parseInt(req.params.id), parsedEvent);
       res.status(201).json(event);
     } catch (error) {
-      console.error("Event update error:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
     }
   });
@@ -206,7 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const product = await storage.createProduct({
       ...req.body,
-      availableStock: req.body.stock,
+      // availableStock: req.body.stock,
     });
     res.status(201).json(product);
   });
@@ -250,42 +254,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const updatedBody = {
       ...req.body,
-      availableStock: req.body.stock !== undefined ? req.body.stock : req.body.availableStock
+      // availableStock: req.body.stock !== undefined ? req.body.stock : req.body.availableStock
     };
     const product = await storage.updateProduct(parseInt(req.params.id), updatedBody);
     if (!product) return res.sendStatus(404);
     res.json(product);
   });
 
-  // Cart
   app.get("/api/cart", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    const items = await storage.getCartItems(req.user.id);
+    const cartToken = req.headers["x-cart-token"];
+    const userId = req.user?.id;
+    // if (!req.isAuthenticated() && !cartToken) {
+    if(!userId && !cartToken){
+      return res.status(401).json({ message: "Missing user ID or cart token" });
+    }
+    const items = await storage.getCartItems(
+      req.isAuthenticated() ? req.user.id : undefined,
+      cartToken?.toString() || null
+    );
     res.json(items);
   });
 
   app.post("/api/cart", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    const item = await storage.addToCart({
-      ...req.body,
-      userId: req.user.id,
-    });
-    res.status(201).json(item);
+    const cartToken = req.headers["x-cart-token"];
+    const userId = req.user?.id;
+    
+    if (!userId && !cartToken) {
+      return res.status(401).json({ message: "Missing user ID or cart token" });
+    }
+    
+    try {
+      const cartItem = await storage.addToCart({
+        ...req.body,
+        userId: userId || null,
+        cartToken: cartToken || null
+      });
+      res.json(cartItem);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Failed to add item to cart' });
+      }
+    }
   });
 
   app.patch("/api/cart/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    const item = await storage.updateCartItem(
+    const cartToken = req.headers["x-cart-token"];
+    const userId = req.user?.id;
+    
+    if (!userId && !cartToken) {
+      return res.status(401).json({ message: "Missing user ID or cart token" });
+    }
+    const cartItem = await storage.updateCartItem(
       parseInt(req.params.id),
-      req.body.quantity
+      req.body.quantity,
+      userId,
+      cartToken as string
     );
-    if (!item) return res.sendStatus(404);
-    res.json(item);
+    if (!cartItem) return res.sendStatus(404);
+    res.json(cartItem);
   });
-
+  
   app.delete("/api/cart/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    const success = await storage.removeFromCart(parseInt(req.params.id));
+    const cartToken = req.headers["x-cart-token"];
+    const userId = req.user?.id;
+    
+    if (!userId && !cartToken) {
+      return res.status(400).json({ message: "Missing user ID or cart token" });
+    }
+    
+    const success = await storage.removeFromCart(
+      parseInt(req.params.id),
+      userId,
+      cartToken as string
+    );
     if (!success) return res.sendStatus(404);
     res.sendStatus(204);
   });
@@ -314,7 +357,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(order);
     } catch (error) {
-      console.error("Error fetching order:", error);
       res.status(500).json({ message: "Failed to fetch order details" });
     }
   });
@@ -325,7 +367,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orders = await storage.getUserOrders(req.user.id);
       res.json(orders);
     } catch (error) {
-      console.error("Error fetching orders:", error);
       res.status(500).json({ message: "Failed to fetch orders" });
     }
   });
@@ -387,7 +428,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         archivedCount
       });
     } catch (error) {
-      console.error("Error archiving expired events:", error);
       return res.status(500).json({
         success: false,
         message: "Failed to archive expired events",

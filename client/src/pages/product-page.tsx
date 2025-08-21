@@ -3,20 +3,16 @@ import { Product } from "@shared/schema";
 import { useParams } from "wouter";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import NotFound from "./not-found";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
 import CountDown from "@/components/product/count-down";
+import { useCart } from "@/hooks/use-cart";
 
 export default function ProductPage() {
     const { id } = useParams<{ id: string }>();
-    const { user } = useAuth();
-    const { toast } = useToast();
+    const { addToCart } = useCart();
 
     const { data: product, isLoading } = useQuery<Product>({
         queryKey: [`/api/product/${id}`],
@@ -24,23 +20,6 @@ export default function ProductPage() {
 
     const { data: products, isLoadingRelative } = useQuery<Product>({
         queryKey: [`/api/product/${id}/relative`],
-    });
-
-    const addToCart = useMutation({
-        mutationFn: async () => {
-            const res = await apiRequest("POST", "/api/cart", {
-                productId: id,
-                quantity: 1,
-            });
-            return res.json();
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-            toast({
-                title: "Added to cart",
-                description: `${product?.name} has been added to your cart.`,
-            });
-        },
     });
 
     if (isLoading || isLoadingRelative) {
@@ -104,12 +83,10 @@ export default function ProductPage() {
                                 Stock: {product.stock} available
                             </span>
                         </div>
-
-                        {user?.role === "customer" && (
                             <Button
                                 className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full"
                                 size="lg"
-                                onClick={() => addToCart.mutate()}
+                                onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
                                 disabled={addToCart.isPending || product.stock === 0}
                             >
                                 {addToCart.isPending ? (
@@ -119,7 +96,6 @@ export default function ProductPage() {
                                 )}
                                 Grab it
                             </Button>
-                        )}
                     </div>
                 </div>
             </section>

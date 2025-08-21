@@ -1,6 +1,7 @@
 // import { LogoSVG } from "@/assets/logo-svg";
 // import logoImage from "@/assets/TapNGrag-logo.jpg";
-import logoImage from "@/assets/TnG_Logo.png";
+// import logoImage from "@/assets/TnG_Logo.png";
+import logoImage from "@/assets/logo_latest.png";
 import { useState } from "react";
 import { useLocation } from "wouter";
 

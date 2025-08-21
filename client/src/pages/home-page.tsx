@@ -67,7 +67,6 @@ export default function HomePage(
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
   });
-  // console.log(products_featured);
 
   const filteredProducts = products
     ?.filter((product) =>
@@ -523,13 +522,13 @@ export default function HomePage(
       </section>
 
       {/* <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}> */}
-      <section className="transferGrabs py-32 relative bg-[#1B0164] bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+      <section className="transferGrabs py-32 relative bg-primaryGreen bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-none bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]"
           style={{ '--bg-image': `url(${Images.transferGrabsImg.src || Images.transferGrabsImg})` } as React.CSSProperties}>
           <div className="lg:max-w-3xl z-10 text-center">
             <h2 className="text-h2 font-bold mb-4 md:mb-11">Transfer Your Grabs</h2>
             <p className="text-h5 mb-6 md:mb-11">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
-            <Link href="/auth" className="bg-[#F58020] text-white font-medium px-6 py-2 rounded-full hover:bg-orange-600 transition">
+            <Link href="/auth" className="bg-white text-primaryGreen font-medium px-6 py-2 rounded-full hover:bg-orange-600 transition">
               Register
             </Link>
           </div>
@@ -548,7 +547,7 @@ export default function HomePage(
       </section>
 
       {/* <section className="whatMakes relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}> */}
-      <section className="whatMakes py-32 my-32 bg-[#1B0164] relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+      <section className="whatMakes py-32 my-32 bg-primaryGreen relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">What Makes Us Uncommon</h2>
           <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>

@@ -49,7 +49,6 @@ export function  StallForm({ event, onSuccess }: AddStallDialogProps ) {
           approved: false,
         };
   
-        // console.log('Submitting stall:', formattedValues);
         const res = await apiRequest("POST", "/api/stalls", formattedValues);
   
         if (!res.ok) {
@@ -69,7 +68,6 @@ export function  StallForm({ event, onSuccess }: AddStallDialogProps ) {
         onSuccess();
       },
       onError: (error: any) => {
-        console.error('Stall creation error:', error);
         toast({
           title: "Error",
           description: error.message || "Failed to create stall",

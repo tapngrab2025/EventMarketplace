@@ -55,7 +55,6 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
           endDate: new Date(values.endDate).toISOString(),
         };
   
-        // console.log('Submitting event:', formattedValues);
         const res = await apiRequest("POST", "/api/events", formattedValues);
   
         if (!res.ok) {
@@ -75,7 +74,6 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
         onSuccess();
       },
       onError: (error: any) => {
-        console.error('Event creation error:', error);
         toast({
           title: "Error",
           description: error.message || "Failed to create event",
@@ -112,7 +110,7 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
     });
   
     return (
-      <Form {...form}>
+      <Form {...form} className="space-y-4">
         <form onSubmit={onSubmit} className="space-y-4">
           <FormField
             control={form.control}
@@ -144,10 +142,9 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="relative">
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                {/* <Input {...field} /> */}
                   <LocationPicker
                     defaultValue={field.value}
                     onLocationSelect={(location) => {
