@@ -1,24 +1,17 @@
 import { Product } from "@shared/schema";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import { useCart } from "@/hooks/use-cart";
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-
-
   const { data: productDetail, isLoading } = useQuery<Product>({
     queryKey: [`/api/product/${product.id}`],
-});
+  });
 
-const { addToCart } = useCart();
+  const { addToCart } = useCart();
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col">
@@ -49,17 +42,17 @@ const { addToCart } = useCart();
             <p>8:00 P.M.</p>
           </div>
           <div className="flex items-center justify-between">
-              <span className="font-bold text-2xl my-3">
-                  ${(product.price / 100).toFixed(2)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {product.stock} left
-                </span>
-            </div>
+            <span className="font-bold text-2xl my-3">
+              ${(product.price / 100).toFixed(2)}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {product.stock} left
+            </span>
+          </div>
         </div>
         <div className="flex justify-between items-center mt-4 gap-x-2">
           <Button
-            className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full w-fit"
+            className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-primaryOrange transition duration-300 max-w-full w-fit"
             onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
 
             disabled={addToCart.isPending || product.stock === 0}
@@ -75,7 +68,7 @@ const { addToCart } = useCart();
             to={`/products/${product.id}`}
             className="text-gray-600 font-semibold rounded-lg transition duration-300"
           >
-           <img src="../src/assets/view.png" alt="view product" className="w-7 h-7 inline-block" />
+            <img src="../src/assets/view.png" alt="view product" className="w-7 h-7 inline-block" />
           </Link>
         </div>
       </div>

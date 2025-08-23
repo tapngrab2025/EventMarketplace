@@ -46,12 +46,12 @@ export default function HomePage(
     {
       text: "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
       author: "Noa Woolloff",
-      image: "https://placehold.co/200x200"
+      image: Images.avatar
     },
     {
       text: "Another testimonial about the amazing service. It has been a great experience using this platform.",
       author: "John Doe",
-      image: "https://placehold.co/200x200"
+      image: Images.avatar
     }
   ];
 
@@ -142,19 +142,25 @@ export default function HomePage(
               headerDisabled: true
               });
 
+              const mapPin = Images.pin
               // Create the marker
               const marker = new google.maps.Marker({
                 map,
                 position,
                 title: event.name,
                 icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  fillColor: '#1B0164',
-                  fillOpacity: 1,
-                  strokeColor: '#ffffff',
-                  strokeWeight: 2,
-                  scale: 8
+                  url: mapPin,
+                  scaledSize: new google.maps.Size(30, 30),
                 },
+
+                // icon: {
+                //   path: google.maps.SymbolPath.CIRCLE,
+                //   fillColor: '#1B0164',
+                //   fillOpacity: 1,
+                //   strokeColor: '#ffffff',
+                //   strokeWeight: 2,
+                //   scale: 8
+                // },
                 animation: google.maps.Animation.DROP
               });
 
@@ -292,7 +298,8 @@ export default function HomePage(
 
   return (
     <main className="pt-8 min-h-screen">
-      <section className="bg-[#1B0164] -mt-8 text-white py-8 md:py-12 overflow-hidden">
+      <section className="bg-primaryGreen -mt-8 text-white py-8 md:py-12 overflow-hidden">
+
         <style>{carouselStyles}</style>
         <div className="container mx-auto px-4">
           <Slider
@@ -308,14 +315,14 @@ export default function HomePage(
                       <MapPin className="h-5 w-5" />
                       <span>{item.location}</span>
                     </div>
-                    <h2 className="text-4xl font-bold mb-4 text-primaryOrange">
+                    <h2 className="text-4xl font-bold mb-4 text-[#FFCA99]">
                       {item.eventName} - {item.stallNumber}
                     </h2>
                     <div className="flex space-x-4 mb-8">
                       <CountDown date={item?.eventEndDate} className="event_count_down" />
                     </div>
                     <Button
-                      className="bg-teal-500 text-white px-8 py-2 rounded-full hover:bg-teal-600"
+                      className="bg-white text-primaryGreen px-8 py-2 rounded-full hover:bg-primaryOrange hover:text-white"
                       onClick={() => window.location.href = `/products/${item.id}`}
                     >
                       Grab This
@@ -330,12 +337,12 @@ export default function HomePage(
                     <div className="absolute top-0 left-0 w-full h-full bg-stone-700 opacity-50"></div>
                   </div>
                 </div>
-                <div className="font-bold uppercase flex">
+                <div className="font-bold uppercase flex hidden">
                   <p className="font-bold uppercase">Type : </p>
                   <p className="font-bold uppercase text-primaryOrange mx-2"> {item.category} </p> : 
                   <p className="font-bold uppercase text-teal-500 mx-2">{item.promotionalText}</p> 
                 </div>
-                <div className="text-3xl md:text-5xl font-bold mb-8 transform bottom-[5rem] absolute w-full">
+                <div className="font-ribeye text-3xl md:text-5xl font-bold mb-8 transform bottom-[5rem] absolute w-full">
                   {item.title}
                 </div>
                 
@@ -528,7 +535,8 @@ export default function HomePage(
           <div className="lg:max-w-3xl z-10 text-center">
             <h2 className="text-h2 font-bold mb-4 md:mb-11">Transfer Your Grabs</h2>
             <p className="text-h5 mb-6 md:mb-11">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
-            <Link href="/auth" className="bg-white text-primaryGreen font-medium px-6 py-2 rounded-full hover:bg-orange-600 transition">
+            <Link href="/auth" className="bg-white text-primaryGreen font-medium px-6 py-2 rounded-full hover:bg-primaryOrange hover:text-white transition">
+
               Register
             </Link>
           </div>

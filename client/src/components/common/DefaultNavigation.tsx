@@ -13,13 +13,7 @@ export function DefaultNavigation({ isMobileMenuOpen, setIsMobileMenuOpen }: { i
     const { user, logoutMutation } = useAuth();
     const [, setLocation] = useLocation();
     const [isCheckingOut, setIsCheckingOut] = useState(false);
-    // const cartItems = [];
     const { cartItems } = useCart();
-
-
-    // const { data: cartItems } = useQuery<CartItem[]>({
-    //     queryKey: ["/api/cart"]
-    // });
 
     return (
         <div className="flex items-center gap-4">
@@ -46,7 +40,7 @@ export function DefaultNavigation({ isMobileMenuOpen, setIsMobileMenuOpen }: { i
                             setIsCheckingOut={setIsCheckingOut}
                         />
                     </Sheet>
-                    <Button onClick={() => setLocation("/auth")}>Sign In</Button>
+                    <Button  className="bg-primaryGreen text-white rounded-full hover:bg-primaryOrange hover:text-white" onClick={() => setLocation("/auth")}>Sign In</Button>
                     <Button
                         variant="ghost"
                         size="icon"

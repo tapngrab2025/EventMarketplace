@@ -14,6 +14,7 @@ export default {
       },
       fontFamily: {
         sans: ['Roboto', 'sans-serif'],
+        ribeye: ["Ribeye", "cursive"], // secondary font
       },
       borderRadius: {
         lg: "var(--radius)",

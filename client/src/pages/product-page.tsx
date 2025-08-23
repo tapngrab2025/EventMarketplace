@@ -58,14 +58,6 @@ export default function ProductPage() {
                         <p className="font-medium mt-5 font-semibold text-xl leading-none">{product.event?.name} - {product.stall?.name}</p>
                         <div className="grid grid-cols-2 gap-4 text-primaryGreen my-12">
                             <CountDown date={product.event?.endDate} className="event_count_down" />
-                            {/* <div>
-                                <span className="text-primaryGreen">Start Date:</span>
-                                <p>{new Date(product.event?.startDate || '').toLocaleDateString()}</p>
-                            </div>
-                            <div>
-                                <span className="text-primaryGreen">End Date:</span>
-                                <p>{new Date(product.event?.endDate || '').toLocaleDateString()}</p>
-                            </div> */}
                         </div>
                         <p className="text-2xl font-semibold mt-5">
                             ${(product.price / 100).toFixed(2)}
@@ -84,7 +76,7 @@ export default function ProductPage() {
                             </span>
                         </div>
                             <Button
-                                className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full"
+                                className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-primaryOrange transition duration-300 max-w-full"
                                 size="lg"
                                 onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
                                 disabled={addToCart.isPending || product.stock === 0}

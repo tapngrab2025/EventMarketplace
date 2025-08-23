@@ -21,36 +21,13 @@ export function RightNavigation({
     const { user, logoutMutation } = useAuth();
     const [, setLocation] = useLocation();
     const [isCheckingOut, setIsCheckingOut] = useState(false);
-    // const cartItems = [];
     const { cartItems } = useCart();
-
-    // const cartToken = !user ? Cookies.get('cart_token') : undefined;
-    // const headers: Record<string, string> = {};
-    // if (cartToken) {
-    //     headers['x-cart-token'] = cartToken;
-    // }
-    // const { data: cartItems } = useQuery<CartItem[]>({
-    //     queryKey: ["/api/cart"],
-    //     queryFn: async () => {
-    //         const response = await apiRequest(
-    //             "GET",
-    //             "/api/cart",
-    //             { userId: user?.id },
-    //             headers
-    //         );
-    //         if (!response.ok) {
-    //             throw new Error('Failed to fetch cart items');
-    //         }
-    //         return response.json();
-    //     }
-    // });
-
 
     return (
         <>
             {!user ? (
                 <>
-                    <Button onClick={() => setLocation("/auth")}>Sign In</Button>
+                    <Button className="bg-primaryGreen text-white rounded-full hover:bg-primaryOrange hover:text-white" onClick={() => setLocation("/auth")}>Sign In</Button>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -64,7 +41,6 @@ export function RightNavigation({
                 <div className="flex items-center gap-4">
                     <Button className="hidden md:block" variant="ghost" size="icon" onClick={() => setLocation("/profile")} title="User Profile">
                         <span className="material-icons text-gray-600 hover:text-gray-800 cursor-pointer">person</span>
-
                     </Button>
                     {user.role === "vendor" && (
                         <Button

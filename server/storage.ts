@@ -29,7 +29,7 @@ import {
   InsertProfile,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, ne, and, gte, lte, sql, like, ilike, or, between, inArray } from "drizzle-orm";
+import { eq, ne, and, gte, lte, sql, like, ilike, or, between, inArray, count } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { PgColumn } from "drizzle-orm/pg-core";
@@ -310,7 +310,10 @@ export class DatabaseStorage implements IStorage {
     sortOrder?: string
   ): Promise<{ products: Product[]; total: number }> {
     const offset = (page - 1) * pageSize;
-    const query = db.select({ ...products, }).from(products);
+    const query = db.select({ ...products, }).from(products).where(
+      and(eq(products.archived, false), 
+      eq(products.approved, true))
+    );
 
     if (searchTerm) {
       query.where(
@@ -357,14 +360,21 @@ export class DatabaseStorage implements IStorage {
 
     const [productsPaginates, total] = await Promise.all([
       query.limit(pageSize).offset(offset),
-      db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.archived, false))
+      db.select({ count: sql<number>`count(*)` }).from(products).where(
+        and(eq(products.archived, false), 
+        eq(products.approved, true))
+      )
     ]);
 
     return { products: productsPaginates, total: total[0].count };
   }
   // Get all products
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.archived, false)).orderBy(products.id, 'desc');
+    return await db.select().from(products).where(
+      and(eq(products.archived, false), 
+      eq(products.approved, true))
+    ).orderBy(products.id, 'desc');
+
   }
 
   async getProductsFeatured(): Promise<ProductWithDetails[]> {
@@ -422,7 +432,7 @@ export class DatabaseStorage implements IStorage {
     const productStallId = await db
       .select({ stallId: products.stallId })
       .from(products)
-      .where(eq(products.id, id));
+      .where(and(eq(products.id, id), eq(products.archived, false)));
 
     if (!productStallId) return [];
     const relativeProducts = await db
@@ -450,7 +460,7 @@ export class DatabaseStorage implements IStorage {
     const [product] = await db
       .select()
       .from(products)
-      .where(eq(products.id, id));
+      .where(and(eq(products.id, id), eq(products.archived, false), eq(products.approved, true)));
     return product;
   }
 

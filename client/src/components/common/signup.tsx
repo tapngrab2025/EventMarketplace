@@ -61,7 +61,7 @@ export default function SignUp() {
                     <Button
                         variant="outline"
                         onClick={() => submitSubscriber.mutate()}
-                        className="bg-white text-primaryGreen border-none font-semibold py-2 px-6 rounded-full hover:bg-[#00b4a4] transition duration-300"
+                        className="bg-white text-primaryGreen border-none font-semibold py-2 px-6 rounded-full hover:bg-primaryOrange hover:text-white transition duration-300"
                     >
                         Subscribe
                     </Button>

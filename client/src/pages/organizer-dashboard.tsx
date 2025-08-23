@@ -55,7 +55,8 @@ export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardP
       (product) => product.stallId === stall.id
     );
 
-    return (stallMatches || hasMatchingProduct) && stall.vendorId === user?.id;
+    // return (stallMatches || hasMatchingProduct) && stall.vendorId === user?.id;
+    return (stallMatches || hasMatchingProduct);
   });
 
   // Get events that either match the search term or contain matching stalls

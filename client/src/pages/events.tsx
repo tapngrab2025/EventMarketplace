@@ -51,7 +51,8 @@ export default function EventsPage() {
         
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[240px] rounded-[15px] bg-teal-500 text-white">
+            <Button variant="outline" className="w-[240px] rounded-[15px] bg-teal-500 text-white hover:bg-primaryOrange hover:text-white">
+
               <CalendarIcon className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : <span>Pick a date</span>}
             </Button>

@@ -89,14 +89,15 @@ export default function VendorDashboard({ searchTerm = "", setSearchTerm }: Vend
     return (eventMatches || hasMatchingStall) && event.vendorId != user?.id;
   });
 
-  // Filter products for display based on matched stalls
-  const otherProducts = products?.filter((product) =>
-    myStalls?.some((stall) => stall.id != product.stallId)
-  );
-
   const otherStalls = matchedStalls?.filter((stall) =>
     otherEvents?.some((event) => event.id === stall.eventId)
   );
+
+    // Filter products for display based on matched stalls
+  const otherProducts = products?.filter((product) =>
+    otherStalls?.some((stall) => stall.id == product.stallId)
+  );
+
 
   if (loadingEvents || loadingStalls || loadingProducts) {
     return (

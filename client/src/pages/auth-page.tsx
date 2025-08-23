@@ -90,7 +90,7 @@ function LoginForm() {
         />
         <Button
           type="submit"
-          className="w-full"
+          className="w-full rounded-full text-white bg-primaryGreen hover:bg-primaryOrange"
           disabled={loginMutation.isPending}
         >
           {loginMutation.isPending && (
@@ -313,7 +313,8 @@ const handleEmailChange = async (e: ChangeEvent<HTMLInputElement>) => {
         
         <Button
           type="submit"
-          className="w-full bg-[#00C4B4] hover:bg-[#00b4a4] text-white rounded-full"
+          className="w-full text-white rounded-full bg-primaryGreen hover:bg-primaryOrange"
+
           disabled={registerMutation.isPending || !form.formState.isValid}
         >
           {registerMutation.isPending && (

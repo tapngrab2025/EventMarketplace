@@ -20,7 +20,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/events", async (req, res) => {
-    if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role) ) {
+    if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.status(403).json({ message: "Unauthorized - Vendor/Organizer access required" });
     }
     try {
@@ -59,12 +59,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/events/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid event ID" });
+      return res.status(400).json({ message: "Invalid event ID" });
     }
     const event = await storage.getEvent(id);
     if (!event) return res.sendStatus(404);
     res.json(event);
-})
+  })
 
   app.get("/api/events/city/:city", async (req, res) => {
     const event = await storage.getCityEvent(req.params.city);
@@ -136,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid stall ID" });
+      return res.status(400).json({ message: "Invalid stall ID" });
     }
     const stalls = await storage.getStall(parseInt(req.params.id));
     res.json(stalls);
@@ -230,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    if(isNaN(parseInt(req.params.id))) return res.status(400).json({ message: "Invalid product ID" });
+    if (isNaN(parseInt(req.params.id))) return res.status(400).json({ message: "Invalid product ID" });
     const product = await storage.getProduct(parseInt(req.params.id));
     res.json(product);
   });
@@ -265,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const cartToken = req.headers["x-cart-token"];
     const userId = req.user?.id;
     // if (!req.isAuthenticated() && !cartToken) {
-    if(!userId && !cartToken){
+    if (!userId && !cartToken) {
       return res.status(401).json({ message: "Missing user ID or cart token" });
     }
     const items = await storage.getCartItems(
@@ -278,11 +278,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cart", async (req, res) => {
     const cartToken = req.headers["x-cart-token"];
     const userId = req.user?.id;
-    
+
     if (!userId && !cartToken) {
       return res.status(401).json({ message: "Missing user ID or cart token" });
     }
-    
+
     try {
       const cartItem = await storage.addToCart({
         ...req.body,
@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/cart/:id", async (req, res) => {
     const cartToken = req.headers["x-cart-token"];
     const userId = req.user?.id;
-    
+
     if (!userId && !cartToken) {
       return res.status(401).json({ message: "Missing user ID or cart token" });
     }
@@ -315,15 +315,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!cartItem) return res.sendStatus(404);
     res.json(cartItem);
   });
-  
+
   app.delete("/api/cart/:id", async (req, res) => {
     const cartToken = req.headers["x-cart-token"];
     const userId = req.user?.id;
-    
+
     if (!userId && !cartToken) {
       return res.status(400).json({ message: "Missing user ID or cart token" });
     }
-    
+
     const success = await storage.removeFromCart(
       parseInt(req.params.id),
       userId,
@@ -345,11 +345,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/orders/:id", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     try {
       const order = await storage.getOrder(parseInt(req.params.id));
       if (!order) return res.sendStatus(404);
-      
+
       // Check if the user owns this order or is an admin
       if (order[0].user_id !== req.user.id && req.user.role !== "admin") {
         return res.sendStatus(403);
@@ -389,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const stallId = parseInt(req.params.stallId);
     const { status, notes } = req.body;
 
-    if (!['pending','ready','delivered'].includes(status)) return  res.status(500).json({ error: "Status should be either 'pending' | 'ready' | 'delivered'" });
+    if (!['pending', 'ready', 'delivered'].includes(status)) return res.status(500).json({ error: "Status should be either 'pending' | 'ready' | 'delivered'" });
     try {
       const updated = await storage.updateDeliveryStatus(orderId, stallId, status, notes);
       res.json(updated);
@@ -403,12 +403,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subscriber = await storage.createSubscriber(req.body.email);
       return res.status(201).json(subscriber);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: error instanceof Error ? error.message : "Failed to subscribe"
       });
     }
   });
-  
+
 
   // Cron job endpoint to archive expired events
   app.post("/api/cron/archive-expired-events", async (req, res) => {
@@ -418,10 +418,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (secret !== process.env.CRON_SECRET) {
         return res.status(401).json({ message: "Unauthorized: Invalid secret key" });
       }
-      
+
       // Archive expired events
       const archivedCount = await storage.archiveExpiredEvents();
-      
+
       return res.status(200).json({
         success: true,
         message: `Successfully archived ${archivedCount} expired events and their associated stalls and products.`,
