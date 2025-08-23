@@ -1,5 +1,3 @@
-import { Avatar } from "@radix-ui/react-avatar";
-
 export const Images = {
   transferBg: new URL('@/assets/transfer-your-grabs-bacground.png', import.meta.url).href,
   transferGrabsImg: new URL('@/assets/transferImg.png', import.meta.url).href,
@@ -13,5 +11,7 @@ export const Images = {
   colombo: new URL('@/assets/image-colombo.png', import.meta.url).href,
   pin: new URL('@/assets/pin.png', import.meta.url).href,
   avatar: new URL('@/assets/Avatar.png', import.meta.url).href,
+  view: new URL('@/assets/view.png', import.meta.url).href,
+
 
 } as const;

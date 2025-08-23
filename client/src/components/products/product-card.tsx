@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import { useCart } from "@/hooks/use-cart";
+import { Images } from "@/config/images";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { data: productDetail, isLoading } = useQuery<Product>({
@@ -68,7 +69,7 @@ export default function ProductCard({ product }: { product: Product }) {
             to={`/products/${product.id}`}
             className="text-gray-600 font-semibold rounded-lg transition duration-300"
           >
-            <img src="../src/assets/view.png" alt="view product" className="w-7 h-7 inline-block" />
+            <img src={Images.view} alt="view product" className="w-7 h-7 inline-block" />
           </Link>
         </div>
       </div>
