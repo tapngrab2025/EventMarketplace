@@ -141,4 +141,10 @@
   .pac-container {
     z-index: 999999999999 !important; /* higher than your Dialog overlay (e.g., z-50) */
   }
+
+  .signupEmail:focus,
+  .signupEmail:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+  }
 }

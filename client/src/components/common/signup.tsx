@@ -56,7 +56,16 @@ export default function SignUp() {
                         placeholder="Enter your email"
                         value={subscriber}
                         onChange={(e) => setSubscriber(e.target.value)}
-                        className="lg:w-96 bg-transparent border-0 border-b-2 border-white rounded-none text-white placeholder-gray-300 focus:outline-none mr-4 py-2"
+                        className="placeholder:text-white 
+                        lg:w-96 bg-transparent 
+                        border-0 
+                        border-b-2 
+                        border-white 
+                        rounded-none 
+                        text-white
+                        focus:outline-none focus:ring-0 focus:shadow-none
+                        mr-4 py-2 signupEmail"
+
                     />
                     <Button
                         variant="outline"
