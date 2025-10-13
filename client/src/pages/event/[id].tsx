@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
+import { EventCoupons } from "@/components/coupon/event-coupons";
 
 export default function EventDetailsPage() {
   const { addToCart } = useCart();
@@ -61,6 +62,9 @@ export default function EventDetailsPage() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Display available coupons for this event */}
+      <EventCoupons eventId={id} />
 
       <div className="space-y-8">
         {stalls?.map((stall) => (

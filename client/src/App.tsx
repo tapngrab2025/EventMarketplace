@@ -18,7 +18,8 @@ import { OrganizerLayout } from "./components/layouts/OrganizerLayout";
 import AdminUsersDashboard from "./pages/admin-users";
 import EventDetailsPage from "./pages/event/[id]";
 import ThankYouPage from "./pages/thank-you/[id]";
-import ProductPage from "./pages/product-page";
+// import ProductPage from "./pages/product-page";
+import ProductDetails from "@/pages/products/[id]";
 import AllProducts from "./pages/all-products";
 import EventsPage from "@/pages/events";
 import SearchPage from "./pages/search-page";
@@ -52,7 +53,8 @@ function Router() {
       <Route path="/products/:id" component={
         () => (
           <DefaultLayout>
-            <ProductPage />
+            {/* <ProductPage /> */}
+            <ProductDetails />
           </DefaultLayout>
         )
       } />

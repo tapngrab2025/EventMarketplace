@@ -169,7 +169,7 @@ export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardP
                 setEditStallId={setEditStallId}
                 editProductId={editProductId}
                 setEditProductId={setEditProductId}
-                enableButton={false}
+                enableButton={true}
               />
             </section>
           </TabsContent>

@@ -2,16 +2,13 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { useAuth } from '@/hooks/use-auth';
-import Cookies from 'js-cookie';
 import { insertEventSchema } from "@shared/schema";
-const CART_TOKEN_COOKIE = 'cart_token';
+import { insertProductFeedbackSchema } from "@shared/schema";
+import { insertCouponSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // const { user } = useAuth();
-  setupAuth(app);
 
-  // const cartToken = !user ? Cookies.get(CART_TOKEN_COOKIE) : undefined;
+  setupAuth(app);
 
   // Events
   app.get("/api/events", async (_req, res) => {
@@ -436,7 +433,297 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Coupon endpoints
+  // Get all coupons for an event
+  app.get("/api/events/:id/coupons", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const coupons = await storage.getCoupons(eventId);
+      
+      // Get excluded stalls for each coupon
+      const couponsWithExcludedStalls = await Promise.all(
+        coupons.map(async (coupon) => {
+          const excludedStallIds = await storage.getExcludedStalls(coupon.id);
+          return {
+            ...coupon,
+            excludedStalls: excludedStallIds.map(stallId => ({ stallId }))
+          };
+        })
+      );
+      
+      res.json(couponsWithExcludedStalls);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      res.status(500).json({ error: "Failed to fetch coupons" });
+    }
+  });
+
+  // Create a new coupon
+  app.post("/api/events/:id/coupons", async (req, res) => {
+    if (!req.isAuthenticated() || !['admin', 'organizer'].includes(req.user.role)) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    
+    try {
+      const eventId = parseInt(req.params.id);
+      
+      const couponData = insertCouponSchema.parse({
+        ...req.body,
+        eventId,
+        createdBy: req.user.id
+      });
+      
+      const excludedStallIds = req.body.excludedStallIds || [];
+      delete couponData.excludedStallIds;
+      
+      const coupon = await storage.createCoupon(couponData);
+      
+      // Add excluded stalls
+      for (const stallId of excludedStallIds) {
+        await storage.addExcludedStall(coupon.id, stallId);
+      }
+      
+      // Get the complete coupon with excluded stalls
+      const excludedStalls = await storage.getExcludedStalls(coupon.id);
+      
+      res.status(201).json({
+        ...coupon,
+        excludedStalls: excludedStalls.map(stallId => ({ stallId }))
+      });
+    } catch (error) {
+      console.error("Error creating coupon:", error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create coupon" });
+    }
+  });
+
+  // Update a coupon
+  app.put("/api/coupons/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !['admin', 'organizer'].includes(req.user.role)) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    
+    try {
+      const couponId = parseInt(req.params.id);
+      
+      const couponData = { ...req.body };
+      const excludedStallIds = req.body.excludedStallIds || [];
+      delete couponData.excludedStallIds;
+      
+      // Update coupon
+      const updatedCoupon = await storage.updateCoupon(couponId, couponData);
+      
+      if (!updatedCoupon) {
+        return res.status(404).json({ error: "Coupon not found" });
+      }
+      
+      // Get current excluded stalls
+      const currentExcludedStalls = await storage.getExcludedStalls(couponId);
+      
+      // Remove stalls that are no longer excluded
+      for (const stallId of currentExcludedStalls) {
+        if (!excludedStallIds.includes(stallId)) {
+          await storage.removeExcludedStall(couponId, stallId);
+        }
+      }
+      
+      // Add newly excluded stalls
+      for (const stallId of excludedStallIds) {
+        if (!currentExcludedStalls.includes(stallId)) {
+          await storage.addExcludedStall(couponId, stallId);
+        }
+      }
+      
+      // Get updated excluded stalls
+      const updatedExcludedStalls = await storage.getExcludedStalls(couponId);
+      
+      res.json({
+        ...updatedCoupon,
+        excludedStalls: updatedExcludedStalls.map(stallId => ({ stallId }))
+      });
+    } catch (error) {
+      console.error("Error updating coupon:", error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to update coupon" });
+    }
+  });
+
+  // Delete a coupon
+  app.delete("/api/coupons/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !['admin', 'organizer'].includes(req.user.role)) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    
+    try {
+      const couponId = parseInt(req.params.id);
+      
+      await storage.deleteCoupon(couponId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting coupon:", error);
+      res.status(500).json({ error: "Failed to delete coupon" });
+    }
+  });
+
+  // Validate a coupon code
+  app.post("/api/validate-coupon", async (req, res) => {
+    try {
+      const {code, productIds} = req.body;
+
+      if (!code) {
+        return res.status(400).json({ error: "Coupon code is required" });
+      }
+      
+      // Use the improved validateCoupon method
+      const validationResult = await storage.validateCoupon(code, productIds);
+      
+      // Return the validation result
+      res.json(validationResult);
+    } catch (error) {
+      console.error("Error validating coupon:", error);
+      res.status(500).json({ error: "Failed to validate coupon" });
+    }
+  });
+
+
+   // System Settings Routes
+  app.get("/api/settings/feedback", async (req, res) => {
+    const feedbackEnabled = await storage.getSystemSetting("feedback_enabled");
+    res.json({ enabled: feedbackEnabled === "true" });
+  });
+
+  app.patch("/api/settings/feedback", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    const { enabled } = req.body;
+    await storage.setSystemSetting(
+      "feedback_enabled",
+      enabled ? "true" : "false",
+      "Controls whether product feedback feature is enabled"
+    );
+    res.json({ success: true });
+  });
+
+  // Product Feedback Routes
+  app.post("/api/product/:productId/feedback", async (req, res) => {
+
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(403);
+    }
+    const productId = parseInt(req.params.productId);
+    const userId = req.user!.id;
+
+    try {
+      const canProvideFeedback = await storage.canUserProvideFeedback(userId, productId);
+      if (!canProvideFeedback) {
+        return res.status(403).json({
+          error: "You are not eligible to provide feedback for this product"
+        });
+      }
+
+      const feedbackData = insertProductFeedbackSchema.parse({
+        ...req.body,
+        productId,
+        userId,
+      });
+
+      const feedback = await storage.createProductFeedback(feedbackData);
+      res.json(feedback);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json(error.message);
+      } else {
+        res.status(500).json({ error: "Failed to create feedback" });
+      }
+    }
+  });
+
+  app.get("/api/products/:productId/feedback", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const feedback = await storage.getProductFeedback(productId);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error fetching product feedback:", error);
+      res.status(500).json({ error: "Failed to fetch product feedback" });
+    }
+  });
+
+  app.put("/api/feedback/:feedbackId/status", async (req, res) => {
+    if (!req.isAuthenticated() && !["admin"].includes(req.user.role)) {
+      return res.sendStatus(403);
+    }
+    const feedbackId = parseInt(req.params.feedbackId);
+    const { status } = req.body;
+
+    if (status !== "approved" && status !== "rejected") {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    try {
+      await storage.updateFeedbackStatus(feedbackId, status);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update feedback status" });
+    }
+  });
+
+  app.get("/api/products/:productId/user-feedback", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(403);
+    }
+    const productId = parseInt(req.params.productId);
+    const userId = req.user!.id;
+
+    const feedback = await storage.getUserProductFeedback(userId, productId);
+    res.json(feedback);
+  });
+
+  app.get("/api/products/:productId/order", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(403);
+    }
+
+    const productId = parseInt(req.params.productId);
+    const userId = req.user!.id;
+
+    try {
+
+      const orderResults = await storage.getUserExistingOrderForProduct(userId, productId);
+      // const orderResults = await db
+      //   .select({ orderId: orderItems.orderId })
+      //   .from(orderItems)
+      //   .innerJoin(orders, eq(orders.id, orderItems.orderId))
+      //   .where(
+      //     and(
+      //       eq(orders.user_id, userId),
+      //       eq(orderItems.productId, productId),
+      //       eq(orders.status, "completed")
+      //     )
+      //   )
+      //   .limit(1);
+
+      if (orderResults.length === 0) {
+        return res.json({ orderId: null });
+      }
+
+      res.json({ orderId: orderResults[0].orderId });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order information" });
+    }
+  });
+
+  app.get("/api/products/:productId/can-feedback", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(403);
+    }
+
+    const productId = parseInt(req.params.productId);
+    const userId = req.user!.id;
+
+    const canProvideFeedback = await storage.canUserProvideFeedback(userId, productId);
+    res.json({ canProvideFeedback });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
-

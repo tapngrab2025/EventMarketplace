@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalSection } from "@/components/dashboard/approval-section";
+import { FeedbackSettings } from "@/components/dashboard/feedback-settings";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -76,6 +77,7 @@ export default function AdminDashboard({ searchTerm = "" }: VendorDashboardProps
             approveEvent={approveEvent}
             approveProduct={approveProduct}
           />
+          <FeedbackSettings />
         </div>
       </div>
     </div>

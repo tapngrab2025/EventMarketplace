@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp, date, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, date, varchar, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -121,6 +121,7 @@ export const orderItems = pgTable("order_items", {
   productId: integer("product_id").references(() => products.id),
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(),
+  couponId: integer("coupon_id").references(() => coupons.id),
 });
 
 export const sessions = pgTable("sessions", {
@@ -235,3 +236,76 @@ export type ProductWithDetails = Product & {
   Stall: Stall;
   event: Event;
 }
+
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = z.infer<typeof insertCouponSchema>;
+
+
+export const system_settings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const product_feedback = pgTable("product_feedback", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  orderId: integer("order_id").notNull().references(() => orders.id),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  imageUrl: text("image_url"),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Coupon table
+export const coupons = pgTable("coupons", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  discountPercentage: integer("discount_percentage").notNull(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  createdBy: integer("created_by").notNull().references(() => users.id),
+});
+
+// Excluded stalls for coupons
+export const couponExcludedStalls = pgTable("coupon_excluded_stalls", {
+  couponId: integer("coupon_id").notNull().references(() => coupons.id, { onDelete: "cascade" }),
+  stallId: integer("stall_id").notNull().references(() => stalls.id, { onDelete: "cascade" }),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.couponId, t.stallId] }),
+}));
+
+// Create insert schema for coupons
+export const insertCouponSchema = createInsertSchema(coupons)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    discountPercentage: z.number().min(1).max(100),
+    expiresAt: z.string().transform((str) => new Date(str)).optional(),
+  });
+
+// Create insert schema for product feedback
+export const insertProductFeedbackSchema = createInsertSchema(product_feedback)
+  .omit({
+    id: true,
+    status: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    rating: z.number().min(1).max(5),
+    comment: z.string().min(10, "Comment must be at least 10 characters").optional(),
+    imageUrl: z.string().optional(),
+  });
+  

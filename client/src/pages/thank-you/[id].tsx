@@ -128,7 +128,11 @@ export default function ThankYouPage() {
                             <p className="text-muted-foreground">Quantity: {item.quantity}</p>
                           </div>
                           <p className="font-medium">
-                            ${((item.price * item.quantity) / 100).toFixed(2)}
+                            <span className={item.coupon?.id ? "line-through text-sm text-muted-foreground" : ""}>${((item.price * item.quantity) / 100).toFixed(2)}</span> {item.coupon?.id && (
+                              <span className="text-sm">
+                                - ${(((item.price * item.quantity) * (1 - (item.coupon?.discountPercentage ?? 0) / 100)) / 100).toFixed(2)}
+                              </span>
+                            )}
                           </p>
                         </div>
                       ))}

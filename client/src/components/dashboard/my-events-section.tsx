@@ -8,6 +8,7 @@ import { AddStall } from "@/components/stall/add-stall";
 import { AddProduct } from "@/components/product/add-product";
 import { EditStall } from "@/components/stall/edit-stall";
 import { EditProduct } from "@/components/product/edit-product";
+import { EventCoupons } from "@/components/coupon/event-coupons";
 
 interface MyEventsSectionProps {
   events?: Event[];
@@ -117,6 +118,11 @@ export function MyEventsSection({
                     Dates: {new Date(event.startDate).toLocaleDateString()} -{" "}
                     {new Date(event.endDate).toLocaleDateString()}
                   </p>
+                  
+                  {/* Display coupons for this event */}
+                  <div className="mt-4">
+                    <EventCoupons eventId={event.id} />
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-4">

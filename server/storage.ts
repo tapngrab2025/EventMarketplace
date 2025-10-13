@@ -27,6 +27,13 @@ import {
   InsertSubscriber,
   subscribers,
   InsertProfile,
+  system_settings,
+  product_feedback,
+  coupons,
+  couponExcludedStalls,
+  Coupon,
+  InsertCoupon,
+  OrderItem,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, ne, and, gte, lte, sql, like, ilike, or, between, inArray, count } from "drizzle-orm";
@@ -180,6 +187,11 @@ export class DatabaseStorage implements IStorage {
     const [event] = await db.select().from(events)
       .where(eq(events.id, id));
     return event;
+  }
+
+  async getEventIdByProductId(productId: number): Promise<number | undefined> {
+    const [stall] = await db.select({ eventId: stalls.eventId }).from(products).innerJoin(stalls, eq(stalls.id, products.stallId)).where(eq(products.id, productId));
+    return stall?.eventId;
   }
 
   async getCityEvent(city: string): Promise<any | undefined> {
@@ -492,6 +504,22 @@ export class DatabaseStorage implements IStorage {
     return !!deleted;
   }
 
+  async getUserExistingOrderForProduct(userId: number, productId: number): Promise<any> {
+      const orderResults = await db
+        .select({ orderId: orders.id })
+        .from(orderItems)
+        .innerJoin(orders, eq(orders.id, orderItems.orderId))
+        .where(
+          and(
+            eq(orders.user_id, userId),
+            eq(orderItems.productId, productId),
+            // eq(orders.status, "completed")
+          )
+        )
+        .limit(1);
+    return orderResults;
+  }
+
   // Cart operations
   async getCartItems(userId?: number, cartToken?: string | null): Promise<CartItem[]> {
     if (userId && cartToken) {
@@ -572,7 +600,6 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-
   // When user logs in, merge anonymous cart with user cart
   async mergeAnonymousCart(userId: number, cartToken: string | null): Promise<void> {
     await db.transaction(async (tx) => {
@@ -650,6 +677,7 @@ export class DatabaseStorage implements IStorage {
       }
     });
   }
+
   async updateCartItem(
     id: number,
     quantity: number,
@@ -822,6 +850,11 @@ export class DatabaseStorage implements IStorage {
               id: stalls.id as unknown as number,
               name: stalls.name as unknown as string,
             }
+          },
+          coupon: {
+            id: coupons.id as unknown as number,
+            code: coupons.code as unknown as string,
+            discountPercentage: coupons.discountPercentage as unknown as number,
           }
         }
       })
@@ -829,6 +862,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
       .leftJoin(products, eq(products.id, orderItems.productId))
       .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(coupons, eq(coupons.id, orderItems.couponId))
       .where(eq(orders.id, order_id));
 
     // Group items by order
@@ -1083,6 +1117,248 @@ export class DatabaseStorage implements IStorage {
 
     return eventIds.length;
   }
+
+  // System Settings Methods
+  async getSystemSetting(key: string): Promise<string | null> {
+    const setting = await db
+      .select()
+      .from(system_settings)
+      .where(eq(system_settings.key, key));
+    return setting[0]?.value ?? null;
+  }
+
+  async setSystemSetting(key: string, value: string, description?: string): Promise<void> {
+    await db
+      .insert(system_settings)
+      .values({ key, value, description })
+      .onConflictDoUpdate({
+        target: system_settings.key,
+        set: { value, updatedAt: new Date() },
+      });
+  }
+  
+  // Coupon management
+  async createCoupon(couponData: InsertCoupon): Promise<Coupon> {
+    const [coupon] = await db.insert(coupons).values(couponData).returning();
+    return coupon;
+  }
+
+  async getCoupons(eventId?: number): Promise<Coupon[]> {
+    if (eventId) {
+      return await db.select().from(coupons).where(eq(coupons.eventId, eventId));
+    }
+    return await db.select().from(coupons);
+  }
+
+  async getCoupon(id: number): Promise<Coupon | undefined> {
+    const [coupon] = await db.select().from(coupons).where(eq(coupons.id, id));
+    return coupon;
+  }
+
+  async getCouponByCode(code: string): Promise<Coupon | undefined> {
+    const [coupon] = await db.select().from(coupons).where(eq(coupons.code, code));
+    return coupon;
+  }
+
+  async updateCoupon(id: number, couponData: Partial<Coupon>): Promise<Coupon | undefined> {
+    const [updated] = await db
+      .update(coupons)
+      .set({ ...couponData, updatedAt: new Date() })
+      .where(eq(coupons.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCoupon(id: number): Promise<boolean> {
+    await db.delete(coupons).where(eq(coupons.id, id));
+    return true;
+  }
+
+  async addExcludedStall(couponId: number, stallId: number): Promise<void> {
+    await db.insert(couponExcludedStalls).values({ couponId, stallId });
+  }
+
+  async removeExcludedStall(couponId: number, stallId: number): Promise<void> {
+    await db.delete(couponExcludedStalls)
+      .where(and(
+        eq(couponExcludedStalls.couponId, couponId),
+        eq(couponExcludedStalls.stallId, stallId)
+      ));
+  }
+
+  async getExcludedStalls(couponId: number): Promise<number[]> {
+    const excluded = await db
+      .select({ stallId: couponExcludedStalls.stallId })
+      .from(couponExcludedStalls)
+      .where(eq(couponExcludedStalls.couponId, couponId));
+    
+    return excluded.map(e => e.stallId);
+  }
+
+  async validateCoupon(code: string, productIds: number[]): Promise<{ 
+    valid: boolean; 
+    coupon?: Coupon; 
+    applicableProductIds?: number[];
+    message?: string 
+  }> {
+    const coupon = await this.getCouponByCode(code);
+    
+    if (!coupon) {
+      return { valid: false, message: "Invalid coupon code" };
+    }
+    
+    if (!coupon.isActive) {
+      return { valid: false, message: "Coupon is not active" };
+    }
+    
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      return { valid: false, message: "Coupon has expired" };
+    }
+    
+    // Get all products with their event IDs
+    const productsWithEvents = await Promise.all(
+      productIds.map(async (productId) => {
+        const eventId = await this.getEventIdByProductId(productId);
+        return { productId, eventId };
+      })
+    );
+    
+    // Filter products that belong to the coupon's event
+    const validProductIds = productsWithEvents
+      .filter(product => product.eventId === coupon.eventId)
+      .map(product => product.productId);
+    
+    if (validProductIds.length === 0) {
+      return { 
+        valid: false, 
+        message: "Coupon is not valid for any products in your cart" 
+      };
+    }
+    
+    // Return successful validation with applicable product IDs
+    return { 
+      valid: true, 
+      coupon,
+      applicableProductIds: validProductIds,
+      message: validProductIds.length < productIds.length ? 
+        "Coupon applied to some products only" : undefined
+    };
+  }
+
+// Product Feedback Methods
+  async createProductFeedback(feedback: typeof product_feedback.$inferInsert): Promise<typeof product_feedback.$inferSelect> {
+    // Verify the user has purchased the product
+    const order = await db
+      .select()
+      .from(orderItems)
+      .where(
+        and(
+          eq(orderItems.orderId, feedback.orderId),
+          eq(orderItems.productId, feedback.productId)
+        )
+      );
+
+    if (!order.length) {
+      throw new Error("You can only provide feedback for products you have purchased");
+    }
+
+    // Check if feedback already exists
+    const existingFeedback = await db
+      .select()
+      .from(product_feedback)
+      .where(
+        and(
+          eq(product_feedback.productId, feedback.productId),
+          eq(product_feedback.userId, feedback.userId),
+          eq(product_feedback.orderId, feedback.orderId)
+        )
+      );
+
+    if (existingFeedback.length) {
+      throw new Error("You have already provided feedback for this product");
+    }
+
+    const [result] = await db
+      .insert(product_feedback)
+      .values(feedback)
+      .returning();
+
+    return result;
+  }
+
+  async getProductFeedback(productId: number): Promise<typeof product_feedback.$inferSelect[]> {
+    const feedbackEnabled = await this.getSystemSetting("feedback_enabled");
+    if (feedbackEnabled !== "true") {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(product_feedback)
+      .where(
+        and(
+          eq(product_feedback.productId, productId),
+          eq(product_feedback.status, "approved")
+        )
+      )
+      .orderBy(product_feedback.createdAt, "desc");
+  }
+
+  async updateFeedbackStatus(feedbackId: number, status: "approved" | "rejected"): Promise<void> {
+    await db
+      .update(product_feedback)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(product_feedback.id, feedbackId));
+  }
+
+  async getUserProductFeedback(userId: number, productId: number): Promise<typeof product_feedback.$inferSelect | null> {
+    const feedback = await db
+      .select()
+      .from(product_feedback)
+      .where(
+        and(
+          eq(product_feedback.userId, userId),
+          eq(product_feedback.productId, productId)
+        )
+      );
+    
+    return feedback[0] ?? null;
+  }
+
+  async canUserProvideFeedback(userId: number, productId: number): Promise<boolean> {
+    try {
+      // First check if feedback is enabled
+      const feedbackEnabled = await this.getSystemSetting("feedback_enabled");
+      if (feedbackEnabled !== "true") {
+        return false;
+      }
+
+      // Check if user has purchased the product and order is completed
+      const orderResults = await db
+        .select()
+        .from(orderItems)
+        .innerJoin(orders, eq(orders.id, orderItems.orderId))
+        .where(
+          and(
+            eq(orders.user_id, userId),
+            eq(orderItems.productId, productId)
+            // eq(orders.status, "completed")
+          )
+        );
+
+      if (!orderResults.length) {
+        return false;
+      }
+
+      // Check if user has already provided feedback
+      const existingFeedback = await this.getUserProductFeedback(userId, productId);
+      return !existingFeedback;
+    } catch (error) {
+      console.error('Error checking feedback eligibility:', error);
+      return false;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
+

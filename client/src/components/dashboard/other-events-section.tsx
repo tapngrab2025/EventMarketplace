@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import { AddStall } from "@/components/stall/add-stall";
 import { AddProduct } from "@/components/product/add-product";
+import { EventCoupons } from "@/components/coupon/event-coupons";
 
 interface OtherEventsSectionProps {
   events?: Event[];
@@ -66,6 +67,11 @@ export function OtherEventsSection({
                     Dates: {new Date(event.startDate).toLocaleDateString()} -{" "}
                     {new Date(event.endDate).toLocaleDateString()}
                   </p>
+                  
+                  {/* Display coupons for this event */}
+                  <div className="mt-4">
+                    <EventCoupons eventId={event.id} />
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-4">

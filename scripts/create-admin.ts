@@ -1,6 +1,6 @@
 import { db } from "../server/db";
-import { users } from "../shared/schema";
-import { hashPassword } from "../server/auth"; // Remove .js extension
+import { users, system_settings } from "../shared/schema";
+import { hashPassword } from "../server/auth";
 import { eq } from "drizzle-orm";
 
 async function createAdmin() {
@@ -25,6 +25,19 @@ async function createAdmin() {
       name: "System Admin",
       email: "admin@mail.com",
     });
+
+    // Initialize feedback settings if not exists
+    const existingSettings = await db.query.system_settings.findFirst({
+      where: eq(system_settings.key, "feedback_enabled"),
+    });
+
+    if (!existingSettings) {
+      await db.insert(system_settings).values({
+        key: "feedback_enabled",
+        value: "true",
+        description: "Controls whether product feedback feature is enabled",
+      });
+    }
 
   } catch (error) {
     console.error("Error creating admin user:", error);

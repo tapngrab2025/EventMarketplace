@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useRoute } from "wouter";
 import { Product } from "@shared/schema";
-import { useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_IMAGES } from "@/config/constants";
@@ -9,48 +9,46 @@ import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
 import CountDown from "@/components/product/count-down";
 import { useCart } from "@/hooks/use-cart";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 import { useProductFeedback } from "@/hooks/use-product-feedback";
 import { ProductFeedbackForm } from "@/components/product/product-feedback-form";
 import { ProductFeedbackList } from "@/components/product/product-feedback-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function ProductPage() {
-    const { id } = useParams<{ id: string }>();
-    const { addToCart } = useCart();
-    const productId = parseInt(id!);
+export default function ProductDetails() {
+  const [, params] = useRoute("/products/:id");
+  const id = params?.id;
+  const { user } = useAuth();
+  const productId = parseInt(id!);
+  const { addToCart } = useCart();
 
-    const { data: product, isLoading } = useQuery<Product>({
-        queryKey: [`/api/product/${id}`],
-    });
+  const { data: product, isLoading } = useQuery<Product>({
+    queryKey: [`/api/product/${id}`],
+  });
 
-    const { data: products, isLoadingRelative } = useQuery<Product>({
-        queryKey: [`/api/product/${id}/relative`],
-    });
+  const { data: products, isLoadingRelative } = useQuery<Product>({
+    queryKey: [`/api/product/${id}/relative`],
+  });
+  
+  const {
+    feedbackEnabled,
+    productFeedback,
+    userFeedback,
+    canProvideFeedback,
+    isLoading: isLoadingFeedback,
+  } = useProductFeedback(productId);
 
-    if (isLoading || isLoadingRelative) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin text-border" />
-            </div>
-        );
-    }
-    
-    const {
-        feedbackEnabled,
-        canProvideFeedback,
-        userFeedback,
-    } = useProductFeedback(productId);
+  if (isLoading || isLoadingRelative) {
+      return (
+          <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-border" />
+          </div>
+      );
+  }
 
-    if (!product) {
-        return (
-            <NotFound />
-        );
-    }
-
-    return (
-        <>
-        <main className="container mx-auto py-20 px-4">
-            {/* <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(product, null, 2)}</pre> */}
+  return (
+            <main className="container mx-auto py-20 px-4">
             <section className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                     <div className="aspect-square overflow-hidden max-h-60 lg:max-h-[600px] rounded-lg">
@@ -131,39 +129,44 @@ export default function ProductPage() {
                     <CardTitle>Customer Feedback</CardTitle>
                     </CardHeader>
                     <CardContent>
-                    {canProvideFeedback && (
-                        <div className="mb-8">
-                        <h3 className="text-lg font-semibold mb-4">Share Your Experience</h3>
-                        <ProductFeedbackForm
-                            productId={productId}
-                            orderId={product.orderId}
-                            onSuccess={() => {
-                            // Feedback submitted successfully
-                            }}
-                        />
+                    {isLoadingFeedback ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin text-border" />
                         </div>
-                    )}
+                    ) : (
+                        <>
+                        {canProvideFeedback && (
+                            <div className="mb-8">
+                            <h3 className="text-lg font-semibold mb-4">Share Your Experience</h3>
+                            <ProductFeedbackForm
+                              productId={productId}
+                              onSuccess={() => {
+                                // Feedback submitted successfully
+                              }}
+                            />
+                            </div>
+                        )}
 
-                    {userFeedback && (
-                        <div className="mb-8">
-                        <h3 className="text-lg font-semibold mb-4">Your Feedback</h3>
-                        <div className="border rounded-lg p-4">
-                            <p>{userFeedback.comment}</p>
-                        </div>
-                        </div>
-                    )}
+                        {userFeedback && (
+                            <div className="mb-8">
+                            <h3 className="text-lg font-semibold mb-4">Your Feedback</h3>
+                            <div className="border rounded-lg p-4">
+                                <p>{userFeedback.comment}</p>
+                            </div>
+                            </div>
+                        )}
 
-                    <div>
-                        <h3 className="text-lg font-semibold mb-4">All Reviews</h3>
-                        <ProductFeedbackList productId={productId} />
-                    </div>
+                        <div>
+                            <h3 className="text-lg font-semibold mb-4">All Reviews</h3>
+                            <ProductFeedbackList productId={productId} />
+                        </div>
+                        </>
+                    )}
                     </CardContent>
                 </Card>
                 </div>
             )}
             
         </main>
-        <SignUp />
-        </>
-    );
+  );
 }

@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { LocationPicker } from "@/components/location-picker";
+import { CouponManagement } from "@/components/coupon/coupon-management";
 
 interface EditDialogProps {
   eventId: number;
@@ -211,6 +212,12 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
           Update Event
         </Button>
       </form>
+      
+      {eventId && (
+        <div className="mt-8">
+          <CouponManagement eventId={eventId} />
+        </div>
+      )}
     </Form>
   );
 }
