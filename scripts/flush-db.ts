@@ -1,5 +1,5 @@
 import { db } from "../server/db";
-import { users, profile, events, stalls, products, cartItems, reviews, orderItems, orders } from "../shared/schema";
+import { users, profile, events, stalls, products, cartItems, reviews, orderItems, orders, coupons, couponExcludedStalls, orderDeliveryStatus, product_feedback, subscribers, system_settings, sessions } from "../shared/schema";
 import { eq, not, and } from "drizzle-orm";
 
 async function flushDatabase(excludeRole?: string) {
@@ -13,8 +13,16 @@ async function flushDatabase(excludeRole?: string) {
     await db.delete(reviews);
     await db.delete(products);
     await db.delete(stalls);
+    await db.delete(coupons);
+    await db.delete(couponExcludedStalls);
+    await db.delete(orderDeliveryStatus);
+    await db.delete(product_feedback);
+    await db.delete(reviews);
+    await db.delete(subscribers);
+    await db.delete(system_settings);
     await db.delete(events);
     await db.delete(profile);
+    await db.delete(sessions);
 
     // If excludeRole is provided, exclude users with that role
     if(excludeRole === "all_users") {
