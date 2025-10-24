@@ -65,6 +65,7 @@ export function CheckoutForm({ onSuccess, total, items }: { onSuccess: () => voi
           discount: discount,
           couponCode: appliedCoupon?.code,
           items: items.map(item => ({
+            name: item.product.name,
             productId: item.productId,
             quantity: item.quantity,
             price: item.product.price

@@ -213,6 +213,7 @@ export const insertSubscriber = createInsertSchema(subscribers).omit({
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
+export type UpdateOrder = typeof orders.$inferSelect;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;

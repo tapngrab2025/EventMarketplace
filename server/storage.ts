@@ -34,6 +34,7 @@ import {
   Coupon,
   InsertCoupon,
   OrderItem,
+  UpdateOrder,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, ne, and, gte, lte, sql, like, ilike, or, between, inArray, count } from "drizzle-orm";
@@ -795,6 +796,14 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       throw new Error('Failed to create order');
     }
+  }
+
+  async updateOrder(orderId: number, updateOrder: UpdateOrder): Promise<Order | undefined> {
+    return (await db
+      .update(orders)
+      .set(updateOrder)
+      .where(eq(orders.id, orderId))
+      .returning())[0];
   }
 
   // async getUserOrders(userId: number): Promise<Order[]> {
