@@ -9,9 +9,13 @@ if (!apiKey) {
   console.error('Google Maps API key is missing');
 } else {
   loadGoogleMaps(apiKey)
+    .then(() => {
+      createRoot(document.getElementById("root")!).render(<App />);
+    })
     .catch(error => {
       console.error('Failed to load Google Maps:', error);
+      createRoot(document.getElementById("root")!).render(<App />);
     });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+// createRoot(document.getElementById("root")!).render(<App />);

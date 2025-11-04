@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Product, Event } from "@shared/schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
 import { Loader2, CalendarRange, MapPin } from "lucide-react";
@@ -29,6 +29,11 @@ export default function HomePage(
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [sortBy, setSortBy] = useState("newest");
+  const [animateItems, setAnimateItems] = useState(false);
+
+  useEffect(() => {
+    setAnimateItems(true);
+  }, []);
 
   const testimonials = [
     {
@@ -52,6 +57,10 @@ export default function HomePage(
     queryKey: ["/api/events"],
   });
 
+    useEffect(() => {
+    initMap();
+  }, [events]);
+
   const filteredProducts = products
     ?.filter((product) =>
       product.approved &&
@@ -65,10 +74,11 @@ export default function HomePage(
   if (loadingProducts || loadingEvents) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-border" />
+        <Loader2 className="h-8 w-8 animate-spin text-primaryOrange" />
       </div>
     );
   }
+
 
   // Replace the current initMap function with this implementation
   async function initMap(): Promise<void> {
@@ -165,9 +175,6 @@ export default function HomePage(
       }, 1000);
     }
   }
-  if(events){
-    initMap();
-  }
 
   // Helper function to get coordinates from address string
   // In a real implementation, you would use the Google Geocoding API
@@ -209,38 +216,36 @@ export default function HomePage(
         <BrandHeroCarousel />
         {/* <HeroCarousel/> */}
       </section>
-      {/* <section className="flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
-      <section className="flex flex-col items-center justify-center py-20 px-6 my-32 overflow-hidden relative">
-        <div className="absolute inset-0 opacity-80" 
-            style={{ 
-              zIndex: -1,
-              background: 'radial-gradient(circle at 0% 37%,rgb(167, 88, 158) 0%, transparent 10%), radial-gradient(circle at 100% 60%, #3d0a91cc 0%, transparent 13%)'
-            }}>
-        </div>
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Let's Find Your Grab</h1>
+      {/* Modernized: "Let's Find Your Grab" */}
+      <section className="relative py-20 px-6 mb-32 overflow-hidden">
+        {/* Decorative shapes */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-black/5 rounded-full" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primaryOrange/10 rounded-full" />
+
+        <div className={`text-center mb-16 transition-all duration-700 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}>
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">Let's Find Your Grab</h1>
           <p className="text-gray-600">Discover your favorite entertainment right here</p>
         </div>
 
-        <div className="w-full max-w-6xl flex flex-col sm:flex-row gap-4 mb-12">
+        <div className={`w-full max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 transition-all duration-700 delay-100 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="flex-1">
-            <div className="relative bg-white rounded-lg w-full">
+            <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl w-full shadow-sm ring-1 ring-gray-200">
               <Input
                 id="location"
                 placeholder="Filter by Location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-12 rounded-[15px] bg-white border-[#A3A3A3]"
+                className="w-full pl-12 rounded-2xl bg-transparent border-none focus-visible:ring-2 focus-visible:ring-primaryOrange"
               />
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 bg-white flex items-center justify-center">
-                <MapPin className="h-4 w-4 text-gray-400" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center">
+                <MapPin className="h-5 w-5 text-gray-400" />
               </div>
             </div>
           </div>
           <div className="flex flex-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full bg-white rounded-[15px] border-[#A3A3A3]">
+                <Button variant="outline" className="w-full bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200 hover:border-gray-300">
                   <CalendarRange className="h-4 w-4 text-gray-400" />
                   {startDate && endDate ? (
                     `${format(startDate, "PP")} - ${format(endDate, "PP")}`
@@ -267,7 +272,7 @@ export default function HomePage(
           </div>
           <div className="flex-1">
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="bg-white rounded-[15px] border-[#A3A3A3]">
+              <SelectTrigger className="bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200">
                 <SelectValue placeholder="Newest First" />
               </SelectTrigger>
               <SelectContent>
@@ -277,7 +282,7 @@ export default function HomePage(
             </Select>
           </div>
           <button
-            className="bg-teal-500 text-white text-base py-2 px-16 rounded-[50px] hover:bg-teal-600 transition duration-300 max-w-full"
+            className="bg-primaryOrange text-white text-base py-2 px-16 rounded-full hover:bg-black transition-all duration-300 shadow-md hover:shadow-lg"
             onClick={() => {
               const searchParams = new URLSearchParams();
               if (location) searchParams.set('location', location);
@@ -293,18 +298,18 @@ export default function HomePage(
 
         </div>
 
-        <div className="w-full max-w-4xl">
-          <h2 className="text-h2 font-semibold text-gray-800 mb-6 text-center">Popular Cities</h2>
+        <div className="w-full max-w-4xl mx-auto">
+          <h2 className="text-h2 font-semibold text-gray-900 mb-6 text-center">Popular Cities</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <Link href="/event/city/kandy">
                 <img
                   src={Images.kandy}
                   alt="Kandy"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                  <h3 className="text-white text-2xl font-bold">KANDY</h3>
+                  <h3 className="text-white text-2xl font-bold drop-shadow-md">KANDY</h3>
                 </div>
               </Link>
             </div>
@@ -314,10 +319,10 @@ export default function HomePage(
               <img
                 src={Images.colombo}
                 alt="Colombo"
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
               />
               <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold">COLOMBO</h3>
+                <h3 className="text-white text-2xl font-bold drop-shadow-md">COLOMBO</h3>
               </div>
               </Link>
             </div>
@@ -328,10 +333,10 @@ export default function HomePage(
               <img
                 src={Images.galle}
                 alt="Galle"
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
               />
               <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold">GALLE</h3>
+                <h3 className="text-white text-2xl font-bold drop-shadow-md">GALLE</h3>
               </div>
               </Link>
             </div>
@@ -342,10 +347,10 @@ export default function HomePage(
               <img
                 src={Images.matara}
                 alt="Matara"
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
               />
               <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold">MATARA</h3>
+                <h3 className="text-white text-2xl font-bold drop-shadow-md">MATARA</h3>
               </div>
               </Link>
             </div>
@@ -354,11 +359,12 @@ export default function HomePage(
       </section>
 
       {/* Featured Grabs */}
-      {/* <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-6"> */}
-      <section className="min-h-screen flex flex-col items-center justify-center p-6 mb-32">
+      <section className="min-h-screen flex flex-col items-center justify-center p-6 mb-32 relative">
+        {/* subtle accent shape */}
+        <div className="absolute -top-10 left-10 w-64 h-64 bg-primaryGreen/10 rounded-full" />
         <div className="">
           <div className="text-center mb-20">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">Featured Grabs</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Featured Grabs</h1>
             <p className="text-gray-600">Discover more of the activities with our curated event collections</p>
           </div>
 
@@ -379,7 +385,7 @@ export default function HomePage(
           </div>
 
           <div className="mt-8 flex justify-center">
-            <Link href="/products" className="text-blue-500 font-semibold hover:underline">
+            <Link href="/products" className="text-primaryOrange font-semibold hover:underline">
               View All Grabs
             </Link>
           </div>
@@ -388,8 +394,8 @@ export default function HomePage(
 
       {/* <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}> */}
       <section className="transferGrabs py-32 relative bg-primaryGreen bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
-        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-none bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]"
-          style={{ '--bg-image': `url(${Images.transferGrabsImg.src || Images.transferGrabsImg})` } as React.CSSProperties}>
+        <div className="container mx-auto flex flex-wrap items-center justify-between px-6 gap-8 flex-col lg:flex-row min-h-[600px] md:min-h-[400px] max-w-7xl relative bg-no-repeat bg-right lg:bg-[image:var(--bg-image)]"
+          style={{ '--bg-image': `url(${Images.transferGrabsImg})` } as React.CSSProperties}>
           <div className="lg:max-w-3xl z-10 text-center">
             <h2 className="text-h2 font-bold mb-4 md:mb-11">Transfer Your Grabs</h2>
             <p className="text-h5 mb-6 md:mb-11">Get registered with tapNgrab to transfer and receive E-Ticket(s). Spread the joy by seamlessly transferring tickets to friends and family.</p>
@@ -404,15 +410,16 @@ export default function HomePage(
         </div>
       </section>
 
+      {/* All Events Map */}
       <section className="py-12 min-h-[400px]">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-h2 font-bold mb-4">All Events Map</h2>
+          <h2 className="text-h2 font-bold mb-4 text-gray-900">All Events Map</h2>
           <p className="text-gray-600 mb-16">Explore events happening near you</p>
-          <div id="all_events" className="w-full h-[500px] rounded-lg shadow-lg"></div>
+          <div id="all_events" className="w-full h-[500px] rounded-2xl shadow-xl ring-1 ring-gray-200"></div>
         </div>
       </section>
 
-      {/* <section className="whatMakes relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.whatMakesImg.src || Images.whatMakesImg})` }}> */}
+      {/* "What Makes Us Uncommon" remains green as requested */}
       <section className="whatMakes py-32 my-32 bg-primaryGreen relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">What Makes Us Uncommon</h2>
@@ -434,10 +441,13 @@ export default function HomePage(
         </div>
       </section>
 
-      <section className="py-12 testimonial mt-32">
+      {/* What People Say */}
+      <section className="py-20 testimonial mt-32 bg-neutral-900 text-white relative overflow-hidden">
+        {/* accent divider */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primaryOrange" />
         <div className="container mx-auto px-6 text-center mb-12">
           <h2 className="text-h2 font-bold mb-4">What People Say</h2>
-          <p className="text-lg mb-32">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+          <p className="text-lg mb-32 text-white/80">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
           <Slider
             {...testimonialSliderSettings}
             className="w-full max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto overflow-hidden"
@@ -446,10 +456,10 @@ export default function HomePage(
               <div key={index} className="px-2 sm:px-4 w-full">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-full">
                   <div className="quote-bg flex-1 max-w-full">
-                    <p className="text-[20px] lg:text-[32px] mb-4 line-clamp-5 md:line-clamp-none text-left">{testimonial.text}</p>
-                    <p className="text-[20px] lg:text-[32px] font-semibold text-left">- {testimonial.author}</p>
+                    <p className="text-[20px] lg:text-[32px] mb-4 line-clamp-5 md:line-clamp-none text-left text-white/90">{testimonial.text}</p>
+                    <p className="text-[20px] lg:text-[32px] font-semibold text-left text-primaryOrange">- {testimonial.author}</p>
                   </div>
-                  <img src={testimonial.image} alt={testimonial.author} className="rounded-full w-[150px] h-[150px] md:w-[200px] md:h-[200px] flex-shrink-0" />
+                  <img src={testimonial.image} alt={testimonial.author} className="rounded-full w-[150px] h-[150px] md:w-[200px] md:h-[200px] flex-shrink-0 ring-2 ring-primaryOrange/50" />
                 </div>
               </div>
             ))}
