@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import express, { Express } from "express";
+import type { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
@@ -9,6 +10,7 @@ import { User as SelectUser } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from 'fs';
+import jwt from "jsonwebtoken";
 
 declare global {
   namespace Express {
@@ -187,6 +189,36 @@ export function setupAuth(app: Express) {
     })(req, res, next);
   });
 
+  // Helper to sign JWTs for API authentication (does not change existing session-based login)
+  function signToken(user: SelectUser): string {
+    const secret = process.env.JWT_SECRET || "dev-secret";
+    return jwt.sign({ id: user.id, role: user.role }, secret, { expiresIn: "24h" });
+  }
+
+  // Issue a JWT on successful credential authentication without creating a session
+  app.post("/api/login-token", (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate("local", async (err, user, info) => {
+      if (err) return next(err);
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Invalid credentials" });
+      }
+      try {
+        const token = signToken(user);
+        // Return token and minimal user info; front-end may ignore token if unused
+        res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+      } catch (error) {
+        next(error);
+      }
+    })(req, res, next);
+  });
+
+  // Generate a JWT for the currently authenticated session user
+  app.post("/api/token", async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const token = jwt.sign({ id: req.user.id, role: req.user.role }, process.env.JWT_SECRET || "dev-secret", { expiresIn: "24h" });
+    res.json({ token });
+  });
+
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) {
@@ -311,4 +343,27 @@ export function setupAuth(app: Express) {
   // Example
   // FILE_UPLOADER_PATH="e:/xampp8-0/htdocs/EventMarketplace/client/.next/server/uploads"
   // SERVER_UPLOAD_PATH="/_next/server/uploads/"
+}
+
+// Middleware: validate either existing session or Bearer JWT token
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      return next();
+    }
+    const header = req.headers["authorization"];
+    if (!header || Array.isArray(header)) {
+      return res.sendStatus(401);
+    }
+    const match = (header as string).match(/^Bearer\s+(.+)$/i);
+    const token = match?.[1];
+    if (!token) return res.sendStatus(401);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev-secret") as { id: number; role: string };
+    const user = await storage.getUser(decoded.id);
+    if (!user) return res.sendStatus(401);
+    (req as any).user = user as SelectUser;
+    return next();
+  } catch (err) {
+    return res.sendStatus(401);
+  }
 }

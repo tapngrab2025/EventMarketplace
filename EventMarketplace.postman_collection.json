@@ -18,7 +18,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/register",
+              "raw": "{{domain}}/api/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -41,7 +41,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/login",
+              "raw": "{{domain}}/api/login",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -54,11 +54,72 @@
           }
         },
         {
+          "name": "Login (Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/login-token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "login-token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.token) {",
+                  "  pm.collectionVariables.set('token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Session Token",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.token) {",
+                  "  pm.collectionVariables.set('token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Logout",
           "request": {
             "method": "POST",
             "url": {
-              "raw": "http://localhost:5000/api/logout",
+              "raw": "{{domain}}/api/logout",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -71,7 +132,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/user",
+              "raw": "{{domain}}/api/user",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -95,7 +156,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/user/profile",
+              "raw": "{{domain}}/api/user/profile",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -123,7 +184,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/events",
+              "raw": "{{domain}}/api/events",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -140,7 +201,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/events",
+              "raw": "{{domain}}/api/events",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -153,7 +214,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/events/1",
+              "raw": "{{domain}}/api/events/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -177,7 +238,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/stalls",
+              "raw": "{{domain}}/api/stalls",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -194,7 +255,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/stalls",
+              "raw": "{{domain}}/api/stalls",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -207,7 +268,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/events/1/stalls",
+              "raw": "{{domain}}/api/events/1/stalls",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -231,7 +292,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/products",
+              "raw": "{{domain}}/api/products",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -248,7 +309,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/stalls/1/products",
+              "raw": "{{domain}}/api/stalls/1/products",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -272,7 +333,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/cart",
+              "raw": "{{domain}}/api/cart",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -289,7 +350,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/cart",
+              "raw": "{{domain}}/api/cart",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -308,7 +369,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/cart/1",
+              "raw": "{{domain}}/api/cart/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -325,7 +386,7 @@
           "request": {
             "method": "DELETE",
             "url": {
-              "raw": "http://localhost:5000/api/cart/1",
+              "raw": "{{domain}}/api/cart/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -349,7 +410,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/orders",
+              "raw": "{{domain}}/api/orders",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -366,7 +427,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/orders/1",
+              "raw": "{{domain}}/api/orders/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -379,7 +440,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/orders",
+              "raw": "{{domain}}/api/orders",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -396,8 +457,11 @@
           "name": "Get Stall Order Details",
           "request": {
             "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": {
-              "raw": "http://localhost:5000/api/stall-orders/1/1",
+              "raw": "{{baseUrl}}/api/stall-orders/1/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
@@ -413,10 +477,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              }
+              },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/stall-orders/1/1/delivery",
+              "raw": "{{baseUrl}}/api/stall-orders/1/1/delivery",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",

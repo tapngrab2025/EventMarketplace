@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
+import { setupAuth, requireAuth } from "./auth";
 import { storage } from "./storage";
 import { insertEventSchema } from "@shared/schema";
 import { insertProductFeedbackSchema } from "@shared/schema";
@@ -472,11 +472,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get stall-specific order details
-  app.get("/api/stall-orders/:orderId/:stallId", async (req, res) => {
+  // Get stall-specific order details (requires auth)
+  app.get("/api/stall-orders/:orderId/:stallId", requireAuth, async (req, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
       const stallId = parseInt(req.params.stallId);
+
+      // Access control: admin can access; vendor can access only if owns the stall; customer can access only if owns the order
+      const stall = await storage.getStall(stallId);
+      const order = await storage.getOrder(orderId);
+      const isAdmin = req.user?.role === "admin";
+      const isVendorOwner = stall?.vendorId === req.user?.id;
+      const isOrderOwner = Array.isArray(order) && order[0]?.user_id === req.user?.id;
+      if (!isAdmin && !isVendorOwner && !isOrderOwner) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
       const orderDetails = await storage.getStallOrder(orderId, stallId);
       res.json(orderDetails);
     } catch (error) {
@@ -484,14 +495,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update delivery status
-  app.put("/api/stall-orders/:orderId/:stallId/delivery", async (req, res) => {
+  // Update delivery status (requires auth)
+  app.put("/api/stall-orders/:orderId/:stallId/delivery", requireAuth, async (req, res) => {
     const orderId = parseInt(req.params.orderId);
     const stallId = parseInt(req.params.stallId);
     const { status, notes } = req.body;
 
     if (!['pending', 'ready', 'delivered'].includes(status)) return res.status(500).json({ error: "Status should be either 'pending' | 'ready' | 'delivered'" });
     try {
+      // Only admin or the stall's vendor can update delivery status
+      const stall = await storage.getStall(stallId);
+      const isAdmin = req.user?.role === "admin";
+      const isVendorOwner = stall?.vendorId === req.user?.id;
+      if (!isAdmin && !isVendorOwner) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
       const updated = await storage.updateDeliveryStatus(orderId, stallId, status, notes);
       res.json(updated);
     } catch (error) {
