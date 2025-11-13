@@ -462,10 +462,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/user/orders", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/user/orders", requireAuth,  async (req, res) => {
+    // if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const orders = await storage.getUserOrders(req.user.id);
+      const orders = await storage.getUserOrders(req.user?.id);
       res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
