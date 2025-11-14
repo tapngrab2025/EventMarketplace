@@ -360,6 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Generate PayHere form data
     const merchantSecret = config.payhere.merchantSecret;
     const merchantId = config.payhere.merchantId;
+    const baseUrl = config.baseUrl;
     const orderId = order.id;
     const amountFormatted = (total / 100).toFixed(2);
     const currency = "LKR";
@@ -379,10 +380,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Return PayHere form data
     res.json({
       merchant_id: merchantId,
-      return_url: `${config.baseUrl}/thank-you/${order.id}`,
-      cancel_url: `${config.baseUrl}/cart`,
-      notify_url: `${config.baseUrl}/api/payhere/notify`,
-      order_id: order.id,
+      return_url: `${baseUrl}/thank-you/${orderId}`,
+      cancel_url: `${baseUrl}/cart`,
+      notify_url: `${baseUrl}/api/payhere/notify`,
+      order_id: `${orderId}`,
       items: items.map(item => item.name).join(", "),
       currency: currency,
       amount: amountFormatted,
@@ -390,6 +391,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       last_name: fullName.split(" ").slice(1).join(" "),
       email: email,
       phone: phone,
+      country : 'Sri Lanka',
+      city: 'Colombo',
+      address : '123 Main St',
       hash: hash
     });
   } catch (error) {
