@@ -494,6 +494,192 @@
           }
         }
       ]
+    },
+    {
+      "name": "Get Vendor Events",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/events",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "events"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Event Details + Stalls",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/events/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "events",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Event Stalls",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/events/1/stalls",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "events",
+            "1",
+            "stalls"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Stall Orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/events/1/stalls/1/orders",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "events",
+            "1",
+            "stalls",
+            "1",
+            "orders"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Event Orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/events/1/orders",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "events",
+            "1",
+            "orders"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Event Sales",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/events/1/sales",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "events",
+            "1",
+            "sales"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Vendor Orders (All)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/vendor/orders",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "vendor",
+            "orders"
+          ]
+        }
+      }
     }
   ]
 }
