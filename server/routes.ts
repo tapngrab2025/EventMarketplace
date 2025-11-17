@@ -850,6 +850,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ canProvideFeedback });
   });
 
+  // Vendor mobile API
+  app.get("/api/vendor/events", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventsList = await storage.getVendorEvents(req.user.id);
+      res.json(eventsList);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendor events" });
+    }
+  });
+
+  app.get("/api/vendor/events/:eventId", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const event = await storage.getEvent(eventId);
+      if (!event) return res.sendStatus(404);
+      const stalls = await storage.getVendorEventStalls(req.user.id, eventId);
+      res.json({ event, stalls });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  app.get("/api/vendor/events/:eventId/stalls", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const stalls = await storage.getVendorEventStalls(req.user.id, eventId);
+      res.json(stalls);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch stalls" });
+    }
+  });
+
+  app.get("/api/vendor/events/:eventId/stalls/:stallId/orders", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const stallId = parseInt(req.params.stallId);
+      const stall = await storage.getStall(stallId);
+      if (!stall || stall.vendorId !== req.user.id || stall.eventId !== eventId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      const orders = await storage.getVendorStallOrders(stallId);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch stall orders" });
+    }
+  });
+
+  app.get("/api/vendor/events/:eventId/orders", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const orders = await storage.getVendorEventOrders(req.user.id, eventId);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event orders" });
+    }
+  });
+
+  app.get("/api/vendor/events/:eventId/sales", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const sales = await storage.getVendorEventSales(req.user.id, eventId);
+      res.json(sales);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sales" });
+    }
+  });
+
+  app.get("/api/vendor/orders", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const eventsList = await storage.getVendorEvents(req.user.id);
+      const all: any[] = [];
+      for (const ev of eventsList) {
+        const orders = await storage.getVendorEventOrders(req.user.id, ev.id);
+        all.push(...orders);
+      }
+      // De-duplicate by order id
+      const map = new Map<number, any>();
+      for (const o of all) { map.set(o.id, o); }
+      res.json(Array.from(map.values()));
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vendor orders" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

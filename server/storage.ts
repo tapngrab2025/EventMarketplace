@@ -967,6 +967,191 @@ export class DatabaseStorage implements IStorage {
       .returning();
   }
 
+  // Vendor: list distinct events where vendor has stalls
+  async getVendorEvents(vendorId: number): Promise<Event[]> {
+    const rows = await db
+      .select({
+        id: events.id,
+        name: events.name,
+        description: events.description,
+        startDate: events.startDate,
+        endDate: events.endDate,
+        imageUrl: events.imageUrl,
+        approved: events.approved,
+        archived: events.archived,
+      })
+      .from(events)
+      .innerJoin(stalls, eq(stalls.eventId, events.id))
+      .where(and(eq(stalls.vendorId, vendorId), eq(events.archived, false)))
+      .orderBy(events.startDate, 'desc');
+
+    // Distinct by event id
+    const seen = new Set<number>();
+    const unique = rows.filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; });
+    return unique as any;
+  }
+
+  // Vendor: stalls by event
+  async getVendorEventStalls(vendorId: number, eventId: number): Promise<Stall[]> {
+    return await db
+      .select()
+      .from(stalls)
+      .where(and(eq(stalls.vendorId, vendorId), eq(stalls.eventId, eventId), eq(stalls.archived, false)))
+      .orderBy(stalls.id, 'asc');
+  }
+
+  // Vendor: orders for a specific stall (with items limited to that stall)
+  async getVendorStallOrders(stallId: number): Promise<any[]> {
+    const rows = await db
+      .select({
+        order: {
+          id: orders.id,
+          user_id: orders.user_id,
+          total: orders.total,
+          status: orders.status,
+          paymentMethod: orders.paymentMethod,
+          createdAt: orders.createdAt,
+        },
+        item: {
+          id: orderItems.id,
+          quantity: orderItems.quantity,
+          price: orderItems.price,
+        },
+        product: {
+          id: products.id,
+          name: products.name,
+          stallId: products.stallId,
+        }
+      })
+      .from(orders)
+      .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .innerJoin(products, eq(products.id, orderItems.productId))
+      .where(eq(products.stallId, stallId))
+      .orderBy(orders.createdAt, 'desc');
+
+    // Group items by order
+    const byOrder = new Map<number, any>();
+    for (const r of rows) {
+      const o = r.order.id;
+      if (!byOrder.has(o)) {
+        byOrder.set(o, { ...r.order, items: [] as any[] });
+      }
+      byOrder.get(o).items.push({ ...r.item, product: r.product });
+    }
+    return Array.from(byOrder.values());
+  }
+
+  // Vendor: orders for an event across all vendor stalls
+  async getVendorEventOrders(vendorId: number, eventId: number): Promise<any[]> {
+    const rows = await db
+      .select({
+        order: {
+          id: orders.id,
+          user_id: orders.user_id,
+          total: orders.total,
+          status: orders.status,
+          paymentMethod: orders.paymentMethod,
+          createdAt: orders.createdAt,
+        },
+        item: {
+          id: orderItems.id,
+          quantity: orderItems.quantity,
+          price: orderItems.price,
+        },
+        product: {
+          id: products.id,
+          name: products.name,
+          stallId: products.stallId,
+        },
+        stall: {
+          id: stalls.id,
+          name: stalls.name,
+        }
+      })
+      .from(orders)
+      .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .innerJoin(products, eq(products.id, orderItems.productId))
+      .innerJoin(stalls, eq(stalls.id, products.stallId))
+      .where(and(eq(stalls.vendorId, vendorId), eq(stalls.eventId, eventId)))
+      .orderBy(orders.createdAt, 'desc');
+
+    const byOrder = new Map<number, any>();
+    for (const r of rows) {
+      const o = r.order.id;
+      if (!byOrder.has(o)) {
+        byOrder.set(o, { ...r.order, items: [] as any[], stalls: new Set<number>() });
+      }
+      byOrder.get(o).items.push({ ...r.item, product: r.product, stall: r.stall });
+      byOrder.get(o).stalls.add(r.stall.id);
+    }
+    return Array.from(byOrder.values()).map(o => ({ ...o, stalls: Array.from(o.stalls) }));
+  }
+
+  // Vendor: sales aggregates for event
+  async getVendorEventSales(vendorId: number, eventId: number): Promise<{
+    event: Event;
+    totals: { revenue: number; orders: number; items: number };
+    byStall: Array<{ stallId: number; stallName: string; revenue: number; orders: number; items: number }>;
+    byDay: Array<{ day: Date; revenue: number; orders: number }>
+  }> {
+    const [event] = await db.select().from(events).where(eq(events.id, eventId));
+
+    // Per item revenue rows
+    const rows = await db
+      .select({
+        orderId: orders.id,
+        createdAt: orders.createdAt,
+        stallId: stalls.id,
+        stallName: stalls.name,
+        revenue: sql<number>`(${orderItems.price} * ${orderItems.quantity})`,
+        items: orderItems.quantity,
+      })
+      .from(orders)
+      .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .innerJoin(products, eq(products.id, orderItems.productId))
+      .innerJoin(stalls, eq(stalls.id, products.stallId))
+      .where(and(eq(stalls.vendorId, vendorId), eq(stalls.eventId, eventId)));
+
+    // Totals
+    let totalRevenue = 0;
+    const orderSet = new Set<number>();
+    let totalItems = 0;
+    for (const r of rows) {
+      totalRevenue += r.revenue;
+      totalItems += r.items;
+      orderSet.add(r.orderId);
+    }
+
+    // By stall
+    const stallMap = new Map<number, { stallId: number; stallName: string; revenue: number; orders: Set<number>; items: number }>();
+    for (const r of rows) {
+      const s = stallMap.get(r.stallId) || { stallId: r.stallId, stallName: r.stallName, revenue: 0, orders: new Set<number>(), items: 0 };
+      s.revenue += r.revenue;
+      s.items += r.items;
+      s.orders.add(r.orderId);
+      stallMap.set(r.stallId, s);
+    }
+    const byStall = Array.from(stallMap.values()).map(s => ({ stallId: s.stallId, stallName: s.stallName, revenue: s.revenue, orders: s.orders.size, items: s.items }));
+
+    // By day
+    const dayMap = new Map<string, { day: Date; revenue: number; orders: Set<number> }>();
+    for (const r of rows) {
+      const dayStr = new Date(r.createdAt as any).toISOString().slice(0, 10);
+      const entry = dayMap.get(dayStr) || { day: new Date(dayStr), revenue: 0, orders: new Set<number>() };
+      entry.revenue += r.revenue;
+      entry.orders.add(r.orderId);
+      dayMap.set(dayStr, entry);
+    }
+    const byDay = Array.from(dayMap.values()).map(d => ({ day: d.day, revenue: d.revenue, orders: d.orders.size }));
+
+    return {
+      event: event as Event,
+      totals: { revenue: totalRevenue, orders: orderSet.size, items: totalItems },
+      byStall,
+      byDay,
+    };
+  }
+
   async createSubscriber(email: string): Promise<Subscriber[] | any> {
     const existingSubscriber = await db
       .select()
