@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Product, Event, Stall } from "@shared/schema";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { ApprovalSection } from "@/components/dashboard/approval-section";
-import { AddEvent } from "@/components/event/add-event";
+import { Link } from "wouter";
 import { MyEventsSection } from "@/components/dashboard/my-events-section";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,15 +17,6 @@ interface VendorDashboardProps {
 export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
-  const [stallDialogOpen, setStallDialogOpen] = useState(false);
-  const [productDialogOpen, setProductDialogOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [selectedStall, setSelectedStall] = useState<Stall | null>(null);
-  const [eventEditDialogOpen, setEventEditDialogOpen] = useState(false);
-  const [editEventId, setEditEventId] = useState<number | null>(null);
-  const [editStallId, setEditStallId] = useState<number | null>(null);
-  const [editProductId, setEditProductId] = useState<number | null>(null);
 
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -36,7 +27,7 @@ export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardP
   });
 
   const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/products/all"],
   });
 
   // Events list start
@@ -144,31 +135,14 @@ export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardP
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold">My Events</h2>
-                <AddEvent
-                  eventDialogOpen={eventDialogOpen}
-                  setEventDialogOpen={setEventDialogOpen}
-                />
+                <Link to="/vendor/events/new">
+                  <button className="px-3 py-2 border rounded-md flex items-center"><Plus className="h-4 w-4 mr-2" />Add Event</button>
+                </Link>
               </div>
               <MyEventsSection
                 events={myEvents}
                 stalls={myStalls}
                 products={matchedProducts}
-                editEventId={editEventId}
-                setEditEventId={setEditEventId}
-                eventEditDialogOpen={eventEditDialogOpen}
-                setEventEditDialogOpen={setEventEditDialogOpen}
-                stallDialogOpen={stallDialogOpen}
-                setStallDialogOpen={setStallDialogOpen}
-                selectedEvent={selectedEvent}
-                setSelectedEvent={setSelectedEvent}
-                productDialogOpen={productDialogOpen}
-                setProductDialogOpen={setProductDialogOpen}
-                selectedStall={selectedStall}
-                setSelectedStall={setSelectedStall}
-                editStallId={editStallId}
-                setEditStallId={setEditStallId}
-                editProductId={editProductId}
-                setEditProductId={setEditProductId}
                 enableButton={true}
               />
             </section>

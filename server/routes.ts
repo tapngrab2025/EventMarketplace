@@ -78,6 +78,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.sendStatus(403);
     }
     try {
+      const existing = await storage.getEvent(parseInt(req.params.id));
+      if (!existing) return res.sendStatus(404);
+      const isOwner = existing.vendorId === req.user.id;
+      const isAdmin = req.user.role === "admin";
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
       const parsedEvent = insertEventSchema.parse({
         ...req.body,
       });
@@ -147,6 +154,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
+    const existing = await storage.getStall(parseInt(req.params.id));
+    if (!existing) return res.sendStatus(404);
+    const isOwner = existing.vendorId === req.user.id;
+    const isAdmin = req.user.role === "admin";
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
     const stall = await storage.updateStall(parseInt(req.params.id), req.body);
     if (!stall) return res.sendStatus(404);
     res.json(stall);
@@ -155,6 +169,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Products
   app.get("/api/products", async (_req, res) => {
     const products = await storage.getProducts();
+    res.json(products);
+  });
+
+  app.get("/api/products/all", async (_req, res) => {
+    const products = await storage.getProductsAll();
     res.json(products);
   });
 
@@ -208,6 +227,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || req.user.role !== "vendor") {
       return res.sendStatus(403);
     }
+    const targetStall = await storage.getStall(req.body.stallId);
+    if (!targetStall || (req.user.role !== "admin" && targetStall.vendorId !== req.user.id)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
     const product = await storage.createProduct({
       ...req.body,
       // availableStock: req.body.stock,
@@ -256,6 +279,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ...req.body,
       // availableStock: req.body.stock !== undefined ? req.body.stock : req.body.availableStock
     };
+    const current = await storage.getProduct(parseInt(req.params.id));
+    if (!current) return res.sendStatus(404);
+    const stall = await storage.getStall(current.stallId);
+    const isOwner = stall?.vendorId === req.user.id;
+    const isAdmin = req.user.role === "admin";
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
     const product = await storage.updateProduct(parseInt(req.params.id), updatedBody);
     if (!product) return res.sendStatus(404);
     res.json(product);
@@ -815,18 +846,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
 
       const orderResults = await storage.getUserExistingOrderForProduct(userId, productId);
-      // const orderResults = await db
-      //   .select({ orderId: orderItems.orderId })
-      //   .from(orderItems)
-      //   .innerJoin(orders, eq(orders.id, orderItems.orderId))
-      //   .where(
-      //     and(
-      //       eq(orders.user_id, userId),
-      //       eq(orderItems.productId, productId),
-      //       eq(orders.status, "completed")
-      //     )
-      //   )
-      //   .limit(1);
 
       if (orderResults.length === 0) {
         return res.json({ orderId: null });

@@ -1,39 +1,17 @@
 import { Event, Stall, Product } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
-import { EditEvent } from "@/components/event/edit-event";
-import { AddStall } from "@/components/stall/add-stall";
-import { AddProduct } from "@/components/product/add-product";
-import { EditStall } from "@/components/stall/edit-stall";
-import { EditProduct } from "@/components/product/edit-product";
+import { Link } from "wouter";
 import { EventCoupons } from "@/components/coupon/event-coupons";
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface MyEventsSectionProps {
   events?: Event[];
   stalls?: Stall[];
   products?: Product[];
-  editEventId: number | null;
-  setEditEventId: (id: number | null) => void;
-  eventEditDialogOpen: boolean;
-  setEventEditDialogOpen: (open: boolean) => void;
-  stallDialogOpen: boolean;
-  setStallDialogOpen: (open: boolean) => void;
-  stallEditDialogOpen: boolean;
-  setStallEditDialogOpen: (open: boolean) => void;
-  selectedEvent: Event | null;
-  setSelectedEvent: (event: Event | null) => void;
-  productDialogOpen: boolean;
-  setProductDialogOpen: (open: boolean) => void;
-  productEditDialogOpen: boolean;
-  setProductEditDialogOpen: (open: boolean) => void;
-  selectedStall: Stall | null;
-  setSelectedStall: (stall: Stall | null) => void;
-  editStallId: number | null;
-  setEditStallId: (id: number | null) => void;
-  editProductId: number | null;
-  setEditProductId: (id: number | null) => void;
   enableButton: boolean | false;
 }
 
@@ -41,28 +19,11 @@ export function MyEventsSection({
   events = [],
   stalls = [],
   products = [],
-  editEventId,
-  setEditEventId,
-  eventEditDialogOpen,
-  setEventEditDialogOpen,
-  stallDialogOpen,
-  setStallDialogOpen,
-  stallEditDialogOpen,
-  setStallEditDialogOpen,
-  selectedEvent,
-  setSelectedEvent,
-  productDialogOpen,
-  setProductDialogOpen,
-  productEditDialogOpen,
-  setProductEditDialogOpen,
-  selectedStall,
-  setSelectedStall,
-  editStallId,
-  setEditStallId,
-  editProductId,
-  setEditProductId,
   enableButton,
 }: MyEventsSectionProps) {
+  
+  const { user } = useAuth();
+
   return (
     <div className="grid gap-6">
       {events?.length === 0 ? (
@@ -75,23 +36,10 @@ export function MyEventsSection({
                 <div className="flex flex-wrap items-center gap-2">
                   {event.name}
                   {enableButton && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEditEventId(event.id);
-                        setEventEditDialogOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
+                    <Link to={`/vendor/events/${event.id}/edit`}>
+                      <Button><Pencil className="h-4 w-4 mr-2" />Edit Event</Button>
+                    </Link>
                   )}
-                  <EditEvent
-                    eventId={editEventId}
-                    setEventId={setEditEventId}
-                    eventDialogOpen={eventEditDialogOpen}
-                    setEventDialogOpen={setEventEditDialogOpen}
-                  />
                 </div>
                 <span
                   className={`text-sm px-2 py-1 rounded-full ${
@@ -128,13 +76,9 @@ export function MyEventsSection({
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Stalls</h3>
                     {enableButton && (
-                      <AddStall
-                        stallDialogOpen={stallDialogOpen}
-                        setStallDialogOpen={setStallDialogOpen}
-                        event={event}
-                        selectedEvent={selectedEvent}
-                        setSelectedEvent={setSelectedEvent}
-                      />
+                      <Link to={`/vendor/stalls/new/${event.id}`}>
+                        <Button><Plus className="h-4 w-4 mr-2" />Add Stall</Button>
+                      </Link>
                     )}
                   </div>
                   {stalls
@@ -145,34 +89,20 @@ export function MyEventsSection({
                           <CardTitle className="text-base flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2">
                               {stall.name}
-                              {enableButton && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditStallId(stall.id);
-                                    setStallEditDialogOpen(true);
-                                  }}
-                                >
-                                  Edit
-                                </Button>
+                              {stall.vendorId === user?.id && (
+                                <Link to={`/vendor/stalls/${stall.id}/edit`}>
+                                  <Button><Pencil className="h-4 w-4 mr-2" />Edit Stall</Button>
+                                </Link>
                               )}
-                              <EditStall
-                                stallId={editStallId}
-                                setStallId={setEditStallId}
-                                stallDialogOpen={stallEditDialogOpen}
-                                setStallDialogOpen={setStallEditDialogOpen}
-                              />
                             </div>
-                            {enableButton && (
-                              <AddProduct
-                                productDialogOpen={productDialogOpen}
-                                setProductDialogOpen={setProductDialogOpen}
-                                stall={stall}
-                                selectedStall={selectedStall}
-                                setSelectedStall={setSelectedStall}
-                              />
+                            {stall.vendorId === user?.id  && (
+                              <Link to={`/vendor/products/new/${stall.id}`}>
+                                <Button><Plus className="h-4 w-4 mr-2" />Add Product</Button>
+                              </Link>
                             )}
+                            {/* <pre className="text-xs overflow-auto max-h-32">
+                              {JSON.stringify(stall, null, 2)}
+                            </pre> */}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -186,24 +116,11 @@ export function MyEventsSection({
                                       <h4 className="font-medium">
                                         {product.name}
                                       </h4>
-                                      {enableButton && (
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => {
-                                            setEditProductId(product.id);
-                                            setProductEditDialogOpen(true);
-                                          }}
-                                        >
-                                          Edit
-                                        </Button>
+                                      {stall.vendorId === user?.id  && (
+                                        <Link to={`/vendor/products/${product.id}/edit`}>
+                                          <Button><Pencil className="h-4 w-4 mr-2" />Edit</Button>
+                                        </Link>
                                       )}
-                                      <EditProduct
-                                        productId={editProductId}
-                                        setProductId={setEditProductId}
-                                        productDialogOpen={productEditDialogOpen}
-                                        setProductDialogOpen={setProductEditDialogOpen}
-                                      />
                                     </div>
                                     <img
                                       src={

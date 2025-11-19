@@ -5,8 +5,8 @@ import {
   Stall,
   Product,
 } from "@shared/schema";
-import { AddEvent } from "@/components/event/add-event";
-import { Loader2} from "lucide-react";
+import { Link } from "wouter";
+import { Loader2, Plus} from "lucide-react";
 import { useState } from "react";
 import { MyEventsSection } from "@/components/dashboard/my-events-section";
 import { Input } from "@/components/ui/input";
@@ -19,17 +19,8 @@ interface VendorDashboardProps {
 
 export default function VendorDashboard({ searchTerm = "", setSearchTerm }: VendorDashboardProps) {
   const { user } = useAuth();
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
-  const [eventEditDialogOpen, setEventEditDialogOpen] = useState(false);
   const [stallDialogOpen, setStallDialogOpen] = useState(false);
-  const [stallEditDialogOpen, setStallEditDialogOpen] = useState(false);
-  const [productDialogOpen, setProductDialogOpen] = useState(false);
-  const [productEditDialogOpen, setProductEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [selectedStall, setSelectedStall] = useState<Stall | null>(null);
-  const [editEventId, setEditEventId] = useState<number | null>(null);
-  const [editStallId, setEditStallId] = useState<number | null>(null);
-  const [editProductId, setEditProductId] = useState<number | null>(null);
 
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -40,7 +31,7 @@ export default function VendorDashboard({ searchTerm = "", setSearchTerm }: Vend
   });
 
   const { data: products, isLoading: loadingProducts } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/products/all"],
   });
 
   // First, filter products based on search term
@@ -130,35 +121,14 @@ export default function VendorDashboard({ searchTerm = "", setSearchTerm }: Vend
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">My Events</h2>
-              <AddEvent
-                eventDialogOpen={eventDialogOpen}
-                setEventDialogOpen={setEventDialogOpen}
-              />
+              <Link to="/vendor/events/new">
+              <button className="px-3 py-2 border rounded-md flex items-center"><Plus className="h-4 w-4 mr-2" />Add Event</button>
+              </Link>
             </div>
             <MyEventsSection
               events={myEvents}
               stalls={myStalls}
               products={matchedProducts}
-              editEventId={editEventId}
-              setEditEventId={setEditEventId}
-              eventEditDialogOpen={eventEditDialogOpen}
-              setEventEditDialogOpen={setEventEditDialogOpen}
-              stallDialogOpen={stallDialogOpen}
-              setStallDialogOpen={setStallDialogOpen}
-              stallEditDialogOpen={stallEditDialogOpen}
-              setStallEditDialogOpen={setStallEditDialogOpen}
-              selectedEvent={selectedEvent}
-              setSelectedEvent={setSelectedEvent}
-              productDialogOpen={productDialogOpen}
-              setProductDialogOpen={setProductDialogOpen}
-              productEditDialogOpen={productEditDialogOpen}
-              setProductEditDialogOpen={setProductEditDialogOpen}
-              selectedStall={selectedStall}
-              setSelectedStall={setSelectedStall}
-              editStallId={editStallId}
-              setEditStallId={setEditStallId}
-              editProductId={editProductId}
-              setEditProductId={setEditProductId}
               enableButton={true}
             />
           </section>
@@ -174,10 +144,7 @@ export default function VendorDashboard({ searchTerm = "", setSearchTerm }: Vend
               setStallDialogOpen={setStallDialogOpen}
               selectedEvent={selectedEvent}
               setSelectedEvent={setSelectedEvent}
-              productDialogOpen={productDialogOpen}
-              setProductDialogOpen={setProductDialogOpen}
-              selectedStall={selectedStall}
-              setSelectedStall={setSelectedStall}
+              enableButton={true}
             />
           </section>
         </div>

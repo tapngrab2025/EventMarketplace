@@ -1,9 +1,11 @@
 import { Event, Stall, Product } from "@shared/schema";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEFAULT_IMAGES } from "@/config/constants";
-import { AddStall } from "@/components/stall/add-stall";
-import { AddProduct } from "@/components/product/add-product";
+import { Link } from "wouter";
 import { EventCoupons } from "@/components/coupon/event-coupons";
+import { AddStall } from "../stall/add-stall";
+import { Pencil, Plus } from "lucide-react";
 
 interface OtherEventsSectionProps {
   events?: Event[];
@@ -13,10 +15,7 @@ interface OtherEventsSectionProps {
   setStallDialogOpen: (open: boolean) => void;
   selectedEvent: Event | null;
   setSelectedEvent: (event: Event | null) => void;
-  productDialogOpen: boolean;
-  setProductDialogOpen: (open: boolean) => void;
-  selectedStall: Stall | null;
-  setSelectedStall: (stall: Stall | null) => void;
+  enableButton: boolean | false;
 }
 
 export function OtherEventsSection({
@@ -27,10 +26,7 @@ export function OtherEventsSection({
   setStallDialogOpen,
   selectedEvent,
   setSelectedEvent,
-  productDialogOpen,
-  setProductDialogOpen,
-  selectedStall,
-  setSelectedStall,
+  enableButton,
 }: OtherEventsSectionProps) {
   return (
     <div className="grid gap-6">
@@ -43,11 +39,10 @@ export function OtherEventsSection({
               <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <span className="text-xl">{event.name}</span>
                 <span
-                  className={`text-sm px-2 py-1 rounded-full ${
-                    event.approved
+                  className={`text-sm px-2 py-1 rounded-full ${event.approved
                       ? "bg-green-100 text-green-700"
                       : "bg-yellow-100 text-yellow-700"
-                  }`}
+                    }`}
                 >
                   {event.approved ? "Approved" : "Pending"}
                 </span>
@@ -67,7 +62,7 @@ export function OtherEventsSection({
                     Dates: {new Date(event.startDate).toLocaleDateString()} -{" "}
                     {new Date(event.endDate).toLocaleDateString()}
                   </p>
-                  
+
                   {/* Display coupons for this event */}
                   <div className="mt-4">
                     <EventCoupons eventId={event.id} />
@@ -90,14 +85,19 @@ export function OtherEventsSection({
                       <Card key={stall.id} className="mb-4">
                         <CardHeader>
                           <CardTitle className="text-base flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                            <span>{stall.name}</span>
-                            <AddProduct
-                              productDialogOpen={productDialogOpen}
-                              setProductDialogOpen={setProductDialogOpen}
-                              stall={stall}
-                              selectedStall={selectedStall}
-                              setSelectedStall={setSelectedStall}
-                            />
+                            <div className="flex flex-wrap items-center gap-2">
+                              {stall.name}
+                              {enableButton && (
+                                <Link to={`/vendor/stalls/${stall.id}/edit`}>
+                                  <Button><Pencil className="h-4 w-4 mr-2" />Edit Stall</Button>
+                                </Link>
+                              )}
+                            </div>
+                            {enableButton && (
+                              <Link to={`/vendor/products/new/${stall.id}`}>
+                                <Button><Plus className="h-4 w-4 mr-2" />Add Product</Button>
+                              </Link>
+                            )}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -113,13 +113,17 @@ export function OtherEventsSection({
                                       className="w-full h-32 sm:h-24 object-cover rounded-md mb-2"
                                     />
                                     <h4 className="font-medium">{product.name}</h4>
+                                    {enableButton && (
+                                      <Link to={`/vendor/products/${product.id}/edit`}>
+                                        <Button><Pencil className="h-4 w-4 mr-2" />Edit</Button>
+                                      </Link>
+                                    )}
                                     <div className="flex flex-wrap items-center gap-2 mt-2">
                                       <span
-                                        className={`text-sm px-2 py-1 rounded-full ${
-                                          product.approved
+                                        className={`text-sm px-2 py-1 rounded-full ${product.approved
                                             ? "bg-green-100 text-green-700"
                                             : "bg-yellow-100 text-yellow-700"
-                                        }`}
+                                          }`}
                                       >
                                         {product.approved ? "Approved" : "Pending"}
                                       </span>

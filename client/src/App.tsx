@@ -8,6 +8,12 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
 import VendorDashboard from "@/pages/vendor-dashboard";
+import VendorEventNew from "./pages/vendor/events/new";
+import VendorEventEdit from "./pages/vendor/events/[id]/edit";
+import VendorStallNew from "./pages/vendor/stalls/new/[eventId]";
+import VendorStallEdit from "./pages/vendor/stalls/[id]/edit";
+import VendorProductNew from "./pages/vendor/products/new/[stallId]";
+import VendorProductEdit from "./pages/vendor/products/[id]/edit";
 import AdminDashboard from "@/pages/admin-dashboard";
 import ProfilePage from "@/pages/profile-page";
 import OrganizerDashboard from "@/pages/organizer-dashboard";
@@ -111,6 +117,114 @@ function Router() {
         component={() => (
           <VendorLayout>
             <VendorDashboard />
+          </VendorLayout>
+        )}
+        roles={["vendor"]}
+      />
+      <ProtectedRoute
+        path="/vendor/events/new"
+        component={() => (
+          <VendorLayout>
+            <VendorEventNew />
+          </VendorLayout>
+        )}
+        roles={["vendor", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/vendor/events/:id/edit"
+        component={() => (
+          <VendorLayout>
+            <VendorEventEdit />
+          </VendorLayout>
+        )}
+        roles={["vendor", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/vendor/stalls/new/:eventId"
+        component={() => (
+          <VendorLayout>
+            <VendorStallNew />
+          </VendorLayout>
+        )}
+        roles={["vendor", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/vendor/stalls/:id/edit"
+        component={() => (
+          <VendorLayout>
+            <VendorStallEdit />
+          </VendorLayout>
+        )}
+        roles={["vendor", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/vendor/products/new/:stallId"
+        component={() => (
+          <VendorLayout>
+            <VendorProductNew />
+          </VendorLayout>
+        )}
+        roles={["vendor", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/vendor/products/:id/edit"
+        component={() => (
+          <VendorLayout>
+            <VendorProductEdit />
+          </VendorLayout>
+        )}
+        roles={["vendor", "organizer"]}
+      />
+      <ProtectedRoute
+        path="/vendor/events/new"
+        component={() => (
+          <VendorLayout>
+            {(() => { const Page = require("./pages/vendor/events/new").default; return <Page/>; })()}
+          </VendorLayout>
+        )}
+        roles={["vendor"]}
+      />
+      <ProtectedRoute
+        path="/vendor/events/:id/edit"
+        component={() => (
+          <VendorLayout>
+            {(() => { const Page = require("./pages/vendor/events/[id]/edit").default; return <Page/>; })()}
+          </VendorLayout>
+        )}
+        roles={["vendor"]}
+      />
+      <ProtectedRoute
+        path="/vendor/stalls/new/:eventId"
+        component={() => (
+          <VendorLayout>
+            {(() => { const Page = require("./pages/vendor/stalls/new/[eventId]").default; return <Page/>; })()}
+          </VendorLayout>
+        )}
+        roles={["vendor"]}
+      />
+      <ProtectedRoute
+        path="/vendor/stalls/:id/edit"
+        component={() => (
+          <VendorLayout>
+            {(() => { const Page = require("./pages/vendor/stalls/[id]/edit").default; return <Page/>; })()}
+          </VendorLayout>
+        )}
+        roles={["vendor"]}
+      />
+      <ProtectedRoute
+        path="/vendor/products/new/:stallId"
+        component={() => (
+          <VendorLayout>
+            {(() => { const Page = require("./pages/vendor/products/new/[stallId]").default; return <Page/>; })()}
+          </VendorLayout>
+        )}
+        roles={["vendor"]}
+      />
+      <ProtectedRoute
+        path="/vendor/products/:id/edit"
+        component={() => (
+          <VendorLayout>
+            {(() => { const Page = require("./pages/vendor/products/[id]/edit").default; return <Page/>; })()}
           </VendorLayout>
         )}
         roles={["vendor"]}

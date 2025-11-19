@@ -387,7 +387,12 @@ export class DatabaseStorage implements IStorage {
       and(eq(products.archived, false), 
       eq(products.approved, true))
     ).orderBy(products.id, 'desc');
+  }
 
+  async getProductsAll(): Promise<Product[]> {
+    return await db.select().from(products).where(
+      and(eq(products.archived, false))
+    ).orderBy(products.id, 'desc');
   }
 
   async getProductsFeatured(): Promise<ProductWithDetails[]> {
@@ -447,13 +452,15 @@ export class DatabaseStorage implements IStorage {
       .from(products)
       .where(and(eq(products.id, id), eq(products.archived, false)));
 
-    if (!productStallId) return [];
+    if (!productStallId || productStallId.length === 0) return [];
+    const stallId = productStallId[0]?.stallId;
+    if (!stallId) return [];
     const relativeProducts = await db
       .select()
       .from(products)
       .where(
         and(
-          eq(products.stallId, productStallId[0].stallId),
+          eq(products.stallId, stallId),
           ne(products.id, id)
         )
       )

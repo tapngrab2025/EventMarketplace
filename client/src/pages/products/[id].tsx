@@ -2,14 +2,13 @@ import { useRoute } from "wouter";
 import { Product } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShoppingCart } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import NotFound from "./not-found";
 import ProductCard from "@/components/products/product-card";
-import SignUp from "@/components/common/signup";
 import CountDown from "@/components/product/count-down";
 import { useCart } from "@/hooks/use-cart";
-import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useProductFeedback } from "@/hooks/use-product-feedback";
 import { ProductFeedbackForm } from "@/components/product/product-feedback-form";
@@ -22,12 +21,13 @@ export default function ProductDetails() {
   const { user } = useAuth();
   const productId = parseInt(id!);
   const { addToCart } = useCart();
+  const [animateItems, setAnimateItems] = useState(false);
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: [`/api/product/${id}`],
   });
 
-  const { data: products, isLoadingRelative } = useQuery<Product>({
+  const { data: products, isLoadingRelative } = useQuery<Product[]>({
     queryKey: [`/api/product/${id}/relative`],
   });
   
@@ -39,23 +39,35 @@ export default function ProductDetails() {
     isLoading: isLoadingFeedback,
   } = useProductFeedback(productId);
 
+  useEffect(() => {
+    setAnimateItems(true);
+  }, []);
+
   if (isLoading || isLoadingRelative) {
       return (
           <div className="flex items-center justify-center min-h-screen">
-              <Loader2 className="h-8 w-8 animate-spin text-border" />
+              <Loader2 className="h-12 w-12 animate-spin text-primaryGreen" />
           </div>
       );
   }
 
+  if (!product || !products) {
+    return <NotFound />;
+  }
+
   return (
-            <main className="container mx-auto py-20 px-4">
-            <section className="grid md:grid-cols-2 gap-8">
+            <div className="min-h-screen bg-gradient-to-b from-white to-teal-50 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500 opacity-5 rounded-full transform translate-x-1/3 -translate-y-1/3"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-primaryOrange opacity-5 rounded-full transform -translate-x-1/3 translate-y-1/3"></div>
+            <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-teal-300 opacity-5 rounded-full"></div>
+            <main className="container mx-auto py-20 px-4 relative z-10">
+            <section className={`grid md:grid-cols-2 gap-8 transition-all duration-700 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
                 <div className="space-y-4">
                     <div className="aspect-square overflow-hidden max-h-60 lg:max-h-[600px] rounded-lg">
                         <img
                             src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
                             alt={product.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                         />
                     </div>
                 </div>
@@ -100,7 +112,7 @@ export default function ProductDetails() {
                     </div>
                 </div>
             </section>
-            <section className="border-t pt-6 mt-6 space-y-4 my-20">
+            <section className={`border-t pt-6 mt-6 space-y-4 my-20 transition-all duration-700 delay-200 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 <h2 className="text-2xl font-semibold">Event Details</h2>
                 <div className="grid gap-4 text-2xl">
                     <p className="text-xl">{product.event?.description}</p>
@@ -109,13 +121,19 @@ export default function ProductDetails() {
             {products?.length === 0 ? (
                 <></>
             ) : (
-                <section className="pt-6 mt-6 space-y-4 text-center my-20">
+                <section className={`pt-6 mt-6 space-y-4 text-center my-20 transition-all duration-700 delay-300 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                     <h2 className="text-2xl font-semibold">Stalls Grabs</h2>
                     <p className="">Discover more of the activities with our curated event collections</p>
                     <div className="w-full max-w-7xl flex text-center">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14">
-                        {products?.map((product) => (
-                            <ProductCard key={product.id} product={product} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-14">
+                        {products?.map((product, index) => (
+                            <div
+                                key={product.id}
+                                className={`transition-all duration-500 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                                style={{ transitionDelay: `${300 + index * 50}ms` }}
+                            >
+                                <ProductCard product={product} />
+                            </div>
                         ))}
                         </div>
                     </div>
@@ -131,7 +149,7 @@ export default function ProductDetails() {
                     <CardContent>
                     {isLoadingFeedback ? (
                         <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin text-border" />
+                            <Loader2 className="h-6 w-6 animate-spin text-primaryGreen" />
                         </div>
                     ) : (
                         <>
@@ -168,5 +186,6 @@ export default function ProductDetails() {
             )}
             
         </main>
+        </div>
   );
 }
