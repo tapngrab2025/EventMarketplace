@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useEffect, useState } from "react";
+import { Images } from "@/config/images";
 
 export default function EventDetailsCityPage() {
     const { addToCart } = useCart();
@@ -146,7 +147,7 @@ export default function EventDetailsCityPage() {
                                                         to={`/products/${product?.products?.id}`}
                                                         className="bg-gray-100 text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-all duration-300"
                                                     >
-                                                        <img src="../src/assets/view.png" alt="view product" className="w-6 h-6" />
+                                                        <img src={Images.view} alt="view product" className="w-6 h-6" />
                                                     </Link>
                                                 </div>
                                             </CardContent>

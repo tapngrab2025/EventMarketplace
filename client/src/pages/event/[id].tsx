@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { EventCoupons } from "@/components/coupon/event-coupons";
 import { useEffect, useState } from "react";
+import { Images } from "@/config/images";
 
 export default function EventDetailsPage() {
   const { addToCart } = useCart();
@@ -168,7 +169,7 @@ export default function EventDetailsPage() {
                                     to={`/products/${product.id}`}
                                     className="bg-gray-100 text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-all duration-300"
                                   >
-                                    <img src="../src/assets/view.png" alt="view product" className="w-6 h-6" />
+                                    <img src={Images.view} alt="view product" className="w-6 h-6" />
                                   </Link>
                                 </div>
                               </CardContent>
