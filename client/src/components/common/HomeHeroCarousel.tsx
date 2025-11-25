@@ -43,11 +43,11 @@ export default function HomeHeroCarousel() {
       <div className="absolute bottom-0 left-0 w-[26rem] h-[26rem] bg-primaryGreen/10 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3" />
 
       <div className="absolute inset-x-0 bottom-24 text-center select-none pointer-events-none">
-        <span className="font-extrabold tracking-wider mix-blend-soft-light drop-shadow-sm">
-          <span className="text-6xl sm:text-8xl lg:text-[10rem] uppercase">
-            <span className="text-primaryOrange">Tap</span>
+        <span className="font-extrabold tracking-wider mix-blend-overlay drop-shadow-sm">
+          <span className="inline-block animate-wobble text-6xl sm:text-8xl lg:text-[10rem] uppercase">
+            <span className="text-white/80">Tap</span>
             <span className="mx-6 text-white/80">&</span>
-            <span className="text-primaryGreen">Grab</span>
+            <span className="text-white/80">Grab</span>
           </span>
         </span>
       </div>

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Product, Event } from "@shared/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
 import { Loader2, CalendarRange, MapPin } from "lucide-react";
@@ -22,6 +22,32 @@ import HomeHeroCarousel from "@/components/common/HomeHeroCarousel";
 interface VendorDashboardProps {
   searchTerm?: string;
 }
+function useInViewAnimation(threshold = 0.2) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.unobserve(entry.target); // animate only once
+          }
+        },
+        { threshold }
+      );
+
+      if (ref.current) {
+        observer.observe(ref.current);
+      }
+
+      return () => observer.disconnect();
+    }, 1000);
+  }, [threshold]);
+
+  return { ref, visible };
+}
 
 export default function HomePage(
   { searchTerm = "" }: VendorDashboardProps
@@ -30,11 +56,11 @@ export default function HomePage(
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [sortBy, setSortBy] = useState("newest");
-  const [animateItems, setAnimateItems] = useState(false);
 
-  useEffect(() => {
-    setAnimateItems(true);
-  }, []);
+
+  const afterHero = useInViewAnimation();
+  const features = useInViewAnimation();
+  const pricing = useInViewAnimation();
 
   const testimonials = [
     {
@@ -217,17 +243,17 @@ export default function HomePage(
         {true ? <HomeHeroCarousel /> : <BrandHeroCarousel />}
       </section>
       {/* Modernized: "Let's Find Your Grab" */}
-      <section className="relative pt-44 pb-20 px-6 mb-32 overflow-hidden -mt-16 bg-white">
+      <section ref={afterHero.ref} className="relative pt-44 pb-20 px-6 mb-32 overflow-hidden -mt-16 bg-white">
         {/* Decorative shapes */}
         <div className="absolute -top-24 -left-24 w-80 h-80 bg-black/5 rounded-full" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primaryOrange/10 rounded-full" />
 
-        <div className={`text-center mb-16 transition-all duration-700 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}>
+        <div className={`text-center mb-16 transition-all duration-700 delay-500 ${afterHero.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}>
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Let's Find Your Grab</h1>
           <p className="text-gray-600">Discover your favorite entertainment right here</p>
         </div>
 
-        <div className={`w-full max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 transition-all duration-700 delay-100 ${animateItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <div className={`w-full max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 transition-all duration-700 delay-100 ${afterHero.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="flex-1">
             <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl w-full shadow-sm ring-1 ring-gray-200">
               <Input
@@ -298,7 +324,7 @@ export default function HomePage(
 
         </div>
 
-        <div className="w-full max-w-4xl mx-auto">
+        <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 delay-500 ${afterHero.visible ? 'opacity-100' : 'opacity-0 translate-x-1/3'}`}>
           <h2 className="text-h2 font-semibold text-gray-900 mb-6 text-center">Popular Cities</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative rounded-lg overflow-hidden shadow-lg">
@@ -359,16 +385,16 @@ export default function HomePage(
       </section>
 
       {/* Featured Grabs */}
-      <section className="min-h-screen flex flex-col items-center justify-center p-6 mb-32 relative">
+      <section ref={features.ref} className="min-h-screen flex flex-col items-center justify-center p-6 mb-32 relative">
         {/* subtle accent shape */}
         <div className="absolute -top-10 left-10 w-64 h-64 bg-primaryGreen/10 rounded-full" />
         <div className="">
-          <div className="text-center mb-20">
+          <div className={`text-center mb-20 transition-all duration-700 ${features.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Featured Grabs</h1>
             <p className="text-gray-600">Discover more of the activities with our curated event collections</p>
           </div>
 
-          <div className="w-full max-w-7xl">
+          <div className={`w-full max-w-7xl transition-all duration-1000 delay-500 ${features.visible ? 'opacity-100' : 'opacity-0 translate-y-1/3'}`}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
               {filteredProducts?.length === 0 ? (

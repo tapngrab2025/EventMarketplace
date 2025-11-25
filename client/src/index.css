@@ -148,3 +148,17 @@
     outline: none !important;
   }
 }
+
+@keyframes wobbleX {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
+}
+
+@layer utilities {
+  .animate-wobble {
+    animation: wobbleX 6s ease-in-out infinite;
+  }
+}
