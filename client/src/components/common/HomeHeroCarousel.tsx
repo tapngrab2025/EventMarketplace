@@ -80,7 +80,7 @@ export default function HomeHeroCarousel() {
                     </div>
                   </div>
                   <div className="order-1 lg:order-2 w-full">
-                    <div className="relative rounded-2xl overflow-hidden shadow-xl bg-white/50 backdrop-blur-sm">
+                    <div className="relative rounded-2xl overflow-hidden [filter:drop-shadow(-15px_10px_10px_rgba(0,0,0,0.2))] bg-white/50 backdrop-blur-sm">
                       <img
                         src={slide.imageUrl}
                         alt={slide.title}
