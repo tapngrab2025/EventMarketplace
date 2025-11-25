@@ -17,6 +17,7 @@ import "slick-carousel/slick/slick.css";
 import { Images } from "@/config/images";
 import BrandHeroCarousel from "@/components/common/BrandHeroCarousel";
 import HeroCarousel from "@/components/common/HeroCarousel";
+import HomeHeroCarousel from "@/components/common/HomeHeroCarousel";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -211,13 +212,12 @@ export default function HomePage(
     arrows: false,
   }
   return (
-    <main className="pt-8 min-h-screen">
-      <section className="bg-primaryGreen -mt-8 text-white py-8 md:py-12 overflow-hidden">
-        <BrandHeroCarousel />
-        {/* <HeroCarousel/> */}
+    <main className="pt-20 min-h-screen">
+      <section className="-mt-20">
+        {true ? <HomeHeroCarousel /> : <BrandHeroCarousel />}
       </section>
       {/* Modernized: "Let's Find Your Grab" */}
-      <section className="relative py-20 px-6 mb-32 overflow-hidden">
+      <section className="relative pt-44 pb-20 px-6 mb-32 overflow-hidden -mt-16 bg-white">
         {/* Decorative shapes */}
         <div className="absolute -top-24 -left-24 w-80 h-80 bg-black/5 rounded-full" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primaryOrange/10 rounded-full" />

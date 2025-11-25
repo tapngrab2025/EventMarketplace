@@ -8,18 +8,19 @@ import { Link } from "wouter";
 
 interface DefaultLayoutProps {
     children: ReactNode;
+    transparentHeader?: boolean;
 }
 
 export function DefaultLayout(
-    { children }: DefaultLayoutProps
+    { children, transparentHeader = false }: DefaultLayoutProps
 ) {
     const [searchTerm, setSearchTerm] = useState("");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     return (
         <div className="min-h-screen flex">
             <div className="flex-1">
-                <header className="border-b">
-                    <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+                <header className={`${transparentHeader ? 'fixed inset-x-0 top-0 z-20 bg-white/30 backdrop-blur-md' : 'border-b bg-white'}`}>
+                    <div className={`container mx-auto px-4 py-4 flex items-center justify-between`}>
                         <Logo />
                         <DefaultNavigation
                             isMobileMenuOpen={isMobileMenuOpen}

@@ -37,7 +37,7 @@ function Router() {
     <Switch>
       <Route path="/" component={
         () => (
-          <DefaultLayout>
+          <DefaultLayout transparentHeader>
             <HomePage />
           </DefaultLayout>
         )
