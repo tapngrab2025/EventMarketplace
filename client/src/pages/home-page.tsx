@@ -3,7 +3,7 @@ import { Product, Event } from "@shared/schema";
 import { useEffect, useState, useRef } from "react";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
-import { Loader2, CalendarRange, MapPin, Ticket, ShieldCheck, Trophy, BarChart3, Clock } from "lucide-react";
+import { Loader2, CalendarRange, MapPin, Ticket, ShieldCheck, Trophy, BarChart3, Clock, Star, ArrowLeft, ArrowRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -61,6 +61,8 @@ export default function HomePage(
   const afterHero = useInViewAnimation();
   const features = useInViewAnimation();
   const whyUs = useInViewAnimation();
+  const testimonialsShowcase = useInViewAnimation();
+  const testimonialSliderRef = useRef<Slider | null>(null);
 
   const testimonials = [
     {
@@ -84,7 +86,7 @@ export default function HomePage(
     queryKey: ["/api/events"],
   });
 
-    useEffect(() => {
+  useEffect(() => {
     initMap();
   }, [events]);
 
@@ -115,7 +117,7 @@ export default function HomePage(
     // Create the map centered at the default position
     const mapElement = document.getElementById('all_events') as HTMLElement;
     if (!mapElement) return;
-    
+
     const map = new google.maps.Map(mapElement, {
       zoom: 8, // Adjust zoom level as needed
       center: defaultPosition,
@@ -128,7 +130,7 @@ export default function HomePage(
     if (events && events.length > 0) {
       // Create bounds to fit all markers
       const bounds = new google.maps.LatLngBounds();
-      
+
       // Process each event to create markers
       events.forEach(event => {
         // You need to geocode the location string to get coordinates
@@ -153,9 +155,9 @@ export default function HomePage(
                   <a href="/event/${event.id}" style="padding:5px;background-color: #0296A4; color: #FFFFFF; text-decoration: none; font-weight: bold;border-radius:10px;margin-bottom:10px;">View Details</a>
                 </div>
               `,
-              disableAutoPan: true,
-              minWidth: 250,
-              headerDisabled: true
+                disableAutoPan: true,
+                minWidth: 250,
+                headerDisabled: true
               });
 
               const mapPin = Images.pin
@@ -209,7 +211,7 @@ export default function HomePage(
     return new Promise((resolve) => {
       // Create a geocoder instance
       const geocoder = new google.maps.Geocoder();
-      
+
       // Geocode the address
       geocoder.geocode({ address }, (results, status) => {
         if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
@@ -341,43 +343,43 @@ export default function HomePage(
             </div>
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-            <Link href="/event/city/colombo">
-              <img
-                src={Images.colombo}
-                alt="Colombo"
-                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold drop-shadow-md">COLOMBO</h3>
-              </div>
+              <Link href="/event/city/colombo">
+                <img
+                  src={Images.colombo}
+                  alt="Colombo"
+                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
+                  <h3 className="text-white text-2xl font-bold drop-shadow-md">COLOMBO</h3>
+                </div>
               </Link>
             </div>
 
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-            <Link href="/event/city/galle">
-              <img
-                src={Images.galle}
-                alt="Galle"
-                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold drop-shadow-md">GALLE</h3>
-              </div>
+              <Link href="/event/city/galle">
+                <img
+                  src={Images.galle}
+                  alt="Galle"
+                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
+                  <h3 className="text-white text-2xl font-bold drop-shadow-md">GALLE</h3>
+                </div>
               </Link>
             </div>
 
 
             <div className="relative rounded-lg overflow-hidden shadow-lg">
-            <Link href="/event/city/matara">
-              <img
-                src={Images.matara}
-                alt="Matara"
-                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                <h3 className="text-white text-2xl font-bold drop-shadow-md">MATARA</h3>
-              </div>
+              <Link href="/event/city/matara">
+                <img
+                  src={Images.matara}
+                  alt="Matara"
+                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
+                  <h3 className="text-white text-2xl font-bold drop-shadow-md">MATARA</h3>
+                </div>
               </Link>
             </div>
           </div>
@@ -535,8 +537,7 @@ export default function HomePage(
       </section>
 
       {/* What People Say */}
-      <section className="py-20 testimonial mt-32 bg-neutral-900 text-white relative overflow-hidden">
-        {/* accent divider */}
+      {/* <section className="py-20 testimonial mt-32 bg-neutral-900 text-white relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-primaryOrange" />
         <div className="container mx-auto px-6 text-center mb-12">
           <h2 className="text-h2 font-bold mb-4">What People Say</h2>
@@ -557,6 +558,74 @@ export default function HomePage(
               </div>
             ))}
           </Slider>
+        </div>
+      </section> */}
+
+      <section ref={testimonialsShowcase.ref} className="py-20 bg-white relative">
+        <div className={`container mx-auto px-6 transition-all duration-700 ${testimonialsShowcase.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1/3'}`}>
+          <h2 className="text-h2 font-bold mb-4">What People Say</h2>
+          <p className="text-lg mb-4">Discover why thousands rely on tapNgrab for seamless ticketing, effortless transfers, and a better event journey.</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            <div className="rounded-2xl bg-[#0B242B] text-white p-8 flex flex-col justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 text-primaryGreen font-medium mb-4">
+                  <span className="inline-block w-2 h-2 rounded-full bg-primaryOrange"></span>
+                  <span>Testimonials</span>
+                </div>
+                <div className="text-5xl font-bold">4.9</div>
+                <div className="flex items-center gap-1 mt-2 text-primaryOrange">
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                </div>
+                <p className="text-white/70 mt-2">(40+ Reviews)</p>
+                <p className="text-white/70 mt-4">Experiences from live events and on‑site grabs</p>
+              </div>
+              <div className="mt-6 flex -space-x-2">
+                <img src={Images.avatar} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
+                <img src={Images.avatar} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
+                <img src={Images.avatar} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
+                <div className="w-9 h-9 rounded-full bg-primaryOrange text-white flex items-center justify-center text-sm">+</div>
+              </div>
+            </div>
+            <div className="lg:col-span-2">
+              <div className="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow-sm relative h-full flex items-center">
+                <Slider ref={testimonialSliderRef} {...testimonialSliderSettings} className="w-full">
+                  {testimonials.map((t, i) => (
+                    <div key={i} className="px-2 sm:px-4 w-full">
+                      <div className="flex items-start gap-4">
+                        <div className="flex items-center gap-1 text-primaryOrange">
+                          <Star className="w-4 h-4 fill-current" />
+                          <Star className="w-4 h-4 fill-current" />
+                          <Star className="w-4 h-4 fill-current" />
+                          <Star className="w-4 h-4 fill-current" />
+                          <Star className="w-4 h-4 fill-current" />
+                        </div>
+                      </div>
+                      <p className="text-gray-700 mt-3">{t.text}</p>
+                      <div className="mt-4 flex items-center gap-3">
+                        <img src={t.image} alt={t.author} className="w-10 h-10 rounded-full ring-2 ring-primaryOrange/40" />
+                        <div>
+                          <p className="font-semibold text-gray-900">{t.author}</p>
+                          <p className="text-sm text-gray-500">Event Attendee</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </Slider>
+                <div className="absolute bottom-4 right-4 flex gap-2">
+                  <button onClick={() => testimonialSliderRef.current?.slickPrev()} className="h-9 w-9 rounded-full bg-primaryGreen text-white hover:bg-primaryOrange grid place-items-center">
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => testimonialSliderRef.current?.slickNext()} className="h-9 w-9 rounded-full bg-primaryGreen text-white hover:bg-primaryOrange grid place-items-center">
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
