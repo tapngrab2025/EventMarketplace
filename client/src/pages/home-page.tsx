@@ -3,7 +3,7 @@ import { Product, Event } from "@shared/schema";
 import { useEffect, useState, useRef } from "react";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
-import { Loader2, CalendarRange, MapPin } from "lucide-react";
+import { Loader2, CalendarRange, MapPin, Ticket, ShieldCheck, Trophy, BarChart3, Clock } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -60,7 +60,7 @@ export default function HomePage(
 
   const afterHero = useInViewAnimation();
   const features = useInViewAnimation();
-  const pricing = useInViewAnimation();
+  const whyUs = useInViewAnimation();
 
   const testimonials = [
     {
@@ -446,7 +446,7 @@ export default function HomePage(
       </section>
 
       {/* "What Makes Us Uncommon" remains green as requested */}
-      <section className="whatMakes py-32 my-32 bg-primaryGreen relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+      {/* <section className="whatMakes py-32 my-32 bg-primaryGreen relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-h2 font-bold mb-4">What Makes Us Uncommon</h2>
           <p className="text-lg mb-12">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
@@ -464,6 +464,73 @@ export default function HomePage(
               <p className="text-lg font-semibold">User Friendly</p>
             </div>
           </div>
+        </div>
+      </section> */}
+
+      <section ref={whyUs.ref} className="relative whatMakes py-32 my-32 bg-primaryGreen relative bg-cover bg-center text-white py-12  min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
+        <div className={`container mx-auto px-6 transition-all duration-1000 delay-500 ${whyUs.visible ? 'opacity-100' : 'opacity-0 translate-y-1/3'}`}>
+          <div className="text-center mb-12 ">
+            <h2 className="text-h2 font-bold mb-4">Why Choose Us</h2>
+            <p className="text-lg mb-12">Enjoy Every Moment — No Lines, No Delays, No Stress.</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-stretch">
+
+            {/* LEFT IMAGE — matches height of right side */}
+            <div className="lg:col-span-1 h-full">
+              <img
+                src={Images.groupOfPeople}
+                alt="Event"
+                className="rounded-xl w-full h-full object-cover min-h-[400px]"
+              />
+            </div>
+
+            {/* RIGHT FEATURE BOXES — equal height boxes */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+
+              <div className="rounded-xl p-6 bg-[#0B242B] text-white flex flex-col justify-top h-full">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primaryOrange/20 text-primaryOrange mb-4">
+                  <Ticket className="w-5 h-5" />
+                </div>
+
+                <h3 className="font-semibold mb-1">Instant E-Tickets</h3>
+                <p className="text-white/80 text-sm">
+                  Secure digital tickets delivered instantly with QR verification. No printing, no waiting—your entry pass is always ready on your phone, ensuring a smooth and hassle-free event experience.
+                </p>
+              </div>
+
+              <div className="rounded-xl p-6 bg-[#0B242B] text-white flex flex-col justify-top h-full">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primaryGreen/20 text-primaryGreen mb-4">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold mb-1">Verified Vendors</h3>
+                <p className="text-white/80 text-sm">
+                  Every stall and organizer is verified for trust and authenticity. We ensure that all event partners meet strict quality standards, so you can purchase with confidence—whether it’s food, merchandise, or exclusive event add-ons. No scams, no uncertainty—only trusted vendors curated for a safe and reliable experience.
+                </p>
+              </div>
+
+              <div className="rounded-xl p-6 bg-[#0B242B] text-white flex flex-col justify-top h-full">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/20 text-teal-500 mb-4">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold mb-1">Never Miss a Moment</h3>
+                <p className="text-white/80 text-sm">
+                  No more stepping out during the best part of the event. With our advance ordering and seamless pickup options, you can get what you need without missing a single minute. Stay immersed in the music, the energy, and the excitement—our platform keeps everything running smoothly in the background while you enjoy the show.
+                </p>
+              </div>
+
+              <div className="rounded-xl p-6 bg-[#0B242B] text-white flex flex-col justify-top h-full">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 text-white mb-4">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold mb-1">Transparent Pricing</h3>
+                <p className="text-white/80 text-sm">
+                  Clear fees and fair pricing across all events and grabs. No hidden charges, no last-minute surprises—just honest, straightforward pricing so you always know exactly what you're paying for. Enjoy full visibility and make confident decisions every time you purchase.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </section>
 

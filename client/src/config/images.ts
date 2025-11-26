@@ -12,6 +12,7 @@ export const Images = {
   pin: new URL('@/assets/pin.png', import.meta.url).href,
   avatar: new URL('@/assets/Avatar.png', import.meta.url).href,
   view: new URL('@/assets/view.png', import.meta.url).href,
+  groupOfPeople: new URL('@/assets/A-group-of-happy-people-at-a-concert-or-festival.png', import.meta.url).href,
 
 
 } as const;
