@@ -66,14 +66,19 @@ export default function HomePage(
 
   const testimonials = [
     {
-      text: "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      author: "Noa Woolloff",
-      image: Images.avatar
+      text: "Using this platform has transformed the way we manage our projects. The interface is intuitive and the support team is always ready to help.",
+      author: "Emma Thompson",
+      image: Images.emmaThompson
     },
     {
-      text: "Another testimonial about the amazing service. It has been a great experience using this platform.",
-      author: "John Doe",
-      image: Images.avatar
+      text: "The attention to detail and personalized approach made our experience seamless. Highly recommend to anyone looking for quality results.",
+      author: "Sophia Lee",
+      image: Images.sophiaLee
+    },
+    {
+      text: "I was impressed with the speed and reliability of the services. It truly exceeded my expectations!",
+      author: "David Miller",
+      image: Images.davidMiller
     }
   ];
 
@@ -584,9 +589,9 @@ export default function HomePage(
                 <p className="text-white/70 mt-4">Experiences from live events and on‑site grabs</p>
               </div>
               <div className="mt-6 flex -space-x-2">
-                <img src={Images.avatar} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
-                <img src={Images.avatar} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
-                <img src={Images.avatar} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
+                <img src={Images.emmaThompson} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
+                <img src={Images.davidMiller} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
+                <img src={Images.sophiaLee} alt="reviewer" className="w-9 h-9 rounded-full ring-2 ring-white/20" />
                 <div className="w-9 h-9 rounded-full bg-primaryOrange text-white flex items-center justify-center text-sm">+</div>
               </div>
             </div>

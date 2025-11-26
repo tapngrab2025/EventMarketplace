@@ -13,6 +13,9 @@ export const Images = {
   avatar: new URL('@/assets/Avatar.png', import.meta.url).href,
   view: new URL('@/assets/view.png', import.meta.url).href,
   groupOfPeople: new URL('@/assets/A-group-of-happy-people-at-a-concert-or-festival.png', import.meta.url).href,
+  emmaThompson: new URL('@/assets/Emma-Thompson.png', import.meta.url).href,
+  davidMiller: new URL('@/assets/David-Miller.png', import.meta.url).href,
+  sophiaLee: new URL('@/assets/Sophia-Lee.png', import.meta.url).href,
 
 
 } as const;
