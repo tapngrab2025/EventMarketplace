@@ -72,7 +72,7 @@ export function CheckoutForm({ onSuccess, total, items }: { onSuccess: () => voi
           }))
         });
         console.log(res);
-// throw new Error("Process stopped for debugging");
+        throw new Error("Process stopped for debugging");
         const formData = await res.json();
         
         // Create and submit PayHere form

@@ -375,62 +375,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/orders/payhere", async (req, res) => {
-  try {
-    const { fullName, email, phone, total, items } = req.body;
-    
-    // console.log(items);
-    // exit(1);
-    // Create order in your database first
-    const order = await storage.createOrder({
-      ...req.body,
-      user_id: req.user.id,
-      status: "pending",
-      paymentMethod: "payhere"
-    });
+    try {
+      const { fullName, email, phone, total, items } = req.body;
+      
+      // console.log(items);
+      // exit(1);
+      // Create order in your database first
+      const order = await storage.createOrder({
+        ...req.body,
+        user_id: req.user.id,
+        status: "pending",
+        paymentMethod: "payhere"
+      });
 
-    // Generate PayHere form data
-    const merchantSecret = config.payhere.merchantSecret;
-    const merchantId = config.payhere.merchantId;
-    const baseUrl = config.baseUrl;
-    const orderId = order.id;
-    const amountFormatted = (total / 100).toFixed(2);
-    const currency = "LKR";
+      // Generate PayHere form data
+      const merchantSecret = config.payhere.merchantSecret;
+      const merchantId = config.payhere.merchantId;
+      const baseUrl = config.baseUrl;
+      const orderId = order.id;
+      const amountFormatted = (total / 100).toFixed(2);
+      const currency = "LKR";
 
-    const hash = crypto
-      .createHash("md5")
-      .update(
-        `${merchantId}${orderId}${amountFormatted}${currency}${crypto
-          .createHash("md5")
-          .update(merchantSecret)
-          .digest("hex")
-          .toUpperCase()}`
-      )
-      .digest("hex")
-      .toUpperCase();
+      const hash = crypto
+        .createHash("md5")
+        .update(
+          `${merchantId}${orderId}${amountFormatted}${currency}${crypto
+            .createHash("md5")
+            .update(merchantSecret)
+            .digest("hex")
+            .toUpperCase()}`
+        )
+        .digest("hex")
+        .toUpperCase();
 
-    // Return PayHere form data
-    res.json({
-      merchant_id: merchantId,
-      return_url: `${baseUrl}/thank-you/${orderId}`,
-      cancel_url: `${baseUrl}/cart`,
-      notify_url: `${baseUrl}/api/payhere/notify`,
-      order_id: `${orderId}`,
-      items: items.map(item => item.name).join(", "),
-      currency: currency,
-      amount: amountFormatted,
-      first_name: fullName.split(" ")[0],
-      last_name: fullName.split(" ").slice(1).join(" "),
-      email: email,
-      phone: phone,
-      country : 'Sri Lanka',
-      city: 'Colombo',
-      address : '123 Main St',
-      hash: hash
-    });
-  } catch (error) {
-    console.error("PayHere order creation error:", error);
-    res.status(500).json({ error: "Failed to create PayHere order" });
-  }
+      // Return PayHere form data
+        //       console.log(`${baseUrl}/thank-you/${orderId}`);
+        // throw new Error("Process stopped for debugging");
+      res.json({
+        merchant_id: merchantId,
+        return_url: `${baseUrl}/thank-you/${orderId}`,
+        cancel_url: `${baseUrl}/cart`,
+        notify_url: `${baseUrl}/api/payhere/notify`,
+        order_id: `${orderId}`,
+        items: items.map(item => item.name).join(", "),
+        currency: currency,
+        amount: amountFormatted,
+        first_name: fullName.split(" ")[0],
+        last_name: fullName.split(" ").slice(1).join(" "),
+        email: email,
+        phone: phone,
+        country : 'Sri Lanka',
+        city: 'Colombo',
+        address : '123 Main St',
+        hash: hash
+      });
+    } catch (error) {
+      console.error("PayHere order creation error:", error);
+      res.status(500).json({ error: "Failed to create PayHere order" });
+    }
   });
 
   // PayHere notification handler
