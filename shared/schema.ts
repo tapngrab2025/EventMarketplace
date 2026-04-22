@@ -112,6 +112,7 @@ export const orders = pgTable("orders", {
   total: integer("total").notNull(),
   status: text("status").notNull().default("pending"),
   paymentMethod: text("payment_method").notNull(),
+  paymentId: text("payment_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -213,7 +214,7 @@ export const insertSubscriber = createInsertSchema(subscribers).omit({
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
-export type UpdateOrder = typeof orders.$inferSelect;
+export type UpdateOrder = Partial<Order>;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;

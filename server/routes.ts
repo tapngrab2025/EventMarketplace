@@ -8,6 +8,8 @@ import { insertCouponSchema } from "@shared/schema";
 import crypto from "crypto";
 import { config } from "./config";
 import { exit } from "process";
+import fs from "fs";
+import path from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -441,6 +443,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { merchant_id, order_id, payment_id, payhere_amount, payhere_currency, 
               status_code, md5sig, status_message } = req.body;
 
+      // Log the notification
+      const logDir = path.join(process.cwd(), "logs");
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir);
+      }
+      const logFile = path.join(logDir, "payhere.log");
+      const logEntry = `${new Date().toISOString()} - Order: ${order_id}, Status: ${status_code}, Message: ${status_message}, Body: ${JSON.stringify(req.body)}\n`;
+      fs.appendFileSync(logFile, logEntry);
+
       // Verify the PayHere signature
       const merchantSecret = config.payhere.merchantSecret;
       const hash = crypto
@@ -460,15 +471,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update order status based on PayHere status
-      if (status_code === 2) { // Payment successful
+      if (status_code == 2) { // Payment successful
         await storage.updateOrder(parseInt(order_id), {
-          user_id: req.user.id,
           status: "paid",
           paymentId: payment_id
         });
-      } else if (status_code === -2) { // Payment rejected
+      } else if (status_code == -2) { // Payment rejected
         await storage.updateOrder(parseInt(order_id), {
-          user_id: req.user.id,
           status: "failed",
           paymentId: payment_id
         });
