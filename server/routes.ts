@@ -444,13 +444,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status_code, md5sig, status_message } = req.body;
 
       // Log the notification
-      // const logDir = path.join(process.cwd(), "logs");
-      // if (!fs.existsSync(logDir)) {
-      //   fs.mkdirSync(logDir);
-      // }
-      // const logFile = path.join(logDir, "payhere.log");
-      // const logEntry = `${new Date().toISOString()} - Order: ${order_id}, Status: ${status_code}, Message: ${status_message}, Body: ${JSON.stringify(req.body)}\n`;
-      // fs.appendFileSync(logFile, logEntry);
+      const logDir = path.join(process.cwd(), "logs");
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir);
+      }
+      const logFile = path.join(logDir, "payhere.log");
+      const logEntry = `${new Date().toISOString()} - Order: ${order_id}, Status: ${status_code}, Message: ${status_message}, Body: ${JSON.stringify(req.body)}\n`;
+      fs.appendFileSync(logFile, logEntry);
 
       // Verify the PayHere signature
       const merchantSecret = config.payhere.merchantSecret;
