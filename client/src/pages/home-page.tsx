@@ -3,21 +3,15 @@ import { Product, Event } from "@shared/schema";
 import { useEffect, useState, useRef } from "react";
 import ProductCard from "@/components/products/product-card";
 import SignUp from "@/components/common/signup";
-import { Loader2, CalendarRange, MapPin, Ticket, ShieldCheck, Trophy, BarChart3, Clock, Star, ArrowLeft, ArrowRight } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
+import { Loader2, Ticket, ShieldCheck, Trophy, BarChart3, Clock, Star, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import { Images } from "@/config/images";
 import BrandHeroCarousel from "@/components/common/BrandHeroCarousel";
-import HeroCarousel from "@/components/common/HeroCarousel";
 import HomeHeroCarousel from "@/components/common/HomeHeroCarousel";
+import SearchSection from "@/components/common/SearchSection";
 
 interface VendorDashboardProps {
   searchTerm?: string;
@@ -52,13 +46,6 @@ function useInViewAnimation(threshold = 0.2) {
 export default function HomePage(
   { searchTerm = "" }: VendorDashboardProps
 ) {
-  const [location, setLocation] = useState("");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
-  const [sortBy, setSortBy] = useState("newest");
-
-
-  const afterHero = useInViewAnimation();
   const features = useInViewAnimation();
   const whyUs = useInViewAnimation();
   const testimonialsShowcase = useInViewAnimation();
@@ -249,147 +236,7 @@ export default function HomePage(
       <section className="-mt-20">
         {true ? <HomeHeroCarousel /> : <BrandHeroCarousel />}
       </section>
-      {/* Modernized: "Let's Find Your Grab" */}
-      <section ref={afterHero.ref} className="relative pt-44 pb-20 px-6 mb-32 overflow-hidden -mt-16 bg-white">
-        {/* Decorative shapes */}
-        <div className="absolute -top-24 -left-24 w-80 h-80 bg-black/5 rounded-full" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primaryOrange/10 rounded-full" />
-
-        <div className={`text-center mb-16 transition-all duration-700 delay-500 ${afterHero.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}>
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">Let's Find Your Grab</h1>
-          <p className="text-gray-600">Discover your favorite entertainment right here</p>
-        </div>
-
-        <div className={`w-full max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 transition-all duration-700 delay-100 ${afterHero.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <div className="flex-1">
-            <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl w-full shadow-sm ring-1 ring-gray-200">
-              <Input
-                id="location"
-                placeholder="Filter by Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-12 rounded-2xl bg-transparent border-none focus-visible:ring-2 focus-visible:ring-primaryOrange"
-              />
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center">
-                <MapPin className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-1">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200 hover:border-gray-300">
-                  <CalendarRange className="h-4 w-4 text-gray-400" />
-                  {startDate && endDate ? (
-                    `${format(startDate, "PP")} - ${format(endDate, "PP")}`
-                  ) : (
-                    "Select Date Range"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={{
-                    from: startDate,
-                    to: endDate,
-                  }}
-                  onSelect={(range) => {
-                    setStartDate(range?.from);
-                    setEndDate(range?.to);
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="flex-1">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200">
-                <SelectValue placeholder="Newest First" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <button
-            className="bg-primaryOrange text-white text-base py-2 px-16 rounded-full hover:bg-black transition-all duration-300 shadow-md hover:shadow-lg"
-            onClick={() => {
-              const searchParams = new URLSearchParams();
-              if (location) searchParams.set('location', location);
-              if (startDate) searchParams.set('startDate', startDate.toISOString());
-              if (endDate) searchParams.set('endDate', endDate.toISOString());
-              if (sortBy) searchParams.set('sortBy', sortBy);
-
-              window.location.href = `/search?${searchParams.toString()}`;
-            }}
-          >
-            Search
-          </button>
-
-        </div>
-
-        <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 delay-500 ${afterHero.visible ? 'opacity-100' : 'opacity-0 translate-x-1/3'}`}>
-          <h2 className="text-h2 font-semibold text-gray-900 mb-6 text-center">Popular Cities</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <Link href="/event/city/kandy">
-                <img
-                  src={Images.kandy}
-                  alt="Kandy"
-                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                  <h3 className="text-white text-2xl font-bold drop-shadow-md">KANDY</h3>
-                </div>
-              </Link>
-            </div>
-
-            <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <Link href="/event/city/colombo">
-                <img
-                  src={Images.colombo}
-                  alt="Colombo"
-                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                  <h3 className="text-white text-2xl font-bold drop-shadow-md">COLOMBO</h3>
-                </div>
-              </Link>
-            </div>
-
-
-            <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <Link href="/event/city/galle">
-                <img
-                  src={Images.galle}
-                  alt="Galle"
-                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                  <h3 className="text-white text-2xl font-bold drop-shadow-md">GALLE</h3>
-                </div>
-              </Link>
-            </div>
-
-
-            <div className="relative rounded-lg overflow-hidden shadow-lg">
-              <Link href="/event/city/matara">
-                <img
-                  src={Images.matara}
-                  alt="Matara"
-                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center">
-                  <h3 className="text-white text-2xl font-bold drop-shadow-md">MATARA</h3>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <SearchSection />
 
       {/* Featured Grabs */}
       <section ref={features.ref} className="min-h-screen flex flex-col items-center justify-center p-6 mb-32 relative">
