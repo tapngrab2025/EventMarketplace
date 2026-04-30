@@ -107,7 +107,7 @@
     top: -99px;
   }
 
-  .whatMakes::after {
+  /* .whatMakes::after {
     content: "";
     background-image: url('@/assets/Uncommon-bottom.png');
     background-size: cover;
@@ -117,7 +117,7 @@
     height: 100px;
     position: absolute;
     bottom: -99px;
-  }
+  } */
 
   .featured-carousel .slick-dots li button:before {
     border: 2px solid #D9D9D9;
