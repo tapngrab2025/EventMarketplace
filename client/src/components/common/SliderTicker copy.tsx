@@ -1,17 +1,18 @@
 import { useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Event } from "@shared/schema";
-import { Link } from "wouter";
-import { Loader2 } from "lucide-react";
-import { DEFAULT_IMAGES } from "@/config/constants";
+import event1 from "@/assets/mainslider/event1.webp";
+import event2 from "@/assets/mainslider/event2.webp";
+import event3 from "@/assets/mainslider/event3.webp";
+import event4 from "@/assets/mainslider/event4.webp";
+import event5 from "@/assets/mainslider/event5.webp";
+import event6 from "@/assets/mainslider/event6.webp";
+import event7 from "@/assets/mainslider/event7.webp";
 
 const SPEED = 1;
 
-export default function MarqueeSlider() {
-  const { data: events, isLoading } = useQuery<Event[]>({
-    queryKey: ["/api/events"],
-  });
+const items = [event1, event2, event3, event4, event5, event6, event7];
+const duplicatedItems = [...items, ...items];
 
+export default function MarqueeSlider() {
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -22,9 +23,6 @@ export default function MarqueeSlider() {
     startX: 0,
     startOffset: 0,
   });
-
-  const items = events || [];
-  const duplicatedItems = [...items, ...items, ...items, ...items]; // Quadruple the items for smoother scrolling
 
   const normalizeOffset = (value: number) => {
     const halfWidth = halfTrackWidthRef.current;
@@ -102,14 +100,6 @@ export default function MarqueeSlider() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="relative w-full bg-white py-12 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primaryOrange" />
-      </div>
-    );
-  }
-
   return (
     <div
       ref={sliderRef}
@@ -120,18 +110,16 @@ export default function MarqueeSlider() {
       onPointerCancel={stopDragging}
     >
       <div ref={trackRef} className="flex w-max pt-12 will-change-transform">
-        {duplicatedItems.map((event, index) => (
-          <div className="mx-4 w-56 shrink-0 sm:w-64 lg:w-72" key={`event-${event.id}-${index}`}>
-            <Link to={`/event/${event.id}`}>
-              <div className="h-72 w-full overflow-hidden rounded bg-zinc-100 sm:h-80 lg:h-96 hover:opacity-90 transition-opacity">
-                <img
-                  src={event.imageUrl || DEFAULT_IMAGES.EVENT}
-                  alt={event.name}
-                  draggable={false}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </Link>
+        {duplicatedItems.map((image, index) => (
+          <div className="mx-4 w-56 shrink-0 sm:w-64 lg:w-72" key={`${image}-${index}`}>
+            <div className="h-72 w-full overflow-hidden rounded bg-zinc-100 sm:h-80 lg:h-96">
+              <img
+                src={image}
+                alt={`Slider image ${index + 1}`}
+                draggable={false}
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         ))}
       </div>
