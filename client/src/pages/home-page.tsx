@@ -229,8 +229,8 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
     ],
   };
   return (
-    <main className="pt-20 min-h-screen">
-      <section className="-mt-20">
+    <main>
+      <section className="hidden">
         {true ? <HomeHeroCarousel /> : <BrandHeroCarousel />}
       </section>
       <SearchSection />

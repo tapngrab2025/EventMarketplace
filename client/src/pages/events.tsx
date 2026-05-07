@@ -65,13 +65,13 @@ export default function EventsPage() {
         <section className="mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-18 bg-orange-500">
           <div>
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Grabs
+              Events
             </h1>
           </div>
         </section>
 
         <div
-          className={`mb-16 flex flex-wrap gap-4 justify-center items-center bg-white p-6 rounded-xl shadow-lg transition-all duration-700 delay-100 ${animateItems ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          className={`hidden mb-16 flex flex-wrap gap-4 justify-center items-center bg-white p-6 rounded-xl shadow-lg transition-all duration-700 delay-100 ${animateItems ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
         >
           <div className="relative flex-grow max-w-xs">
             <MapPin
@@ -137,7 +137,7 @@ export default function EventsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 border">
             {filteredEvents?.map((event, index) => (
               <div
                 key={event.id}

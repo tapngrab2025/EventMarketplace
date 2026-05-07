@@ -31,7 +31,7 @@ export default function SearchSection() {
             Let's Find Your Grab
           </div>
 
-          <h2 className="mt-4 font-serif text-4xl leading-tight tracking-tight text-zinc-900 sm:text-5xl">
+          <h2 className="mt-4 font-serif text-4xl tracking-tight text-zinc-900 sm:text-5xl">
             Discover your favorite entertainment right here
           </h2>
         </div>

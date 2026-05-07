@@ -55,7 +55,7 @@ export default function AllProducts() {
         <div
           className={`transition-all duration-700 delay-200 ${animateItems ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
         >
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 border p-8">
             {data?.products?.length === 0 ? (
               <p className="text-muted-foreground">No products found</p>
             ) : (

@@ -10,7 +10,9 @@ interface FeaturedProductCardProps {
   product: Product;
 }
 
-export default function FeaturedProductCard({ product }: FeaturedProductCardProps) {
+export default function FeaturedProductCard({
+  product,
+}: FeaturedProductCardProps) {
   const featureProduct = product.products;
   if (!featureProduct) {
     return null;
@@ -41,17 +43,22 @@ export default function FeaturedProductCard({ product }: FeaturedProductCardProp
           <div className="flex items-start gap-3 text-sm text-zinc-600">
             <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
             <span>
-              {productDetail?.event.startDate ? new Date(productDetail?.event.startDate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }) : 'Date not available'}
+              {productDetail?.event.startDate
+                ? new Date(productDetail?.event.startDate).toLocaleDateString(
+                    "en-US",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    },
+                  )
+                : "Date not available"}
             </span>
           </div>
 
           <div className="flex items-start gap-3 text-sm text-zinc-600">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
-            <span>{productDetail?.stall?.location}</span>
+            <span className="line-clamp-2">{productDetail?.stall?.location}</span>
           </div>
 
           <div className="flex items-start gap-2 text-base font-semibold text-zinc-900">
@@ -60,10 +67,12 @@ export default function FeaturedProductCard({ product }: FeaturedProductCardProp
         </div>
       </div>
 
-      <div className="mt-auto pt-6 px-4 pb-4">
+      <div className="mt-auto pt-4 px-4 pb-4">
         <Button
           className="inline-flex w-full items-center justify-center bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-400"
-          onClick={() => addToCart.mutate({ productId: featureProduct.id, quantity: 1 })}
+          onClick={() =>
+            addToCart.mutate({ productId: featureProduct.id, quantity: 1 })
+          }
           disabled={addToCart.isPending || featureProduct.stock === 0}
         >
           {addToCart.isPending ? (
