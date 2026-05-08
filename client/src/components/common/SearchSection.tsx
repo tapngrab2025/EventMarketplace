@@ -1,0 +1,114 @@
+import { CalendarDays, MapPin, Search, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
+import { useLocation } from "wouter";
+import MarqueeSlider from "./SliderTicker";
+
+const quickFilters = ["Live Music", "Workshops", "Nightlife", "Family Events"];
+
+export default function SearchSection() {
+  const [, setLocation] = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateRange, setDateRange] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+
+  const search = (term = searchTerm) => {
+    const searchParams = new URLSearchParams();
+    const trimmedTerm = term.trim();
+
+    if (trimmedTerm) searchParams.set("location", trimmedTerm);
+    if (dateRange.trim()) searchParams.set("dateRange", dateRange.trim());
+    if (sortBy) searchParams.set("sortBy", sortBy);
+
+    const query = searchParams.toString();
+    setLocation(query ? `/search?${query}` : "/search");
+  };
+
+  return (
+    <section className="overflow-hidden bg-white">
+      <div className="relative mx-auto w-full max-w-7xl border border-t-0 border-zinc-200 pb-8 pt-12">
+        <div className="mx-auto max-w-2xl px-6 text-center">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+            Let's Find Your Grab
+          </div>
+
+          <h2 className="mt-4 font-serif text-4xl tracking-tight text-zinc-900 sm:text-5xl">
+            Discover your favorite entertainment right here
+          </h2>
+        </div>
+
+        <div className="mx-auto mt-12 max-w-5xl px-6">
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_0.9fr_auto]">
+            <label className="flex h-12 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+              <MapPin className="h-5 w-5 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Filter by Location"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") search();
+                }}
+                className="w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
+              />
+            </label>
+
+            <label className="flex h-12 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+              <CalendarDays className="h-5 w-5 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Select Date Range"
+                value={dateRange}
+                onChange={(event) => setDateRange(event.target.value)}
+                className="w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
+              />
+            </label>
+
+            <label className="flex h-12 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+              <SlidersHorizontal className="h-5 w-5 text-zinc-400" />
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="w-full bg-transparent text-base text-zinc-900 outline-none"
+              >
+                <option value="newest">Newest First</option>
+                <option value="popular">Popular Now</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="week">Happening This Week</option>
+              </select>
+            </label>
+
+            <button
+              type="button"
+              onClick={() => search()}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded bg-orange-500 px-8 text-base text-white shadow-[0_18px_35px_rgba(249,115,22,0.35)] transition hover:bg-orange-400"
+            >
+              <Search className="h-5 w-5" />
+              Search
+            </button>
+          </div>
+
+          <div className="mt-8 flex flex-col flex-wrap items-center justify-center gap-3 lg:flex-row">
+            <span className="text-sm font-medium text-zinc-500">Popular searches</span>
+            <div className="flex flex-wrap justify-center gap-2">
+              {quickFilters.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm(filter);
+                    search(filter);
+                  }}
+                  className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 lg:text-sm"
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <MarqueeSlider />
+      </div>
+    </section>
+  );
+}

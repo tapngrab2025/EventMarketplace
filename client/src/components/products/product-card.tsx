@@ -1,49 +1,81 @@
 import { Product } from "@shared/schema";
-import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { CalendarDays, Loader2, MapPin, ShoppingCart } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import { useCart } from "@/hooks/use-cart";
-import { Images } from "@/config/images";
+
+type ProductDetail = Product & {
+  event?: {
+    name?: string | null;
+    startDate?: string | Date | null;
+  } | null;
+  stall?: {
+    location?: string | null;
+  } | null;
+};
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { data: productDetail, isLoading } = useQuery<Product>({
+  const { data: productDetail } = useQuery<ProductDetail>({
     queryKey: [`/api/product/${product.id}`],
   });
 
   const { addToCart } = useCart();
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col">
-      {/* <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(productDetail?.event, null, 2)}</pre>*/}
-      <img
-        src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
-        alt={product.name}
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-4 flex flex-col flex-1">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
-          {product.name} @ {productDetail?.event.name}
+    <article className="group flex h-full min-h-[390px] flex-col overflow-hidden rounded border border-zinc-200 bg-white transition duration-300">
+      <div className="relative aspect-[1/1] overflow-hidden">
+        <img
+          src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
+          alt={product.name}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col px-4 pt-3">
+        <h3 className="line-clamp-1 text-base font-semibold leading-snug text-zinc-900">
+          {product.name}
         </h3>
-        <div className="space-y-1 flex-1">
-          <p className="text-gray-500 font-medium line-clamp-3 text-sm my-3 text-teal-500">
-            {product.description}
+
+        <p className="my-3 line-clamp-3 text-sm font-medium text-teal-500">
+          {product.description}
+        </p>
+
+        <div className="space-y-1.5">
+          <p className="line-clamp-1 text-sm text-zinc-600">
+            <span className="font-semibold text-zinc-900">Stall:</span> #
+            {product.stallId}
           </p>
-          <p className="text-gray-600 line-clamp-1">
-            <span className="font-semibold text-gray-800">Stall:</span> #{product.stallId}
+
+          <p className="line-clamp-1 text-sm text-zinc-600">
+            {productDetail?.event?.name}
           </p>
-          <p className="text-gray-600 line-clamp-1">{productDetail?.event.name}</p>
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <p className="line-clamp-1">{productDetail?.event.startDate ? new Date(productDetail?.event.startDate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }) : 'Date not available'}</p>
-            <p>8:00 P.M.</p>
+
+          <div className="flex items-start gap-3 text-sm text-zinc-600">
+            <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <span>
+              {productDetail?.event?.startDate
+                ? new Date(productDetail.event.startDate).toLocaleDateString(
+                    "en-US",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    },
+                  )
+                : "Date not available"}
+            </span>
           </div>
+
+          <div className="flex items-start gap-3 text-sm text-zinc-600">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <span className="line-clamp-2">
+              {productDetail?.stall?.location || "Location not available"}
+            </span>
+          </div>
+
           <div className="flex items-center justify-between">
-            <span className="font-bold text-2xl my-3">
+            <span className="my-3 text-2xl font-bold text-zinc-900">
               ${(product.price / 100).toFixed(2)}
             </span>
             <span className="text-sm text-muted-foreground">
@@ -51,28 +83,22 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           </div>
         </div>
-        <div className="flex justify-between items-center mt-4 gap-x-2">
-          <Button
-            className="bg-teal-500 text-white font-semibold py-2 px-6 rounded-[50px] hover:bg-primaryOrange transition duration-300 max-w-full w-fit"
-            onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
-
-            disabled={addToCart.isPending || product.stock === 0}
-          >
-            {addToCart.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <ShoppingCart className="h-4 w-4 mr-2" />
-            )}
-            Grab It
-          </Button>
-          <Link
-            to={`/products/${product.id}`}
-            className="text-gray-600 font-semibold rounded-lg transition duration-300"
-          >
-            <img src={Images.view} alt="view product" className="w-7 h-7 inline-block" />
-          </Link>
-        </div>
       </div>
-    </div>
+
+      <div className="mt-auto px-4 pb-4 pt-4">
+        <Button
+          className="inline-flex w-full items-center justify-center bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-400"
+          onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
+          disabled={addToCart.isPending || product.stock === 0}
+        >
+          {addToCart.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <ShoppingCart className="mr-2 h-4 w-4" />
+          )}
+          Grab It
+        </Button>
+      </div>
+    </article>
   );
 }

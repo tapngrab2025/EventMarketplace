@@ -1,85 +1,175 @@
-import { useAuth } from "@/hooks/use-auth";
+import {
+  Apple,
+  Facebook,
+  Instagram,
+  Mail,
+  Phone,
+  Play,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
+import { Link } from "wouter";
 import { Logo } from "./logo";
 
-export function DefaultFooter() {
-    const { user, logoutMutation } = useAuth();
-    return (
-        <footer className="bg-black text-white p-8">
-            <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                <div>
-                    <div className="flex items-center mb-4">
-                        <Logo />
-                    </div>
-                    <p className="text-gray-400 text-sm mb-4">
-                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
-                    </p>
-                    <div className="flex space-x-4">
-                        <span className="material-icons text-gray-400 hover:text-white cursor-pointer">facebook</span>
-                        <span className="material-icons text-gray-400 hover:text-white cursor-pointer">photo_camera</span>
-                        <span className="material-icons text-gray-400 hover:text-white cursor-pointer">close</span>
-                    </div>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold mb-4">About Us</h3>
-                    {user?.role === "customer" && (
-                        <ul className="space-y-2 text-gray-400 text-sm">
-                            <li><a href="/profile" className="hover:text-white">My Profile</a></li>
-                            <li><a href="#" className="hover:text-white">All Venues</a></li>
-                            <li><a href="#" className="hover:text-white">All Locations</a></li>
-                        </ul>
-                    ) }
-                    {(user?.role === "vendor" || user?.role === "organizer") && (
-                    <ul className="space-y-2 text-gray-400 text-sm">
-                        <li><a href={user?.role === "vendor" ? "/vendor" : "/organizer"} className="hover:text-white">Dashboard</a></li>
-                        <li><a href="#" className="hover:text-white">Submit Event</a></li>
-                        <li><a href="#" className="hover:text-white">All Locations</a></li>
-                    </ul>
-                    ) }
-                    {user?.role === "admin" && (
-                    <ul className="space-y-2 text-gray-400 text-sm">
-                        <li><a href="#" className="hover:text-white">Submit Event</a></li>
-                        <li><a href="/admin" className="hover:text-white">Admin Dashboard</a></li>
-                        <li><a href="/users" className="hover:text-white">All Users</a></li>
-                    </ul>
-                    ) }
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-                    <ul className="space-y-2 text-gray-400 text-sm">
-                        <li className="flex items-center">
-                            <span className="material-icons text-gray-400 mr-2">location_on</span>
-                            San Francisco City Hall, San Francisco, CA
-                        </li>
-                        <li className="flex items-center">
-                            <span className="material-icons text-gray-400 mr-2">email</span>
-                            <a href="mailto:contact@domain.com" className="hover:text-white">contact@domain.com</a>
-                        </li>
-                        <li className="flex items-center">
-                            <span className="material-icons text-gray-400 mr-2">phone</span>
-                            <a href="tel:+01101234567" className="hover:text-white">(+011) 01234567</a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold mb-4">Download App</h3>
-                    <div className="space-y-4">
-                        <a href="#" className="flex items-center bg-gray-800 hover:bg-gray-700 p-2 rounded-lg">
-                            <span className="material-icons text-white mr-2">apple</span>
-                            <div>
-                                <p className="text-xs text-gray-400">Download on the</p>
-                                <p className="text-sm font-semibold">App Store</p>
-                            </div>
-                        </a>
-                        <a href="#" className="flex items-center bg-gray-800 hover:bg-gray-700 p-2 rounded-lg">
-                            <span className="material-icons text-white mr-2">android</span>
-                            <div>
-                                <p className="text-xs text-gray-400">Get it on</p>
-                                <p className="text-sm font-semibold">Google Play</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    );
+type FooterProps = {
+  phone?: string;
+  email?: string;
 };
+
+const quickLinks = [
+  { label: "About", href: "/about" },
+  { label: "Events", href: "/events" },
+  { label: "Grabs", href: "/products" },
+  { label: "Contact", href: "/contact" },
+];
+
+const socialLinks = [
+  { label: "Facebook", href: "#", icon: Facebook },
+  { label: "Instagram", href: "#", icon: Instagram },
+  { label: "YouTube", href: "#", icon: Youtube },
+];
+
+const appLinks: Array<{
+  label: string;
+  helper: string;
+  href: string;
+  icon: LucideIcon;
+}> = [
+  {
+    label: "App Store",
+    helper: "Download on the",
+    href: "#",
+    icon: Apple,
+  },
+  {
+    label: "Google Play",
+    helper: "Get it on",
+    href: "#",
+    icon: Play,
+  },
+];
+
+export function DefaultFooter({
+  phone = "+94 77 707 2265",
+  email = "info@tapngrab.com",
+}: FooterProps) {
+  return (
+    <footer className="bg-[#0a0a0a] text-white/80">
+      <div className="border-t border-white/10">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-12 md:grid-cols-2 md:gap-0 lg:grid-cols-4 lg:px-8">
+          <div className="md:border-r md:border-white/10 md:pr-8 lg:pr-10">
+            <Link href="/" className="inline-flex items-center">
+              <Logo />
+            </Link>
+
+            <p className="mt-5 max-w-xs text-sm leading-7 text-white/65">
+              Discover trending events, limited drops, and curated experiences
+              all in one place with TapnGrab.
+            </p>
+
+            <div className="mt-6 flex items-center gap-3">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="md:border-r md:border-white/10 md:px-8 lg:px-10">
+            <div className="text-xs font-semibold tracking-[0.25em] text-white/40">
+              QUICK LINKS
+            </div>
+
+            <nav className="mt-5 flex flex-col gap-3 text-sm text-white/80">
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="transition hover:text-white"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="md:border-r md:border-white/10 md:px-8 lg:px-10">
+            <div className="text-xs font-semibold tracking-[0.25em] text-white/40">
+              CONTACT
+            </div>
+
+            <div className="mt-5 space-y-4 text-sm">
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-3 text-white/75 transition hover:text-white"
+              >
+                <Mail className="h-4 w-4 shrink-0 text-orange-500" />
+                <span>{email}</span>
+              </a>
+
+              <a
+                href={`tel:${phone.replace(/\s+/g, "")}`}
+                className="flex items-center gap-3 text-white/75 transition hover:text-white"
+              >
+                <Phone className="h-4 w-4 shrink-0 text-orange-500" />
+                <span>{phone}</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="md:px-8 lg:px-10">
+            <div className="text-xs font-semibold tracking-[0.25em] text-white/40">
+              APP DOWNLOADS
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {appLinks.map(({ label, helper, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  className="flex items-center rounded border border-white/20 bg-black px-4 py-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] transition hover:border-white/35"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <Icon className="h-4 w-4 shrink-0 text-white" />
+                    <div>
+                      <div className="text-[10px] font-medium text-white/80">
+                        {helper}
+                      </div>
+                      <div className="font-medium leading-none text-white">
+                        {label}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-6 text-sm text-white/55 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div>&copy; Copyright TapnGrab 2026</div>
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <Link href="/privacy" className="transition hover:text-white">
+              Privacy
+            </Link>
+            <Link href="/terms" className="transition hover:text-white">
+              Terms of Use
+            </Link>
+            <Link href="/policy" className="transition hover:text-white">
+              Policy
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
