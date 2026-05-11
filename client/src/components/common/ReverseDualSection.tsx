@@ -19,7 +19,7 @@ export default function ReverseDualSection() {
               Why Choose Us
             </p>
 
-            <h2 className="mt-5 max-w-xl font-serif text-4xl leading-tight tracking-tight text-zinc-900">
+            <h2 className="mt-5 max-w-xl font-serif text-2xl md:text-4xl leading-tight tracking-tight text-zinc-900">
               One place to find what&apos;s trending, useful, and worth
               grabbing.
             </h2>

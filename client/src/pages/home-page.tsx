@@ -312,14 +312,14 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
         </div>
       </section> */}
 
-      <section className="whatMakes mx-auto max-w-7xl border border-t-0 border-zinc-200 bg-white py-20">
+      <section className="mx-auto max-w-7xl border border-t-0 border-zinc-200 bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl text-center mb-12">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
               Why Choose Us
             </div>
 
-            <h2 className="mt-4 font-serif text-4xl leading-tight tracking-tight text-zinc-900 sm:text-5xl">
+            <h2 className="mt-4 font-serif text-2xl leading-tight tracking-tight text-zinc-900 sm:text-4xl">
               Enjoy every moment with <br /> no lines, no delays, and no stress.
             </h2>
           </div>
@@ -381,8 +381,8 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
               What People Say
             </div>
 
-            <h2 className="mt-4 font-serif text-4xl leading-tight tracking-tight text-zinc-900 sm:text-5xl">
-              Discover why thousands rely on tapNgrab 
+            <h2 className="mt-4 font-serif text-2xl leading-tight tracking-tight text-zinc-900 sm:text-4xl">
+              Discover why thousands rely on tapNgrab
             </h2>
           </div>
 
