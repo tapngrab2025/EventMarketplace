@@ -19,6 +19,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(events);
   });
 
+  app.get("/api/events/paginate", async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 12;
+      const searchTerm = req.query.searchTerm as string;
+      const startDate = req.query.startDate as string;
+      const endDate = req.query.endDate as string;
+      const sortBy = req.query.sortBy as string;
+
+      const result = await storage.getPaginatedEvents(
+        page,
+        pageSize,
+        searchTerm,
+        startDate,
+        endDate,
+        sortBy
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching paginated events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
   app.post("/api/events", async (req, res) => {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.status(403).json({ message: "Unauthorized - Vendor/Organizer access required" });
@@ -49,7 +73,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    const event = await storage.updateEvent(parseInt(req.params.id), {
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid event ID" });
+    }
+    const event = await storage.updateEvent(id, {
       approved: true,
     });
     if (!event) return res.sendStatus(404);
@@ -78,7 +107,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.sendStatus(403);
     }
     try {
-      const existing = await storage.getEvent(parseInt(req.params.id));
+      // const event = await storage.updateEvent(parseInt(req.params.id), {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid event ID" });
+      }
+      const existing = await storage.getEvent(id);
       if (!existing) return res.sendStatus(404);
       const isOwner = existing.vendorId === req.user.id;
       const isAdmin = req.user.role === "admin";
@@ -88,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsedEvent = insertEventSchema.parse({
         ...req.body,
       });
-      const event = await storage.updateEvent(parseInt(req.params.id), parsedEvent);
+      const event = await storage.updateEvent(id, parsedEvent);
       res.status(201).json(event);
     } catch (error) {
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid event data" });
@@ -130,7 +164,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || req.user.role !== "admin") {
       return res.sendStatus(403);
     }
-    const stall = await storage.updateStall(parseInt(req.params.id), {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid stall ID" });
+    }
+    const stall = await storage.updateStall(id, {
       approved: true,
     });
     if (!stall) return res.sendStatus(404);
@@ -145,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid stall ID" });
     }
-    const stalls = await storage.getStall(parseInt(req.params.id));
+    const stalls = await storage.getStall(id);
     res.json(stalls);
   });
 
@@ -154,14 +192,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    const existing = await storage.getStall(parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid stall ID" });
+    }
+    const existing = await storage.getStall(id);
     if (!existing) return res.sendStatus(404);
     const isOwner = existing.vendorId === req.user.id;
     const isAdmin = req.user.role === "admin";
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Forbidden" });
     }
-    const stall = await storage.updateStall(parseInt(req.params.id), req.body);
+    const stall = await storage.updateStall(id, req.body);
     if (!stall) return res.sendStatus(404);
     res.json(stall);
   });
@@ -242,7 +284,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    const product = await storage.updateProduct(parseInt(req.params.id), {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+    const product = await storage.updateProduct(id, {
       approved: true,
     });
     if (!product) return res.sendStatus(404);
@@ -253,19 +299,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor", "organizer"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
-    if (isNaN(parseInt(req.params.id))) return res.status(400).json({ message: "Invalid product ID" });
-    const product = await storage.getProduct(parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+    const product = await storage.getProduct(id);
     res.json(product);
   });
 
   app.get("/api/product/:id", async (req, res) => {
-    const product = await storage.getProductDetails(parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+    const product = await storage.getProductDetails(id);
     if (!product) return res.status(404).json({ error: "Product not found" });
     res.json(product);
   });
 
   app.get("/api/product/:id/relative", async (req, res) => {
-    const product = await storage.getProductsByRelative(parseInt(req.params.id));
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+    const product = await storage.getProductsByRelative(id);
     if (!product) return res.status(404).json({ error: "Products not found" });
     res.json(product);
   });
@@ -275,11 +332,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || !["admin", "vendor"].includes(req.user.role)) {
       return res.sendStatus(403);
     }
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
     const updatedBody = {
       ...req.body,
       // availableStock: req.body.stock !== undefined ? req.body.stock : req.body.availableStock
     };
-    const current = await storage.getProduct(parseInt(req.params.id));
+    const current = await storage.getProduct(id);
     if (!current) return res.sendStatus(404);
     const stall = await storage.getStall(current.stallId);
     const isOwner = stall?.vendorId === req.user.id;
@@ -287,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Forbidden" });
     }
-    const product = await storage.updateProduct(parseInt(req.params.id), updatedBody);
+    const product = await storage.updateProduct(id, updatedBody);
     if (!product) return res.sendStatus(404);
     res.json(product);
   });
@@ -337,8 +398,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!userId && !cartToken) {
       return res.status(401).json({ message: "Missing user ID or cart token" });
     }
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid cart item ID" });
+    }
     const cartItem = await storage.updateCartItem(
-      parseInt(req.params.id),
+      id,
       req.body.quantity,
       userId,
       cartToken as string
@@ -355,8 +420,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Missing user ID or cart token" });
     }
 
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid cart item ID" });
+    }
+
     const success = await storage.removeFromCart(
-      parseInt(req.params.id),
+      id,
       userId,
       cartToken as string
     );
@@ -483,7 +553,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
-      const order = await storage.getOrder(parseInt(req.params.id));
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid order ID" });
+      }
+      const order = await storage.getOrder(id);
       if (!order) return res.sendStatus(404);
 
       // Check if the user owns this order or is an admin
@@ -595,6 +669,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/events/:id/coupons", async (req, res) => {
     try {
       const eventId = parseInt(req.params.id);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ error: "Invalid event ID" });
+      }
       const coupons = await storage.getCoupons(eventId);
       
       // Get excluded stalls for each coupon
@@ -661,6 +738,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const couponId = parseInt(req.params.id);
+      if (isNaN(couponId)) {
+        return res.status(400).json({ error: "Invalid coupon ID" });
+      }
       
       const couponData = { ...req.body };
       const excludedStallIds = req.body.excludedStallIds || [];
@@ -711,6 +791,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const couponId = parseInt(req.params.id);
+      if (isNaN(couponId)) {
+        return res.status(400).json({ error: "Invalid coupon ID" });
+      }
       
       await storage.deleteCoupon(couponId);
       res.json({ success: true });

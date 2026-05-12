@@ -1,7 +1,8 @@
 import { Product } from "@shared/schema";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, Loader2, MapPin, ShoppingCart } from "lucide-react";
+import { CalendarDays, Loader2, MapPin, ShoppingCart, Eye } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
 import { useCart } from "@/hooks/use-cart";
 
@@ -85,7 +86,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       </div>
 
-      <div className="mt-auto px-4 pb-4 pt-4">
+      <div className="flex items-center gap-2 mt-auto px-4 pb-4 pt-4">
         <Button
           className="inline-flex w-full items-center justify-center bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-400"
           onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
@@ -98,6 +99,13 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
           Grab It
         </Button>
+        <Link
+          to={`/products/${product.id}`}
+          aria-label={`View ${product.name}`}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-orange-500 hover:text-orange-500"
+        >
+          <Eye className="h-4 w-4" />
+        </Link>
       </div>
     </article>
   );
