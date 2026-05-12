@@ -11,7 +11,7 @@ export default function DualSection() {
               About Tap & Grab
             </p>
 
-            <h2 className="mt-5 max-w-xl font-serif text-4xl leading-tight tracking-tight text-zinc-900">
+            <h2 className="mt-5 max-w-xl font-serif text-2xl md:text-4xl leading-tight tracking-tight text-zinc-900">
               We make discovering events and claiming the best grabs feel easy.
             </h2>
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Event } from "@shared/schema";
 import { Link } from "wouter";
@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { DEFAULT_IMAGES } from "@/config/constants";
 
 const SPEED = 1;
+const EMPTY_EVENTS: Event[] = [];
 
 export default function MarqueeSlider() {
   const { data: events, isLoading } = useQuery<Event[]>({
@@ -16,20 +17,24 @@ export default function MarqueeSlider() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const slideOffsetRef = useRef(0);
-  const halfTrackWidthRef = useRef(0);
+  const loopWidthRef = useRef(0);
   const dragStateRef = useRef({
     isDragging: false,
     startX: 0,
     startOffset: 0,
   });
 
-  const items = events || [];
-  const duplicatedItems = [...items, ...items, ...items, ...items]; // Quadruple the items for smoother scrolling
+  const items = events ?? EMPTY_EVENTS;
+  const repeatCount = items.length > 0 && items.length < 4 ? 6 : 4;
+  const duplicatedItems = useMemo(
+    () => Array.from({ length: repeatCount }).flatMap(() => items),
+    [items, repeatCount],
+  );
 
   const normalizeOffset = (value: number) => {
-    const halfWidth = halfTrackWidthRef.current;
-    if (!halfWidth) return value;
-    return ((value % halfWidth) + halfWidth) % halfWidth;
+    const loopWidth = loopWidthRef.current;
+    if (!loopWidth) return value;
+    return ((value % loopWidth) + loopWidth) % loopWidth;
   };
 
   const applyTransform = () => {
@@ -41,10 +46,11 @@ export default function MarqueeSlider() {
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    const slider = sliderRef.current;
+    if (!track || !slider || duplicatedItems.length === 0) return;
 
     const measureTrack = () => {
-      halfTrackWidthRef.current = track.scrollWidth / 2;
+      loopWidthRef.current = track.scrollWidth / repeatCount;
       slideOffsetRef.current = normalizeOffset(slideOffsetRef.current);
       applyTransform();
     };
@@ -58,17 +64,23 @@ export default function MarqueeSlider() {
       animationFrameRef.current = requestAnimationFrame(tick);
     };
 
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(measureTrack) : null;
+
     measureTrack();
+    resizeObserver?.observe(slider);
+    resizeObserver?.observe(track);
     animationFrameRef.current = requestAnimationFrame(tick);
     window.addEventListener("resize", measureTrack);
 
     return () => {
       window.removeEventListener("resize", measureTrack);
+      resizeObserver?.disconnect();
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [duplicatedItems.length, repeatCount]);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 && event.pointerType === "mouse") return;
@@ -104,26 +116,37 @@ export default function MarqueeSlider() {
 
   if (isLoading) {
     return (
-      <div className="relative w-full bg-white py-12 flex items-center justify-center">
+      <div className="relative flex w-full items-center justify-center bg-white py-8 sm:py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primaryOrange" />
       </div>
     );
   }
 
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <div
       ref={sliderRef}
-      className="relative w-full cursor-grab touch-pan-y select-none overflow-hidden bg-white active:cursor-grabbing"
+      aria-label="Featured events"
+      className="relative w-full max-w-full cursor-grab touch-pan-y select-none overflow-hidden bg-white active:cursor-grabbing"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={stopDragging}
       onPointerCancel={stopDragging}
     >
-      <div ref={trackRef} className="flex w-max pt-12 will-change-transform">
+      <div
+        ref={trackRef}
+        className="flex w-full min-w-0 max-w-[100vw] pt-8 will-change-transform sm:pt-10 lg:pt-12"
+      >
         {duplicatedItems.map((event, index) => (
-          <div className="mx-4 w-56 shrink-0 sm:w-64 lg:w-72" key={`event-${event.id}-${index}`}>
+          <div
+            className="mx-2 w-[clamp(8.75rem,44vw,13rem)] shrink-0 sm:mx-3 sm:w-56 md:w-64 lg:mx-4 lg:w-72"
+            key={`event-${event.id}-${index}`}
+          >
             <Link to={`/event/${event.id}`}>
-              <div className="h-72 w-full overflow-hidden rounded bg-zinc-100 sm:h-80 lg:h-96 hover:opacity-90 transition-opacity">
+              <div className="aspect-[3/4] w-full overflow-hidden rounded bg-zinc-100 transition-opacity hover:opacity-90">
                 <img
                   src={event.imageUrl || DEFAULT_IMAGES.EVENT}
                   alt={event.name}

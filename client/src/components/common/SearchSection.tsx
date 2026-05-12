@@ -24,8 +24,8 @@ export default function SearchSection() {
   };
 
   return (
-    <section className="overflow-hidden bg-white">
-      <div className="relative mx-auto w-full max-w-7xl border border-t-0 border-zinc-200 pb-8 pt-12">
+    <section className="max-w-full overflow-hidden bg-white">
+      <div className="relative mx-auto w-full max-w-full overflow-hidden border border-t-0 border-zinc-200 pb-8 pt-12 lg:max-w-7xl">
         <div className="mx-auto max-w-2xl px-6 text-center">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
             Let's Find Your Grab
@@ -37,8 +37,8 @@ export default function SearchSection() {
         </div>
 
         <div className="mx-auto mt-12 max-w-5xl px-6">
-          <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_0.9fr_auto]">
-            <label className="flex h-12 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[1.2fr_1fr_0.9fr_auto]">
+            <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
               <MapPin className="h-5 w-5 text-zinc-400" />
               <input
                 type="text"
@@ -48,27 +48,27 @@ export default function SearchSection() {
                 onKeyDown={(event) => {
                   if (event.key === "Enter") search();
                 }}
-                className="w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
+                className="min-w-0 w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
               />
             </label>
 
-            <label className="flex h-12 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+            <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
               <CalendarDays className="h-5 w-5 text-zinc-400" />
               <input
                 type="text"
                 placeholder="Select Date Range"
                 value={dateRange}
                 onChange={(event) => setDateRange(event.target.value)}
-                className="w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
+                className="min-w-0 w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
               />
             </label>
 
-            <label className="flex h-12 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+            <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
               <SlidersHorizontal className="h-5 w-5 text-zinc-400" />
               <select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value)}
-                className="w-full bg-transparent text-base text-zinc-900 outline-none"
+                className="min-w-0 w-full bg-transparent text-base text-zinc-900 outline-none"
               >
                 <option value="newest">Newest First</option>
                 <option value="popular">Popular Now</option>
@@ -80,7 +80,7 @@ export default function SearchSection() {
             <button
               type="button"
               onClick={() => search()}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded bg-orange-500 px-8 text-base text-white shadow-[0_18px_35px_rgba(249,115,22,0.35)] transition hover:bg-orange-400"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-orange-500 px-8 text-base text-white shadow-[0_18px_35px_rgba(249,115,22,0.35)] transition hover:bg-orange-400 lg:w-auto"
             >
               <Search className="h-5 w-5" />
               Search
@@ -88,7 +88,9 @@ export default function SearchSection() {
           </div>
 
           <div className="mt-8 flex flex-col flex-wrap items-center justify-center gap-3 lg:flex-row">
-            <span className="text-sm font-medium text-zinc-500">Popular searches</span>
+            <span className="text-sm font-medium text-zinc-500">
+              Popular searches
+            </span>
             <div className="flex flex-wrap justify-center gap-2">
               {quickFilters.map((filter) => (
                 <button
@@ -107,7 +109,9 @@ export default function SearchSection() {
           </div>
         </div>
 
-        <MarqueeSlider />
+        <div className="overflow-hidden">
+          <MarqueeSlider />
+        </div>
       </div>
     </section>
   );

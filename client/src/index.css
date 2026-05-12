@@ -6,7 +6,7 @@
   html {
     font-size: 16px;
   }
-  
+
   * {
     @apply border-border;
   }
@@ -55,7 +55,7 @@
 
 @layer components {
   .testimonial .quote-bg {
-    background-image: url('@/assets/quoteImg.png');
+    background-image: url("@/assets/quoteImg.png");
     background-size: 140px;
     background-position: 0 0;
     padding: 2rem;
@@ -65,15 +65,15 @@
 
   /* Add custom styling for slick carousel */
   .testimonial .slick-dots li button:before {
-    color: #F58020;
+    color: #f58020;
   }
 
   .testimonial .slick-dots li.slick-active button:before {
-    color: #F58020;
+    color: #f58020;
   }
   .transferGrabs::before {
     content: "";
-    background-image: url('@/assets/transferGrabs-top.png');
+    background-image: url("@/assets/transferGrabs-top.png");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -85,7 +85,7 @@
 
   .transferGrabs::after {
     content: "";
-    background-image: url('@/assets/transferGrabs-bottom.png');
+    background-image: url("@/assets/transferGrabs-bottom.png");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -94,7 +94,7 @@
     position: absolute;
     bottom: -99px;
   }
-
+  /*
   .whatMakes::before {
     content: "";
     background-image: url('@/assets/Uncommon-top.png');
@@ -105,7 +105,7 @@
     height: 100px;
     position: absolute;
     top: -99px;
-  }
+  } */
 
   /* .whatMakes::after {
     content: "";
@@ -120,7 +120,7 @@
   } */
 
   .featured-carousel .slick-dots li button:before {
-    border: 2px solid #D9D9D9;
+    border: 2px solid #d9d9d9;
     background: #090909;
     border-radius: 50%;
     color: transparent;
@@ -129,8 +129,8 @@
     opacity: 1;
   }
 
- .featured-carousel .slick-dots li.slick-active button:before {
-    background: #F58020;
+  .featured-carousel .slick-dots li.slick-active button:before {
+    background: #f58020;
   }
 
   #all_events .gm-style .gm-style-iw-c,
@@ -150,11 +150,21 @@
 }
 
 @keyframes wobbleX {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  50% { transform: translateX(0); }
-  75% { transform: translateX(8px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(0);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @layer utilities {
