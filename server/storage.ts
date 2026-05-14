@@ -180,6 +180,72 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Event operations
+  async getPaginatedEvents(
+    page: number,
+    pageSize: number,
+    searchTerm?: string,
+    startDate?: string,
+    endDate?: string,
+    sortBy?: string,
+    sortOrder?: string
+  ): Promise<{ events: Event[]; total: number }> {
+    const offset = (page - 1) * pageSize;
+    let query = db.select().from(events).where(
+      and(eq(events.archived, false), eq(events.approved, true))
+    );
+
+    if (searchTerm) {
+      query = query.where(
+        or(
+          ilike(events.name, `%${searchTerm}%`),
+          ilike(events.location, `%${searchTerm}%`),
+          ilike(events.city, `%${searchTerm}%`)
+        )
+      ) as any;
+    }
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      start.setUTCHours(0, 0, 0, 0);
+      end.setUTCHours(23, 59, 59, 999);
+      query = query.where(
+        or(
+          between(events.startDate, start, end),
+          between(events.endDate, start, end)
+        )
+      ) as any;
+    }
+
+    if (sortBy === "week") {
+      const now = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(now.getDate() + 7);
+      query = query.where(
+        between(events.startDate, now, nextWeek)
+      ) as any;
+    }
+
+    // Apply sorting
+    if (sortBy === "newest") {
+      query = query.orderBy(sql`${events.id} desc`) as any;
+    } else if (sortBy === "popular") {
+      // For popular, we don't have a direct metric, so just use id desc for now
+      query = query.orderBy(sql`${events.id} desc`) as any;
+    } else {
+      query = query.orderBy(sql`${events.id} desc`) as any;
+    }
+
+    const [eventsList, total] = await Promise.all([
+      query.limit(pageSize).offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(events).where(
+        and(eq(events.archived, false), eq(events.approved, true))
+      )
+    ]);
+
+    return { events: eventsList, total: total[0].count };
+  }
+
   async getEvents(): Promise<Event[]> {
     return await db.select().from(events).where(eq(events.archived, false)).orderBy(events.id, 'desc');
   }
