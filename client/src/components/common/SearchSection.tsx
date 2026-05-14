@@ -25,7 +25,7 @@ export default function SearchSection() {
 
   return (
     <section className="max-w-full overflow-hidden bg-white">
-      <div className="relative mx-auto w-full max-w-full overflow-hidden border border-t-0 border-zinc-200 pb-8 pt-12 lg:max-w-7xl">
+      <div className="relative mx-auto w-full max-w-full overflow-hidden border border-t-0 border-zinc-200 pb-8 pt-12 overflow-x-hidden">
         <div className="mx-auto max-w-2xl px-6 text-center">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
             Let's Find Your Grab

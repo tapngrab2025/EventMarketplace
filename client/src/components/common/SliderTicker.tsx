@@ -130,7 +130,7 @@ export default function MarqueeSlider() {
     <div
       ref={sliderRef}
       aria-label="Featured events"
-      className="relative w-full max-w-full cursor-grab touch-pan-y select-none overflow-hidden bg-white active:cursor-grabbing"
+      className="relative w-full cursor-grab touch-pan-y select-none overflow-hidden bg-white active:cursor-grabbing"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={stopDragging}

@@ -79,7 +79,7 @@ export function NewsletterComponent() {
   }, []);
 
   return (
-    <section className="relative h-[75dvh] max-w-7xl mx-auto flex justify-center overflow-hidden bg-[#2b2344]">
+    <section className="relative h-[75dvh] mx-auto flex justify-center overflow-hidden bg-[#2b2344]">
       <video
         ref={videoRef}
         className="pointer-events-none absolute inset-0 h-full w-full object-cover"
@@ -93,7 +93,7 @@ export function NewsletterComponent() {
       />
       <div className="absolute inset-0 bg-[#050914]/55" aria-hidden="true" />
 
-      <section className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col items-center justify-center px-6 text-center">
+      <section className="relative z-10 mx-auto flex h-full w-full flex-col items-center justify-center px-6 text-center">
         <div className="mx-auto max-w-2xl text-center">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
             Newsletter

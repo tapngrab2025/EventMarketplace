@@ -4,7 +4,7 @@ import { Images } from "@/config/images";
 export default function DualSection() {
   return (
     <section className="overflow-hidden">
-      <div className="mx-auto grid w-full max-w-7xl border border-t-0 border-zinc-200 bg-white lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mx-auto grid w-full max-w-7xl bg-white lg:grid-cols-[1.1fr_0.9fr]">
         <div className="flex items-center px-6 py-12 sm:px-10 lg:px-16 lg:py-20">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-500">
