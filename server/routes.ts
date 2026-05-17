@@ -439,19 +439,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Orders endpoints
   app.post("/api/orders", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const order = await storage.createOrder({
-      ...req.body,
-      user_id: req.user.id,
-    });
-    res.status(201).json(order);
+    try {
+      const order = await storage.createOrder({
+        ...req.body,
+        user_id: req.user.id,
+      });
+      res.status(201).json(order);
+    } catch (error) {
+      console.error("COD order creation error:", error);
+      res.status(500).json({ error: "Failed to create order" });
+    }
   });
 
+  // PayHere checkout
   app.post("/api/orders/payhere", async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
       const { fullName, email, phone, total, items } = req.body;
-      
-      // console.log(items);
-      // exit(1);
+
       // Create order in your database first
       const order = await storage.createOrder({
         ...req.body,
@@ -460,13 +468,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethod: "payhere"
       });
 
-      // Generate PayHere form data
-      const merchantSecret = config.payhere.merchantSecret;
       const merchantId = config.payhere.merchantId;
-      const baseUrl = config.baseUrl;
-      const orderId = order.id;
-      const amountFormatted = (total / 100).toFixed(2);
+      const merchantSecret = config.payhere.merchantSecret;
       const currency = "LKR";
+      const orderId = order.id.toString();
+      const amountFormatted = (total / 100).toFixed(2);
 
       const hash = crypto
         .createHash("md5")
@@ -480,30 +486,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .digest("hex")
         .toUpperCase();
 
-      // Return PayHere form data
-        //       console.log(`${baseUrl}/thank-you/${orderId}`);
-        // throw new Error("Process stopped for debugging");
-      res.json({
+      const payhereData = {
         merchant_id: merchantId,
-        return_url: `${baseUrl}/thank-you/${orderId}`,
-        cancel_url: `${baseUrl}/cart`,
-        notify_url: `${baseUrl}/api/payhere/notify`,
-        order_id: `${orderId}`,
-        items: items.map(item => item.name).join(", "),
-        currency: currency,
+        return_url: `${req.protocol}://${req.get("host")}/payment/success`,
+        cancel_url: `${req.protocol}://${req.get("host")}/payment/cancel`,
+        notify_url: `${req.protocol}://${req.get("host")}/api/payhere/notify`,
+        order_id: orderId,
+        items: Array.isArray(items) ? items.map((item: any) => item.name).join(", ") : "Events",
         amount: amountFormatted,
+        currency: currency,
         first_name: fullName.split(" ")[0],
-        last_name: fullName.split(" ").slice(1).join(" "),
+        last_name: fullName.split(" ").slice(1).join(" ") || "Customer",
         email: email,
         phone: phone,
-        country : 'Sri Lanka',
-        city: 'Colombo',
-        address : '123 Main St',
-        hash: hash
-      });
+        address: "Colombo",
+        city: "Colombo",
+        country: "Sri Lanka",
+        hash: hash,
+      };
+
+      res.json(payhereData);
     } catch (error) {
-      console.error("PayHere order creation error:", error);
-      res.status(500).json({ error: "Failed to create PayHere order" });
+      console.error("PayHere checkout error:", error);
+      res.status(500).json({ error: "Failed to initiate PayHere payment" });
     }
   });
 

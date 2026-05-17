@@ -814,7 +814,7 @@ export class DatabaseStorage implements IStorage {
     return !!deleted;
   }
 
-  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+  async createOrder(insertOrder: any): Promise<Order> {
     try {
       // Start a transaction
       return await db.transaction(async (tx) => {
@@ -825,32 +825,24 @@ export class DatabaseStorage implements IStorage {
             user_id: insertOrder.user_id,
             fullName: insertOrder.fullName,
             phone: insertOrder.phone,
-            // address: insertOrder.address,
             total: insertOrder.total,
-            status: "pending",
+            status: insertOrder.status || "pending",
             paymentMethod: insertOrder.paymentMethod,
           })
           .returning();
 
         // Insert order items
-        if (insertOrder.items && insertOrder.items.length > 0) {
+        if (insertOrder.items && Array.isArray(insertOrder.items) && insertOrder.items.length > 0) {
           await tx
             .insert(orderItems)
             .values(
-              insertOrder.items.map((item) => ({
+              insertOrder.items.map((item: any) => ({
                 orderId: order.id,
                 productId: item.productId,
                 quantity: item.quantity,
                 price: item.price,
               }))
             );
-        }
-
-        // Clear cart
-        if (insertOrder.user_id) {
-          await tx
-            .delete(cartItems)
-            .where(eq(cartItems.userId, insertOrder.user_id));
 
           // Update product stock
           for (const item of insertOrder.items) {
@@ -858,15 +850,23 @@ export class DatabaseStorage implements IStorage {
               .update(products)
               .set({
                 stock: sql<number>`${products.stock} - ${item.quantity}`,
-                availableToDispatch: sql<number>`${item.quantity}`,
+                availableToDispatch: sql<number>`${products.availableToDispatch} + ${item.quantity}`,
               })
               .where(eq(products.id, item.productId));
           }
         }
 
+        // Clear cart if user is logged in
+        if (insertOrder.user_id) {
+          await tx
+            .delete(cartItems)
+            .where(eq(cartItems.userId, insertOrder.user_id));
+        }
+
         return order;
       });
     } catch (error) {
+      console.error('Error creating order:', error);
       throw new Error('Failed to create order');
     }
   }

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Tag, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
 import * as z from "zod";
 import { useLocation } from "wouter";
 import { useCoupon } from "@/hooks/use-coupon";
@@ -21,7 +21,7 @@ const checkoutSchema = z.object({
 
 export function CheckoutForm({ onSuccess, total, items }: { onSuccess: () => void, total: number, items: any[] }) {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const { 
     couponCode, 
     setCouponCode, 
@@ -50,11 +50,13 @@ export function CheckoutForm({ onSuccess, total, items }: { onSuccess: () => voi
           total: finalTotal,
           discount: discount,
           couponCode: appliedCoupon?.code,
-          items: items.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.product.price
-          }))
+          items: items
+            .filter(item => item.product) // Ensure product exists
+            .map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.product!.price
+            }))
         });
         return res.json();
       } else {
@@ -64,12 +66,14 @@ export function CheckoutForm({ onSuccess, total, items }: { onSuccess: () => voi
           total: finalTotal,
           discount: discount,
           couponCode: appliedCoupon?.code,
-          items: items.map(item => ({
-            name: item.product.name,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.product.price
-          }))
+          items: items
+            .filter(item => item.product) // Ensure product exists
+            .map(item => ({
+              name: item.product!.name,
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.product!.price
+            }))
         });
         // console.log(res);
         // throw new Error("Process stopped for debugging");

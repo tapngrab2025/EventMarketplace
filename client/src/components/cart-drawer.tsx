@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CartItem, Product } from "@shared/schema";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { useCart } from '@/hooks/use-cart';
 
-export default function CartDrawer({isCheckingOut, setIsCheckingOut}: {isCheckingOut: boolean, setIsCheckingOut: (isCheckingOut: boolean) => void}) {
+export default function CartDrawer({ isCheckingOut, setIsCheckingOut }: { isCheckingOut: boolean, setIsCheckingOut: (isCheckingOut: boolean) => void }) {
   const { user } = useAuth();
   const { cartItems, isLoading: loadingCart, updateCartItem, removeFromCart } = useCart();
   const [, setLocation] = useLocation();

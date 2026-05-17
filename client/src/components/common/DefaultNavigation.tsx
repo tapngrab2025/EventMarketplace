@@ -112,6 +112,40 @@ function getDashboardHref(role?: string) {
   return null;
 }
 
+const CartButton = ({
+  mobile = false,
+  isCheckingOut,
+  setIsCheckingOut,
+  cartCount,
+}: {
+  mobile?: boolean;
+  isCheckingOut: boolean;
+  setIsCheckingOut: (val: boolean) => void;
+  cartCount: number;
+}) => (
+  <Sheet onOpenChange={(sheetOpen) => !sheetOpen && setIsCheckingOut(false)}>
+    <SheetTrigger asChild>
+      <button
+        type="button"
+        aria-label="Shopping cart"
+        className={[
+          "relative inline-flex items-center justify-center border border-zinc-200 text-zinc-900 transition hover:bg-zinc-50",
+          mobile ? "h-11 rounded px-4 text-sm font-semibold" : "h-10 w-10 rounded",
+        ].join(" ")}
+      >
+        <ShoppingCart className="h-4 w-4" />
+        {mobile && <span className="ml-2">Cart</span>}
+        {cartCount > 0 && (
+          <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-xs font-semibold leading-none text-white">
+            {cartCount}
+          </span>
+        )}
+      </button>
+    </SheetTrigger>
+    <CartDrawer isCheckingOut={isCheckingOut} setIsCheckingOut={setIsCheckingOut} />
+  </Sheet>
+);
+
 export function DefaultNavigation() {
   const { user, logoutMutation } = useAuth();
   const { cartItems } = useCart();
@@ -164,30 +198,6 @@ export function DefaultNavigation() {
       onSuccess: () => setLocation("/auth"),
     });
   };
-
-  const CartButton = ({ mobile = false }: { mobile?: boolean }) => (
-    <Sheet onOpenChange={(sheetOpen) => !sheetOpen && setIsCheckingOut(false)}>
-      <SheetTrigger asChild>
-        <button
-          type="button"
-          aria-label="Shopping cart"
-          className={[
-            "relative inline-flex items-center justify-center border border-zinc-200 text-zinc-900 transition hover:bg-zinc-50",
-            mobile ? "h-11 rounded px-4 text-sm font-semibold" : "h-10 w-10 rounded",
-          ].join(" ")}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {mobile && <span className="ml-2">Cart</span>}
-          {cartCount > 0 && (
-            <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-xs font-semibold leading-none text-white">
-              {cartCount}
-            </span>
-          )}
-        </button>
-      </SheetTrigger>
-      <CartDrawer isCheckingOut={isCheckingOut} setIsCheckingOut={setIsCheckingOut} />
-    </Sheet>
-  );
 
   return (
     <>
@@ -261,7 +271,11 @@ export function DefaultNavigation() {
             </>
           )}
 
-          <CartButton />
+          <CartButton
+            isCheckingOut={isCheckingOut}
+            setIsCheckingOut={setIsCheckingOut}
+            cartCount={cartCount}
+          />
 
           {user ? (
             <Button
@@ -396,7 +410,12 @@ export function DefaultNavigation() {
                 </>
               )}
 
-              <CartButton mobile />
+              <CartButton
+                mobile
+                isCheckingOut={isCheckingOut}
+                setIsCheckingOut={setIsCheckingOut}
+                cartCount={cartCount}
+              />
 
               {user ? (
                 <button

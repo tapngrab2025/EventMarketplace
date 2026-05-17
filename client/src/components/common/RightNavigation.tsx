@@ -1,14 +1,14 @@
 import { useAuth } from "@/hooks/use-auth";
-import { CartItem } from "@shared/schema";
+// import { CartItem } from "@shared/schema";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound, FileArchive } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+// import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import Cookies from 'js-cookie';
-import { apiRequest } from "@/lib/queryClient";
+// import Cookies from 'js-cookie';
+// import { apiRequest } from "@/lib/queryClient";
 import { useCart } from "@/hooks/use-cart";
 
 export function RightNavigation({
@@ -91,7 +91,7 @@ export function RightNavigation({
                         </Button>
                     )}
                     {user.role === "customer" && (
-                        <Sheet>
+                        <Sheet onOpenChange={(sheetOpen) => !sheetOpen && setIsCheckingOut(false)}>
                             <SheetTrigger asChild>
                                 <Button variant="outline" size="icon" className="relative">
                                     <ShoppingCart className="h-5 w-5" />
