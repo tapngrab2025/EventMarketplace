@@ -20,6 +20,8 @@ export default function MarqueeSlider() {
   const loopWidthRef = useRef(0);
   const dragStateRef = useRef({
     isDragging: false,
+    isPressed: false,
+    wasDragging: false,
     startX: 0,
     startOffset: 0,
   });
@@ -84,34 +86,48 @@ export default function MarqueeSlider() {
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 && event.pointerType === "mouse") return;
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    dragStateRef.current.isDragging = true;
+    
+    dragStateRef.current.isPressed = true;
+    dragStateRef.current.isDragging = false;
     dragStateRef.current.startX = event.clientX;
     dragStateRef.current.startOffset = slideOffsetRef.current;
-    slider.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const slider = sliderRef.current;
-    const { isDragging, startX, startOffset } = dragStateRef.current;
-    if (!slider || !isDragging) return;
+    if (!slider || !dragStateRef.current.isPressed) return;
 
-    event.preventDefault();
-    const deltaX = event.clientX - startX;
-    slideOffsetRef.current = normalizeOffset(startOffset - deltaX);
-    applyTransform();
+    const deltaX = event.clientX - dragStateRef.current.startX;
+    
+    // Only start dragging if moved more than 5 pixels
+    if (!dragStateRef.current.isDragging && Math.abs(deltaX) > 5) {
+      dragStateRef.current.isDragging = true;
+      slider.setPointerCapture(event.pointerId);
+    }
+
+    if (dragStateRef.current.isDragging) {
+      event.preventDefault();
+      slideOffsetRef.current = normalizeOffset(dragStateRef.current.startOffset - deltaX);
+      applyTransform();
+    }
   };
 
   const stopDragging = (event: React.PointerEvent<HTMLDivElement>) => {
     const slider = sliderRef.current;
     if (!slider) return;
 
-    dragStateRef.current.isDragging = false;
-    if (slider.hasPointerCapture(event.pointerId)) {
+    if (dragStateRef.current.isDragging && slider.hasPointerCapture(event.pointerId)) {
       slider.releasePointerCapture(event.pointerId);
     }
+    
+    dragStateRef.current.wasDragging = dragStateRef.current.isDragging;
+    dragStateRef.current.isPressed = false;
+    dragStateRef.current.isDragging = false;
+
+    // Reset wasDragging after a short delay so the click handler can see it
+    setTimeout(() => {
+      dragStateRef.current.wasDragging = false;
+    }, 10);
   };
 
   if (isLoading) {
@@ -145,7 +161,14 @@ export default function MarqueeSlider() {
             className="mx-2 w-[clamp(8.75rem,44vw,13rem)] shrink-0 sm:mx-3 sm:w-56 md:w-64 lg:mx-4 lg:w-72"
             key={`event-${event.id}-${index}`}
           >
-            <Link to={`/event/${event.id}`}>
+            <Link 
+              to={`/event/${event.id}`}
+              onClick={(e) => {
+                if (dragStateRef.current.wasDragging) {
+                  e.preventDefault();
+                }
+              }}
+            >
               <div className="aspect-[3/4] w-full overflow-hidden rounded bg-zinc-100 transition-opacity hover:opacity-90">
                 <img
                   src={event.imageUrl || DEFAULT_IMAGES.EVENT}
