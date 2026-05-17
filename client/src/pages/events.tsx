@@ -137,7 +137,7 @@ export default function EventsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 border">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8 max-w-7xl mx-auto">
             {filteredEvents?.map((event, index) => (
               <div
                 key={event.id}

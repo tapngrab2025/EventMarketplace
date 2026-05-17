@@ -54,7 +54,7 @@ export function DefaultFooter({
   email = "info@tapngrab.com",
 }: FooterProps) {
   return (
-    <footer className="bg-[#0a0a0a] text-white/80 max-w-7xl mx-auto">
+    <footer className="bg-[#0a0a0a] text-white/80 w-full">
       <div className="border-t border-white/10">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-12 md:grid-cols-2 md:gap-0 lg:grid-cols-4 lg:px-8">
           <div className="md:border-r md:border-white/10 md:pr-8 lg:pr-10">

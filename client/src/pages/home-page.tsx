@@ -312,7 +312,7 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
         </div>
       </section> */}
 
-      <section className="mx-auto max-w-7xl border border-t-0 border-zinc-200 bg-white py-20">
+      <section className="mx-auto max-w-7xl  bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl text-center mb-12">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
@@ -374,7 +374,7 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
         </div>
       </section> */}
 
-      <section className="mx-auto max-w-7xl border border-t-0 border-zinc-200 py-20 bg-white relative">
+      <section className="mx-auto max-w-7xl py-20 bg-white relative">
         <div className="container mx-auto px-6">
           <div className="mx-auto text- mb-12">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">

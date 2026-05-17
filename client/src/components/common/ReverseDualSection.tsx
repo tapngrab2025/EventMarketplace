@@ -4,7 +4,7 @@ import { Images } from "@/config/images";
 export default function ReverseDualSection() {
   return (
     <section className="overflow-hidden">
-      <div className="mx-auto grid w-full max-w-7xl border border-t-0 border-zinc-200 bg-white lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mx-auto grid w-full max-w-7xl bg-white lg:grid-cols-[0.9fr_1.1fr]">
         <div className="order-2 relative min-h-[320px] overflow-hidden sm:min-h-[420px] lg:order-1">
           <img
             src={Images.dualReverse}
