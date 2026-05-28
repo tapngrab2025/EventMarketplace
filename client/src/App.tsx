@@ -45,9 +45,7 @@ function Router() {
       } />
       <Route path="/auth" component={
         () => (
-          <DefaultLayout>
-            <AuthPage />
-          </DefaultLayout>
+          <AuthPage />
         )
       } />
       <Route path="/products" component={
