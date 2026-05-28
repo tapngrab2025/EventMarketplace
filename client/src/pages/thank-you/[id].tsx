@@ -1,17 +1,189 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Link, useRoute } from "wouter";
+import {
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  CreditCard,
+  Download,
+  FileText,
+  Heart,
+  Loader2,
+  ReceiptText,
+  ShoppingBag,
+  ShoppingCart,
+  Store,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import { QRCodeSVG } from 'qrcode.react';
-import { Download } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+
+type StallInfo = {
+  id: number | string;
+  name: string;
+};
+
+type OrderItem = {
+  id: number | string;
+  quantity: number;
+  price: number;
+  product: {
+    id: number | string;
+    name: string;
+    description?: string | null;
+    stall: StallInfo;
+  };
+  coupon?: {
+    id?: number | null;
+    discountPercentage?: number | null;
+  } | null;
+};
+
+type Order = {
+  id: number;
+  user_id: number;
+  fullName?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  total?: number | null;
+  status?: string | null;
+  paymentMethod?: string | null;
+  createdAt?: string | Date | null;
+  items?: OrderItem[];
+};
+
+type StallGroup = {
+  stall: StallInfo;
+  items: OrderItem[];
+  orderId?: string;
+};
+
+const confetti = [
+  "left-[8%] top-5 h-3 w-2 rotate-6 bg-sky-300",
+  "left-[19%] top-24 h-3 w-2 rotate-45 bg-yellow-300",
+  "left-[29%] top-8 h-4 w-4 rounded-full bg-emerald-400",
+  "left-[40%] top-16 h-3 w-3 rotate-45 bg-yellow-300",
+  "right-[34%] top-20 h-3 w-3 rotate-45 bg-indigo-300",
+  "right-[25%] top-10 h-3 w-3 rotate-12 bg-green-300",
+  "right-[15%] top-24 h-4 w-4 rounded-full bg-sky-300",
+  "right-[7%] top-14 h-3 w-3 rotate-45 bg-green-300",
+];
+
+function sanitizeId(value: string | number) {
+  return String(value)
+    .replace(/[^a-z0-9]/gi, "-")
+    .toLowerCase();
+}
+
+function getQrDomId(stallId: string | number) {
+  return `qr-stall-${sanitizeId(stallId)}`;
+}
+
+function formatCurrency(value?: number | null) {
+  return `$${((value ?? 0) / 100).toFixed(2)}`;
+}
+
+function formatDate(value?: string | Date | null) {
+  if (!value) return "--";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "--";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatLabel(value?: string | null) {
+  if (!value) return "--";
+
+  return value
+    .replace(/[_-]/g, " ")
+    .replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1));
+}
+
+function getStatusClass(status?: string | null) {
+  const normalized = status?.toLowerCase() ?? "";
+
+  if (["completed", "delivered", "paid", "ready"].includes(normalized)) {
+    return "bg-emerald-100 text-emerald-700";
+  }
+
+  if (["pending", "processing"].includes(normalized)) {
+    return "bg-yellow-100 text-yellow-700";
+  }
+
+  return "bg-zinc-100 text-zinc-700";
+}
+
+function buildQrValue(stallGroup: StallGroup) {
+  return JSON.stringify({
+    type: "stall_order",
+    orderId: stallGroup.orderId,
+    stallId: stallGroup.stall.id,
+    items: stallGroup.items.map((item) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+    })),
+  });
+}
+
+function downloadQRCode(stall: StallInfo) {
+  const qrElement = document.getElementById(getQrDomId(stall.id));
+
+  if (!qrElement) return;
+
+  const svgData = new XMLSerializer().serializeToString(qrElement);
+  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  const svgUrl = URL.createObjectURL(svgBlob);
+  const img = new Image();
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width * 2;
+    canvas.height = img.height * 2;
+
+    const ctx = canvas.getContext("2d");
+    ctx?.scale(2, 2);
+    ctx?.drawImage(img, 0, 0);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.download = `order-${sanitizeId(stall.name)}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+
+        URL.revokeObjectURL(svgUrl);
+      },
+      "image/png",
+      1,
+    );
+  };
+
+  img.onerror = () => URL.revokeObjectURL(svgUrl);
+  img.src = svgUrl;
+}
 
 export default function ThankYouPage() {
   const [, params] = useRoute("/thank-you/:id");
   const orderId = params?.id;
 
-  const { data: orderData, isLoading } = useQuery({
+  const {
+    data: orderData,
+    isLoading,
+    isError,
+  } = useQuery<Order[]>({
     queryKey: [`/api/orders/${orderId}`],
     queryFn: async () => {
       const res = await apiRequest("GET", `/api/orders/${orderId}`);
@@ -20,196 +192,347 @@ export default function ThankYouPage() {
     enabled: !!orderId,
   });
 
-  const order = orderData?.[0]; // Get first order from array
+  const order = orderData?.[0];
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
       </div>
     );
   }
 
-  // Group items by stall
-  const stallProducts = order?.items?.reduce((acc: any, item: any) => {
-    const stallId = item.product.stall.id;
-    if (!acc[stallId]) {
-      acc[stallId] = {
-        stall: item.product.stall,
-        items: [],
-        orderId: orderId
-      };
-    }
-    acc[stallId].items.push(item);
-    return acc;
-  }, {});
-
-  function sanitizeId(name: string) {
-    return name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  if (isError || !order) {
+    return (
+      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white px-4 py-16">
+        <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-8 text-center shadow-sm">
+          <ReceiptText className="mx-auto h-10 w-10 text-emerald-600" />
+          <h1 className="mt-5 text-[24px] font-bold leading-tight text-slate-950">
+            Order details unavailable
+          </h1>
+          <p className="mt-2 text-[14px] leading-6 text-slate-500">
+            We could not load this order confirmation right now.
+          </p>
+          <Button
+            asChild
+            className="mt-6 h-11 w-full rounded-md bg-emerald-600 text-[14px] font-semibold hover:bg-emerald-700"
+          >
+            <Link href="/profile">View Orders</Link>
+          </Button>
+        </div>
+      </main>
+    );
   }
 
-  function downloadQRCode(stallName: string, qrValue: string) {
-    const sanitizedId = sanitizeId(stallName);
-    const qrElement = document.getElementById(`qr-${sanitizedId}`);
-    
-    if (!qrElement) {
-      return;
-    }
+  const stallProducts = (order.items ?? []).reduce<Record<string, StallGroup>>(
+    (acc, item) => {
+      const stall = item.product?.stall;
 
-    // Get the SVG data
-    const svgData = new XMLSerializer().serializeToString(qrElement);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const svgUrl = URL.createObjectURL(svgBlob);
+      if (!stall?.id) return acc;
 
-    // Create image from SVG with larger dimensions
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      // Set larger canvas dimensions (2x the original size)
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
-      const ctx = canvas.getContext('2d');
-      // Scale up the image while maintaining quality
-      ctx?.scale(2, 2);
-      ctx?.drawImage(img, 0, 0);
-      
-      // Convert to PNG and download
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `order-${sanitizedId}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }
-      }, 'image/png', 1.0); // Added quality parameter
-    };
-    img.src = svgUrl;
-  }
+      const stallId = String(stall.id);
 
+      if (!acc[stallId]) {
+        acc[stallId] = {
+          stall,
+          items: [],
+          orderId,
+        };
+      }
+
+      acc[stallId].items.push(item);
+      return acc;
+    },
+    {},
+  );
+
+  const stallGroups = Object.values(stallProducts);
+  const orderDate = formatDate(order.createdAt);
+  const totalAmount = formatCurrency(order.total);
+  const statusLabel = formatLabel(order.status);
+  const summaryCards = [
+    {
+      label: "Order ID",
+      value: `#${orderId}`,
+      icon: ShoppingBag,
+    },
+    {
+      label: "Date",
+      value: orderDate,
+      icon: CalendarDays,
+    },
+    {
+      label: "Total Amount",
+      value: totalAmount,
+      icon: CreditCard,
+    },
+  ];
 
   return (
-    <div className="container mx-auto px-4 py-16 text-center">
-      <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-      <h1 className="text-3xl font-bold mb-4">Thank You for Your Order!</h1>
-      <p className="text-muted-foreground mb-8">
-        Your order #{orderId} has been placed successfully.
-      </p>
-      
-      <div className="max-w-xl mx-auto bg-card p-6 rounded-lg shadow mb-8">
-        <h2 className="font-semibold text-xl mb-6">Order Details</h2>
-        <div className="space-y-4 text-left divide-y">
-          <div className="pb-4">
-            <h3 className="font-medium text-lg mb-2">Customer Information</h3>
-            <div className="space-y-2 text-sm">
-              <p><span className="font-medium">Name:</span> {order?.fullName}</p>
-              <p><span className="font-medium">Address:</span> {order?.address}</p>
-              <p><span className="font-medium">Phone:</span> {order?.phone}</p>
+    <main className="relative overflow-hidden bg-white mx-auto max-w-3xl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44">
+        {confetti.map((className) => (
+          <span
+            key={className}
+            className={`absolute hidden rounded-sm sm:block ${className}`}
+          />
+        ))}
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <section className="text-center">
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_14px_34px_rgba(16,185,129,0.35)]">
+            <Check className="h-14 w-14 stroke-[3.2]" />
+          </div>
+
+          <h1 className="mt-6 text-xl font-extrabold leading-[1.15] tracking-tight text-slate-950 sm:text-2xl">
+            Thank You for Your Order!
+          </h1>
+          <p className="text-base leading-7 text-slate-500">
+            Your order #{orderId} has been placed successfully.
+          </p>
+        </section>
+
+        <section className="mx-auto mt-8 grid max-w-6xl gap-5 md:grid-cols-3">
+          {summaryCards.map((card) => {
+            const Icon = card.icon;
+
+            return (
+              <div
+                key={card.label}
+                className="flex items-center gap-4 rounded-lg border border-zinc-100 bg-white px-7 py-6 shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-[14px] font-bold leading-5 text-slate-950">
+                    {card.label}
+                  </p>
+                  <p className="mt-1 truncate text-[18px] font-extrabold leading-6 text-emerald-700">
+                    {card.value}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        <section className="mx-auto mt-8 max-w-6xl rounded-lg border border-zinc-100 bg-white p-5 shadow-[0_10px_32px_rgba(15,23,42,0.08)] sm:p-8">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                  <UserRound className="h-5 w-5" />
+                </div>
+                <h2 className="text-[18px] font-extrabold leading-6 text-slate-950">
+                  Customer Information
+                </h2>
+              </div>
+
+              <dl className="mt-7 space-y-4 text-[14px] leading-5">
+                <div className="grid grid-cols-[90px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Name:</dt>
+                  <dd className="truncate text-slate-700">
+                    {order.fullName || "--"}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-[90px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Address:</dt>
+                  <dd className="truncate text-slate-700">
+                    {order.address || "--"}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-[90px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Phone:</dt>
+                  <dd className="truncate text-slate-700">
+                    {order.phone || "--"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="min-w-0 border-t border-zinc-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <h2 className="text-[18px] font-extrabold leading-6 text-slate-950">
+                  Order Information
+                </h2>
+              </div>
+
+              <dl className="mt-7 space-y-4 text-[14px] leading-5">
+                <div className="grid grid-cols-[132px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Order ID:</dt>
+                  <dd className="text-slate-700">#{orderId}</dd>
+                </div>
+                <div className="grid grid-cols-[132px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Date:</dt>
+                  <dd className="text-slate-700">{orderDate}</dd>
+                </div>
+                <div className="grid grid-cols-[132px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Status:</dt>
+                  <dd>
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-[12px] font-bold leading-4 ${getStatusClass(
+                        order.status,
+                      )}`}
+                    >
+                      {statusLabel}
+                    </span>
+                  </dd>
+                </div>
+                <div className="grid grid-cols-[132px_minmax(0,1fr)] gap-3">
+                  <dt className="font-bold text-slate-950">Payment Method:</dt>
+                  <dd className="text-slate-700">
+                    {formatLabel(order.paymentMethod)}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-[132px_minmax(0,1fr)] gap-3 pt-1">
+                  <dt className="font-extrabold text-slate-950">
+                    Total Amount:
+                  </dt>
+                  <dd className="text-[20px] font-extrabold leading-6 text-emerald-700">
+                    {totalAmount}
+                  </dd>
+                </div>
+              </dl>
             </div>
           </div>
-          <div className="py-4">
-            <h3 className="font-medium text-lg mb-2">Purchased Items</h3>
-            <div className="space-y-3">
-              {Object.values(stallProducts || {}).map((stallGroup: any) => (
-                <div key={stallGroup.stall.id} className="border rounded-lg p-4">
-                  <h4 className="text-md mb-2 bg-muted/50 p-2 rounded-md flex items-center">
-                    <span className="text-muted-foreground">Stall : </span>
-                    <span className="font-semibold ml-1 text-primary">{stallGroup.stall.name}</span>
-                  </h4>
-                  <div className="flex gap-4 flex-col sm:flex-row">
-                    <div className="flex-1">
-                      {stallGroup.items.map((item: any) => (
-                        <div key={item.id} className="flex justify-between items-center text-sm mb-2">
-                          <div className="pl-2">
-                            <p className="font-medium">{item.product.name}</p>
-                            <p className="text-muted-foreground">Quantity: {item.quantity}</p>
-                          </div>
-                          <p className="font-medium">
-                            <span className={item.coupon?.id ? "line-through text-sm text-muted-foreground" : ""}>${((item.price * item.quantity) / 100).toFixed(2)}</span> {item.coupon?.id && (
-                              <span className="text-sm">
-                                - ${(((item.price * item.quantity) * (1 - (item.coupon?.discountPercentage ?? 0) / 100)) / 100).toFixed(2)}
-                              </span>
-                            )}
+
+          <div className="mt-9 border-t border-zinc-200 pt-7">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <ShoppingCart className="h-5 w-5" />
+              </div>
+              <h2 className="text-[18px] font-extrabold leading-6 text-slate-950">
+                Purchased Items
+              </h2>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {stallGroups.map((stallGroup) => (
+                <div
+                  key={stallGroup.stall.id}
+                  className="rounded-lg border border-zinc-200 bg-white p-5"
+                >
+                  <div className="grid gap-5 md:grid-cols-[64px_minmax(0,1fr)_120px_126px] md:items-start">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 md:mt-5">
+                      <Store className="h-7 w-7" />
+                    </div>
+
+                    <div className="min-w-0 space-y-4">
+                      {stallGroup.items.map((item) => (
+                        <div key={item.id} className="min-w-0">
+                          <p className="text-[14px] leading-5 text-slate-500">
+                            Stall:{" "}
+                            <span className="font-extrabold text-emerald-700">
+                              {stallGroup.stall.name}
+                            </span>
+                          </p>
+                          <p className="mt-2 text-[16px] font-medium leading-6 text-slate-950">
+                            {item.product.name}
+                          </p>
+                          <p className="mt-2 text-[14px] leading-5 text-slate-500">
+                            Quantity: {item.quantity}
                           </p>
                         </div>
                       ))}
                     </div>
-                    <div className="flex flex-col items-center gap-2">
+
+                    <div className="text-left md:pt-5 md:text-right">
+                      <p className="text-[15px] font-extrabold leading-5 text-slate-950">
+                        {formatCurrency(
+                          stallGroup.items.reduce(
+                            (total, item) => total + item.price * item.quantity,
+                            0,
+                          ),
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-start gap-3 md:items-center">
                       <QRCodeSVG
-                        id={`qr-${sanitizeId(stallGroup.stall.name)}`}
-                        value={JSON.stringify({
-                          type: 'stall_order',
-                          orderId: stallGroup.orderId,
-                          stallId: stallGroup.stall.id,
-                          items: stallGroup.items.map((item: any) => ({
-                            productId: item.product.id,
-                            quantity: item.quantity
-                          }))
-                        })}
-                        size={150} // Increased from 100 to 150
+                        id={getQrDomId(stallGroup.stall.id)}
+                        value={buildQrValue(stallGroup)}
+                        size={112}
                         level="H"
                         includeMargin
                       />
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex gap-2 items-center"
-                        onClick={() => downloadQRCode(stallGroup.stall.name, stallGroup.stall.id)}
+                        className="h-9 rounded-md border-zinc-200 px-3 text-[13px] font-semibold text-slate-700 hover:bg-zinc-50"
+                        onClick={() => downloadQRCode(stallGroup.stall)}
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className="h-4 w-4 text-emerald-600" />
                         Download QR
                       </Button>
                     </div>
                   </div>
                 </div>
               ))}
-              <div className="pt-3 mt-3 border-t">
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium">Subtotal</span>
-                  <span>${((order?.total || 0) / 100).toFixed(2)}</span>
+
+              {stallGroups.length === 0 && (
+                <div className="rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center">
+                  <p className="text-[15px] font-semibold text-slate-600">
+                    No purchased items are attached to this order.
+                  </p>
                 </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-5 border-t border-zinc-200 pt-5">
+            <div className="flex items-center justify-between gap-4 text-[15px] font-bold leading-5 text-slate-950">
+              <span>Subtotal</span>
+              <span>{totalAmount}</span>
+            </div>
+          </div>
+
+          <div className="mt-7 flex items-center justify-between gap-6 overflow-hidden rounded-lg border border-emerald-100 bg-emerald-50 px-5 py-5">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+                <CheckCircle2 className="h-7 w-7" />
               </div>
-            </div>
-          </div>
-
-
-
-          <div className="py-4">
-            <h3 className="font-medium text-lg mb-2">Order Information</h3>
-            <div className="space-y-2 text-sm">
-              <p><span className="font-medium">Order ID:</span> #{orderId}</p>
-              <p><span className="font-medium">Date:</span> {new Date(order?.createdAt).toLocaleDateString()}</p>
-              <p><span className="font-medium">Status:</span> 
-                <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  order?.status === 'completed' ? 'bg-green-100 text-green-800' :
-                  order?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {order?.status}
-                </span>
-              </p>
-              <p><span className="font-medium">Payment Method:</span> {order?.paymentMethod}</p>
-              <p><span className="font-medium">Total Amount:</span> 
-                <span className="text-lg font-bold ml-2">
-                  ${((order?.total || 0) / 100).toFixed(2)}
-                </span>
+              <p className="text-[13px] leading-6 text-slate-700">
+                We&apos;ve received your order and will confirm it soon.
+                <br className="hidden sm:block" />
+                You will get an update when your order is ready.
               </p>
             </div>
+
+            <div className="relative hidden h-20 w-24 shrink-0 items-center justify-center text-emerald-500 sm:flex">
+              <ShoppingBag className="h-16 w-16 fill-emerald-500/20" />
+              <Heart className="absolute h-5 w-5 fill-white text-white" />
+            </div>
           </div>
+        </section>
+
+        <div className="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <Button
+            asChild
+            variant="outline"
+            className="h-12 w-full rounded-md border-emerald-500 px-8 text-[14px] font-extrabold text-emerald-700 hover:bg-emerald-50 sm:w-auto"
+          >
+            <Link href="/">
+              <ShoppingBag className="h-4 w-4" />
+              Continue Shopping
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            className="h-12 w-full rounded-md bg-emerald-700 px-10 text-[14px] font-extrabold text-white shadow-[0_10px_22px_rgba(4,120,87,0.22)] hover:bg-emerald-800 sm:w-auto"
+          >
+            <Link href="/profile">
+              <FileText className="h-4 w-4" />
+              View Orders
+            </Link>
+          </Button>
         </div>
       </div>
-
-      <div className="space-x-4">
-        <Link href="/">
-          <Button variant="outline">Continue Shopping</Button>
-        </Link>
-        <Link href="/orders">
-          <Button>View Orders</Button>
-        </Link>
-      </div>
-    </div>
+    </main>
   );
 }
