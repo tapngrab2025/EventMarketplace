@@ -7,7 +7,7 @@ export default function ReverseDualSection() {
       <div className="mx-auto grid w-full max-w-7xl bg-white lg:grid-cols-[0.9fr_1.1fr]">
         <div className="order-2 relative min-h-[320px] overflow-hidden sm:min-h-[420px] lg:order-1">
           <img
-            src={Images.dualReverse}
+            src={Images.loginUtils}
             alt="Tap and Grab community experience artwork"
             className="absolute inset-0 h-full w-full object-cover"
           />
