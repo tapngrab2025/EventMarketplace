@@ -488,9 +488,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const payhereData = {
         merchant_id: merchantId,
-        return_url: `${req.protocol}://${req.get("host")}/payment/success`,
-        cancel_url: `${req.protocol}://${req.get("host")}/payment/cancel`,
-        notify_url: `${req.protocol}://${req.get("host")}/api/payhere/notify`,
+        return_url: `https://${req.get("host")}/thank-you/${orderId}`,
+        cancel_url: `https://${req.get("host")}/payment/cancel`,
+        notify_url: `https://${req.get("host")}/api/payhere/notify`,
         order_id: orderId,
         items: Array.isArray(items) ? items.map((item: any) => item.name).join(", ") : "Events",
         amount: amountFormatted,
