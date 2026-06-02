@@ -23,7 +23,7 @@ import { DefaultLayout } from "./components/layouts/DefaultLayout";
 import { OrganizerLayout } from "./components/layouts/OrganizerLayout";
 import AdminUsersDashboard from "./pages/admin-users";
 import EventDetailsPage from "./pages/event/[id]";
-import ThankYouPage from "./pages/thank-you/[id]";
+import ThankYouPage from "./pages/payment/thank-you/[id]";
 // import ProductPage from "./pages/product-page";
 import ProductDetails from "@/pages/products/[id]";
 import AllProducts from "./pages/all-products";
@@ -263,7 +263,7 @@ function Router() {
         roles={["organizer"]}
       />
       <ProtectedRoute
-        path="/thank-you/:id"
+        path="/payment/thank-you/:id"
         component={() => (
           <DefaultLayout>
             <ThankYouPage />

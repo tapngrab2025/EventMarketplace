@@ -370,7 +370,7 @@ function OrdersTable({
                     className="h-9 w-9 rounded text-zinc-500 hover:bg-teal-50 hover:text-teal-700"
                   >
                     <Link
-                      href={`/thank-you/${order.id}`}
+                      href={`/payment/thank-you/${order.id}`}
                       aria-label={`View order ${order.id}`}
                     >
                       <Eye className="h-4 w-4" />
