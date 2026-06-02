@@ -176,7 +176,7 @@ function downloadQRCode(stall: StallInfo) {
 }
 
 export default function ThankYouPage() {
-  const [, params] = useRoute("/thank-you/:id");
+  const [, params] = useRoute("/payment/thank-you/:id");
   const orderId = params?.id;
 
   const {

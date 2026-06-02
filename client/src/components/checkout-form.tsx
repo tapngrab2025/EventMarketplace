@@ -101,7 +101,7 @@ export function CheckoutForm({ onSuccess, total, items }: { onSuccess: () => voi
       if (data?.id) { // Only for COD orders
         queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
         queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-        setLocation(`/thank-you/${data.id}`);
+        setLocation(`/payment/thank-you/${data.id}`);
       }
     },
   });
