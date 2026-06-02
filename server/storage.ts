@@ -880,6 +880,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async cancelOrder(orderId: number): Promise<Order | undefined> {
+    //Stop order cancellation if order is already cancelled or delivered
+    const [existingOrder] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, orderId));
+    
+    if (!existingOrder || existingOrder.status === "cancelled" || existingOrder.status === "delivered") {
+      throw new Error("Order cannot be cancelled");
+    }
+
     try {
       return await db.transaction(async (tx) => {
         // Get order items before updating

@@ -527,7 +527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Redirect to the cancel page
-      res.redirect(`/payment/cancel/${orderId}`);
+      // res.redirect(`/payment/cancel/${orderId}`);
     } catch (error) {
       console.error("Payment cancel error:", error);
       res.status(500).json({ error: "Failed to process payment cancellation" });
