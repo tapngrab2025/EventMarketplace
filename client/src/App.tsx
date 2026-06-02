@@ -271,6 +271,15 @@ function Router() {
         )}
         roles={["admin", "vendor", "customer", "organizer"]}
       />
+      <ProtectedRoute
+        path="/payment/cancel/:id"
+        component={() => (
+          <DefaultLayout>
+            <PaymentCancelPage />
+          </DefaultLayout>
+        )}
+        roles={["admin", "vendor", "customer", "organizer"]}
+      />
       <Route component={NotFound} />
     </Switch>
   );
