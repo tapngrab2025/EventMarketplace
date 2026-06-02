@@ -24,6 +24,7 @@ import { OrganizerLayout } from "./components/layouts/OrganizerLayout";
 import AdminUsersDashboard from "./pages/admin-users";
 import EventDetailsPage from "./pages/event/[id]";
 import ThankYouPage from "./pages/payment/thank-you/[id]";
+import PaymentCancelPage from "./pages/payment/cancel/[id]";
 // import ProductPage from "./pages/product-page";
 import ProductDetails from "@/pages/products/[id]";
 import AllProducts from "./pages/all-products";
