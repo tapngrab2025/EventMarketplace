@@ -489,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payhereData = {
         merchant_id: merchantId,
         return_url: `https://${req.get("host")}/thank-you/${orderId}`,
-        cancel_url: `https://${req.get("host")}/payment/cancel`,
+        cancel_url: `https://${req.get("host")}/payment/cancel/${orderId}`,
         notify_url: `https://${req.get("host")}/api/payhere/notify`,
         order_id: orderId,
         items: Array.isArray(items) ? items.map((item: any) => item.name).join(", ") : "Events",
@@ -509,6 +509,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("PayHere checkout error:", error);
       res.status(500).json({ error: "Failed to initiate PayHere payment" });
+    }
+  });
+
+  app.get("/payment/cancel/:order_id", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.order_id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ error: "Invalid order ID" });
+      }
+
+      // Cancel the order and restore inventory
+      const cancelledOrder = await storage.cancelOrder(orderId);
+      
+      if (!cancelledOrder) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Redirect to the cancel page
+      res.redirect(`/payment/cancel/${orderId}`);
+    } catch (error) {
+      console.error("Payment cancel error:", error);
+      res.status(500).json({ error: "Failed to process payment cancellation" });
     }
   });
 

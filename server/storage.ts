@@ -879,6 +879,53 @@ export class DatabaseStorage implements IStorage {
       .returning())[0];
   }
 
+  async cancelOrder(orderId: number): Promise<Order | undefined> {
+    try {
+      return await db.transaction(async (tx) => {
+        // Get order items before updating
+        const order = await tx
+          .select()
+          .from(orders)
+          .where(eq(orders.id, orderId));
+
+        if (!order || order.length === 0) {
+          return undefined;
+        }
+
+        // Get order items
+        const items = await tx
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, orderId));
+
+        // Restore product stock for each item
+        for (const item of items) {
+          await tx
+            .update(products)
+            .set({
+              stock: sql<number>`${products.stock} + ${item.quantity}`,
+              availableToDispatch: sql<number>`${products.availableToDispatch} - ${item.quantity}`,
+            })
+            .where(eq(products.id, item.productId));
+        }
+
+        // Update order status to cancelled
+        const [updatedOrder] = await tx
+          .update(orders)
+          .set({
+            status: "cancelled"
+          })
+          .where(eq(orders.id, orderId))
+          .returning();
+
+        return updatedOrder;
+      });
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      throw new Error('Failed to cancel order');
+    }
+  }
+
   // async getUserOrders(userId: number): Promise<Order[]> {
   async getUserOrders(userId: number): Promise<any[]> {
     return await db
