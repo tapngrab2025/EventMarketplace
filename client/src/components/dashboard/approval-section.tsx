@@ -17,9 +17,15 @@ export function ApprovalSection({
   approveProduct,
 }: ApprovalSectionProps) {
   return (
-    <div className="grid gap-8">
-      <PendingEvents pendingEvents={pendingEvents} approveEvent={approveEvent} />
-      <PendingProducts pendingProducts={pendingProducts} approveProduct={approveProduct} />
+    <div className="grid lg:grid-cols-2 gap-8">
+      <PendingEvents
+        pendingEvents={pendingEvents}
+        approveEvent={approveEvent}
+      />
+      <PendingProducts
+        pendingProducts={pendingProducts}
+        approveProduct={approveProduct}
+      />
     </div>
   );
 }
