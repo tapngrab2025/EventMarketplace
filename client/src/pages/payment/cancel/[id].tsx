@@ -108,9 +108,9 @@ export default function CancelPage() {
     isLoading,
     isError,
   } = useQuery<Order[]>({
-    queryKey: [`/api/orders/${orderId}`],
+    queryKey: [`/payment/cancel/${orderId}`],
     queryFn: async () => {
-      const res = await apiRequest("GET", `/api/orders/${orderId}`);
+      const res = await apiRequest("POST", `/payment/cancel/${orderId}`);
       return res.json();
     },
     enabled: !!orderId,

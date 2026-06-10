@@ -512,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/payment/cancel/:order_id", async (req, res) => {
+  app.post("/payment/cancel/:order_id", async (req, res) => {
     try {
       const orderId = parseInt(req.params.order_id);
       if (isNaN(orderId)) {
@@ -521,13 +521,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Cancel the order and restore inventory
       const cancelledOrder = await storage.cancelOrder(orderId);
-      
+      if(cancelledOrder == "Order cannot be cancelled") {
+        console.log("Order cannot be cancelled");
+      }
       if (!cancelledOrder) {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      // Redirect to the cancel page
-      // res.redirect(`/payment/cancel/${orderId}`);
+       const order = await storage.getOrder(orderId);
+       if (!order || order.length === 0) {
+        return res.status(404).json({ error: "Order not found" });
+       }
+
+       res.json(order);
     } catch (error) {
       console.error("Payment cancel error:", error);
       res.status(500).json({ error: "Failed to process payment cancellation" });
