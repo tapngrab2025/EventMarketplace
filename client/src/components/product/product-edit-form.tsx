@@ -58,6 +58,7 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
       // Invalidate both the specific product and the products list
       queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products/all"] });
     },
   });
 

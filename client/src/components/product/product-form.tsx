@@ -59,6 +59,7 @@ export function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () 
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/products/all"] });
         toast({
           title: "Success",
           description: "Product created successfully",
