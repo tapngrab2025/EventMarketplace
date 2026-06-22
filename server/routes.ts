@@ -103,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Invalid event ID" });
     }
     let event;
-    if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
+    if (!req.isAuthenticated() && !["admin", "organizer", "vendor"].includes(req.user.role)) {
       event = await storage.getActiveEvent(id);
     }else{
       event = await storage.getEvent(id);
