@@ -97,13 +97,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(event);
   })
 
-    app.get("/api/events/active/:id", async (req, res) => {
+  app.get("/api/events/active/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid event ID" });
     }
     let event;
-    if (!req.isAuthenticated() && !["admin", "organizer", "vendor"].includes(req.user.role)) {
+    if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
       event = await storage.getActiveEvent(id);
     }else{
       event = await storage.getEvent(id);

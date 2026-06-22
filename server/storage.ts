@@ -257,9 +257,7 @@ export class DatabaseStorage implements IStorage {
   }
 
     async getActiveEvent(id: number): Promise<Event | undefined> {
-    const [event] = await db
-      .select()
-      .from(events)
+    const [event] = await db.select().from(events)
       .where(and(eq(events.archived, false), eq(events.id, id)));
     return event;
   }
