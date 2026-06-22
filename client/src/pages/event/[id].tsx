@@ -18,6 +18,7 @@ import { useCart } from "@/hooks/use-cart";
 import { EventCoupons } from "@/components/coupon/event-coupons";
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_IMAGES } from "@/config/constants";
+import NotFound from "../not-found";
 
 type StallWithProducts = Stall & {
   products?: Product[];
@@ -33,8 +34,13 @@ export default function EventDetailsPage() {
     setAnimateItems(true);
   }, []);
 
+  // const { data: event, isLoading: loadingEvent } = useQuery<Event>({
+  //   queryKey: [`/api/events/${id}`],
+  //   enabled: !!id,
+  // });
+
   const { data: event, isLoading: loadingEvent } = useQuery<Event>({
-    queryKey: [`/api/events/${id}`],
+    queryKey: [`/api/events/active/${id}`],
     enabled: !!id,
   });
 
@@ -75,6 +81,10 @@ export default function EventDetailsPage() {
         <Loader2 className="h-12 w-12 animate-spin text-primaryGreen" />
       </div>
     );
+  }
+
+  if (!event) {
+    return <NotFound />;
   }
 
   return (

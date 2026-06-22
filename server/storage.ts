@@ -256,6 +256,14 @@ export class DatabaseStorage implements IStorage {
     return event;
   }
 
+    async getActiveEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db
+      .select()
+      .from(events)
+      .where(and(eq(events.archived, false), eq(events.id, id)));
+    return event;
+  }
+
   async getEventIdByProductId(productId: number): Promise<number | undefined> {
     const [stall] = await db.select({ eventId: stalls.eventId }).from(products).innerJoin(stalls, eq(stalls.id, products.stallId)).where(eq(products.id, productId));
     return stall?.eventId;
@@ -1363,7 +1371,10 @@ export class DatabaseStorage implements IStorage {
     // Archive the events
     await db
       .update(events)
-      .set({ archived: true })
+      .set({ 
+        archived: true, 
+        imageUrl: ''
+      })
       .where(inArray(events.id, eventIds));
 
     // Get stalls for these events

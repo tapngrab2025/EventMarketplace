@@ -97,6 +97,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(event);
   })
 
+    app.get("/api/events/active/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
+    if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
+      return res.sendStatus(404);
+    }
+    const event = await storage.getActiveEvent(id);
+    if (!event) return res.sendStatus(404);
+    res.json(event);
+  })
+
   app.get("/api/events/city/:city", async (req, res) => {
     const event = await storage.getCityEvent(req.params.city);
     if (!event) return res.sendStatus(404);
