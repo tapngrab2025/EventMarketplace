@@ -102,10 +102,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid event ID" });
     }
-    if (!req.isAuthenticated() || !["admin", "organizer"].includes(req.user.role)) {
-      return res.sendStatus(404);
+    if (!req.isAuthenticated() || !["admin", "organizer", "vendor"].includes(req.user.role)) {
+      const event = await storage.getActiveEvent(id);
+      if (!event) return res.sendStatus(404);
+      res.json(event);
     }
-    const event = await storage.getActiveEvent(id);
+    const event = await storage.getEvent(id);
     if (!event) return res.sendStatus(404);
     res.json(event);
   })
