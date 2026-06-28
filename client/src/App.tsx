@@ -185,7 +185,8 @@ function Router() {
         path="/vendor/events/new"
         component={() => (
           <VendorLayout>
-            {(() => { const Page = require("./pages/vendor/events/new").default; return <Page/>; })()}
+            {/* {(() => { const Page = require("./pages/vendor/events/new").default; return <Page/>; })()} */}
+            <VendorEventNew />
           </VendorLayout>
         )}
         roles={["vendor"]}
@@ -194,7 +195,8 @@ function Router() {
         path="/vendor/events/:id/edit"
         component={() => (
           <VendorLayout>
-            {(() => { const Page = require("./pages/vendor/events/[id]/edit").default; return <Page/>; })()}
+            {/* {(() => { const Page = require("./pages/vendor/events/[id]/edit").default; return <Page/>; })()} */}
+            <VendorEventEdit />
           </VendorLayout>
         )}
         roles={["vendor"]}
@@ -203,7 +205,8 @@ function Router() {
         path="/vendor/stalls/new/:eventId"
         component={() => (
           <VendorLayout>
-            {(() => { const Page = require("./pages/vendor/stalls/new/[eventId]").default; return <Page/>; })()}
+            {/* {(() => { const Page = require("./pages/vendor/stalls/new/[eventId]").default; return <Page/>; })()} */}
+            <VendorStallNew />
           </VendorLayout>
         )}
         roles={["vendor"]}
@@ -212,7 +215,8 @@ function Router() {
         path="/vendor/stalls/:id/edit"
         component={() => (
           <VendorLayout>
-            {(() => { const Page = require("./pages/vendor/stalls/[id]/edit").default; return <Page/>; })()}
+            {/* {(() => { const Page = require("./pages/vendor/stalls/[id]/edit").default; return <Page/>; })()} */}
+            <VendorStallEdit />
           </VendorLayout>
         )}
         roles={["vendor"]}
@@ -221,7 +225,8 @@ function Router() {
         path="/vendor/products/new/:stallId"
         component={() => (
           <VendorLayout>
-            {(() => { const Page = require("./pages/vendor/products/new/[stallId]").default; return <Page/>; })()}
+            {/* {(() => { const Page = require("./pages/vendor/products/new/[stallId]").default; return <Page/>; })()} */}
+            <VendorProductNew />
           </VendorLayout>
         )}
         roles={["vendor"]}
@@ -230,7 +235,8 @@ function Router() {
         path="/vendor/products/:id/edit"
         component={() => (
           <VendorLayout>
-            {(() => { const Page = require("./pages/vendor/products/[id]/edit").default; return <Page/>; })()}
+            {/* {(() => { const Page = require("./pages/vendor/products/[id]/edit").default; return <Page/>; })()} */}
+            <VendorProductEdit />
           </VendorLayout>
         )}
         roles={["vendor"]}
