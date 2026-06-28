@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  FileArchive,
   LayoutDashboard,
   Loader2,
   LogOut,
   ShoppingCart,
   User,
-  UsersRound,
 } from "lucide-react";
 import CartDrawer from "@/components/cart-drawer";
 import { Logo } from "@/components/common/logo";
@@ -119,6 +117,7 @@ export function DefaultNavigation() {
   const [open, setOpen] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const dashboardHref = getDashboardHref(user?.role);
+  const isProfilePage = location === "/profile";
   const cartCount = cartItems?.length ?? 0;
 
   const isActiveLink = (href: string) => {
@@ -216,15 +215,17 @@ export function DefaultNavigation() {
         <div className="hidden items-center gap-3 md:flex">
           {user && (
             <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded border border-zinc-200"
-                onClick={() => setLocation("/profile")}
-                title="User Profile"
-              >
-                <User className="h-4 w-4" />
-              </Button>
+              {!isProfilePage && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded border border-zinc-200"
+                  onClick={() => setLocation("/profile")}
+                  title="User Profile"
+                >
+                  <User className="h-4 w-4" />
+                </Button>
+              )}
               {dashboardHref && (
                 <Button
                   variant="ghost"
@@ -235,28 +236,6 @@ export function DefaultNavigation() {
                 >
                   <LayoutDashboard className="h-4 w-4" />
                 </Button>
-              )}
-              {user.role === "admin" && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded border border-zinc-200"
-                    onClick={() => setLocation("/users")}
-                    title="User Dashboard"
-                  >
-                    <UsersRound className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded border border-zinc-200"
-                    onClick={() => setLocation("/admin/archives")}
-                    title="Event Archives"
-                  >
-                    <FileArchive className="h-4 w-4" />
-                  </Button>
-                </>
               )}
             </>
           )}
@@ -377,13 +356,15 @@ export function DefaultNavigation() {
             <div className="mt-6 grid grid-cols-1 gap-3">
               {user && (
                 <>
-                  <Link
-                    href="/profile"
-                    onClick={closeMobileMenu}
-                    className="flex h-11 items-center justify-center rounded border border-zinc-200 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50"
-                  >
-                    Profile
-                  </Link>
+                  {!isProfilePage && (
+                    <Link
+                      href="/profile"
+                      onClick={closeMobileMenu}
+                      className="flex h-11 items-center justify-center rounded border border-zinc-200 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50"
+                    >
+                      Profile
+                    </Link>
+                  )}
                   {dashboardHref && (
                     <Link
                       href={dashboardHref}

@@ -29,7 +29,7 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
 
   if (user) {
-    setLocation("/");
+    setLocation(getPostLoginHref(user.role));
     return null;
   }
 
@@ -94,6 +94,7 @@ export default function AuthPage() {
 
 function LoginForm({ onSignUpClick }: { onSignUpClick: () => void }) {
   const { loginMutation } = useAuth();
+  const [, setLocation] = useLocation();
   const form = useForm({
     resolver: zodResolver(
       insertUserSchema.pick({ username: true, password: true }),
@@ -107,7 +108,11 @@ function LoginForm({ onSignUpClick }: { onSignUpClick: () => void }) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}
+        onSubmit={form.handleSubmit((data) =>
+          loginMutation.mutate(data, {
+            onSuccess: (user) => setLocation(getPostLoginHref(user.role)),
+          }),
+        )}
         className="space-y-6"
       >
         <FormField
@@ -170,6 +175,14 @@ function LoginForm({ onSignUpClick }: { onSignUpClick: () => void }) {
       </form>
     </Form>
   );
+}
+
+function getPostLoginHref(role?: string) {
+  if (role === "admin") return "/admin";
+  if (role === "vendor") return "/vendor";
+  if (role === "organizer") return "/organizer";
+
+  return "/";
 }
 
 function RegisterForm({ onLoginClick }: { onLoginClick: () => void }) {

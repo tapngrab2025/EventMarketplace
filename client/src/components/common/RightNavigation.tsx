@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { CartItem } from "@shared/schema";
 import CartDrawer from "@/components/cart-drawer";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingCart, LogOut, LayoutDashboard, UsersRound, FileArchive } from "lucide-react";
+import { Loader2, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -22,6 +22,7 @@ export function RightNavigation({
     const [, setLocation] = useLocation();
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const { cartItems } = useCart();
+    const cartCount = cartItems?.length ?? 0;
 
     return (
         <>
@@ -53,32 +54,14 @@ export function RightNavigation({
                         </Button>
                     )}
                     {user.role === "admin" && (
-                        <>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setLocation("/admin")}
-                                title="Admin Dashboard"
-                            >
-                                <LayoutDashboard className="h-5 w-5" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setLocation("/users")}
-                                title="User Dashboard"
-                            >
-                                <UsersRound className="h-5 w-5" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setLocation("/admin/archives")}
-                                title="Event Achieves"
-                            >
-                                <FileArchive className="h-5 w-5" />
-                            </Button>
-                        </>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setLocation("/admin")}
+                            title="Admin Dashboard"
+                        >
+                            <LayoutDashboard className="h-5 w-5" />
+                        </Button>
                     )}
                     {user.role === "organizer" && (
                         <Button
@@ -95,9 +78,9 @@ export function RightNavigation({
                             <SheetTrigger asChild>
                                 <Button variant="outline" size="icon" className="relative">
                                     <ShoppingCart className="h-5 w-5" />
-                                    {cartItems?.length > 0 && (
+                                    {cartCount > 0 && (
                                         <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                                            {cartItems.length}
+                                            {cartCount}
                                         </span>
                                     )}
                                 </Button>

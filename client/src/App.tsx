@@ -101,9 +101,9 @@ function Router() {
       <ProtectedRoute
         path="/admin/archives"
         component={() => (
-          <DefaultLayout>
+          <AdminLayout>
             <AdminArchives />
-          </DefaultLayout>
+          </AdminLayout>
         )}
         roles={["admin"]}
       />
