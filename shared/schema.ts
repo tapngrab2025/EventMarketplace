@@ -64,7 +64,18 @@ export const products = pgTable("products", {
   description: text("description").notNull(),
   price: integer("price").notNull(), // Stored in cents
   imageUrl: text("image_url").notNull(),
-  category: text("category", { enum: ["souvenir", "giveaway", "promotional"] }).notNull(),
+  category: text("category", { enum: [
+    "book",         // novels, non-fiction, general reads
+    "kids_book",    // children's / picture books
+    "educational",  // textbooks, revision guides, workbooks
+    "comic",        // comics & graphic novels
+    "magazine",
+    "stationery",   // notebooks, pens, bookmarks
+    "art_craft",    // sketchbooks, postcards, prints
+    "souvenir",
+    "giveaway",
+    "promotional",
+  ] }).notNull(),
   stallId: integer("stall_id").notNull(),
   approved: boolean("approved").notNull().default(false),
   stock: integer("stock").notNull(),

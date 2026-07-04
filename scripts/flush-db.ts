@@ -7,17 +7,16 @@ async function flushDatabase(excludeRole?: string) {
     console.log("🗑️ Flushing database...");
     
     // Delete in order to respect foreign key constraints
+    await db.delete(orderDeliveryStatus);
+    await db.delete(product_feedback);
     await db.delete(orderItems);
     await db.delete(orders);
     await db.delete(cartItems);
     await db.delete(reviews);
+    await db.delete(couponExcludedStalls);
+    await db.delete(coupons);
     await db.delete(products);
     await db.delete(stalls);
-    await db.delete(coupons);
-    await db.delete(couponExcludedStalls);
-    await db.delete(orderDeliveryStatus);
-    await db.delete(product_feedback);
-    await db.delete(reviews);
     await db.delete(subscribers);
     await db.delete(system_settings);
     await db.delete(events);
