@@ -344,6 +344,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(product);
   });
 
+  // Product featured management
+  app.get("/api/products/feature/manager", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    const products = await storage.getProductsForFeaturedManager();
+    // const products = await storage.getProducts();
+    console.log(products);
+    res.json(products);
+  });
+
+  app.post("/api/products/feature/manager", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+    try {
+      const { productIds } = req.body;
+      await storage.updateFeaturedProducts(productIds, true);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating featured products:", error);
+      res.status(500).json({ error: "Failed to update featured products" });
+    }
+  });
+
   // Edit Product
   app.put("/api/products/:id", async (req, res) => {
     if (!req.isAuthenticated() || !["admin", "vendor"].includes(req.user.role)) {

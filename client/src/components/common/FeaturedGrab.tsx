@@ -5,7 +5,7 @@ import FeaturedProductCard, {
 } from "./FeaturedProductCard";
 
 export default function FeaturedGrab() {
-  const { data: featuredProducts, isLoading } = useQuery<FeaturedProduct[]>({
+  const { data: featuredProducts, isLoading } = useQuery<FeaturedProduct[] | []>({
     queryKey: ["/api/products/feature"],
   });
 

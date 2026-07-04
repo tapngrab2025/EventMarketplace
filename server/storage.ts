@@ -466,15 +466,67 @@ export class DatabaseStorage implements IStorage {
       and(eq(products.archived, false))
     ).orderBy(products.id, 'desc');
   }
-
+//where(and(eq(products.id, id), eq(products.archived, false)));
   async getProductsFeatured(): Promise<ProductWithDetails[]> {
     return await db.select()
+      .from(products)
+      .where(and(eq(products.archived, false),eq(products.featured, true)))
+      .leftJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(events, eq(events.id, stalls.eventId))
+      .orderBy(products.id, 'desc');
+  }
+
+  async getProductsForFeaturedManager(): Promise<ProductWithDetails[]> {
+    return await db
+      .select({
+        ...products,
+        stall: {
+          id: stalls.id,
+          name: stalls.name,
+        },
+        event: {
+          id: events.id,
+          name: events.name,
+        },
+      })
       .from(products)
       .where(eq(products.archived, false))
       .leftJoin(stalls, eq(stalls.id, products.stallId))
       .leftJoin(events, eq(events.id, stalls.eventId))
       .orderBy(products.id, 'desc');
   }
+
+  async updateFeaturedProducts(productIds: number[], featured: boolean): Promise<void> {
+    // First set all products to !featured
+    await db.update(products).set({ featured: false }).where(eq(products.archived, false));
+
+    // Then set selected to featured
+    if (productIds.length > 0) {
+      await db.update(products)
+        .set({ featured: true })
+        .where(inArray(products.id, productIds));
+    }
+  }
+
+  // async updateProduct(
+  //   id: number,
+  //   product: Partial<Product>,
+  // ): Promise<Product | undefined> {
+  //   const [updated] = await db
+  //     .update(products)
+  //     .set(product)
+  //     .where(eq(products.id, id))
+  //     .returning();
+  //   return updated;
+  // }
+
+  // async deleteProduct(id: number): Promise<boolean> {
+  //   const [deleted] = await db
+  //     .delete(products)
+  //     .where(eq(products.id, id))
+  //     .returning();
+  //   return !!deleted;
+  // }
 
   // Get single product with details
   async getProductDetails(id: number): Promise<ProductWithDetails | { error: string }> {

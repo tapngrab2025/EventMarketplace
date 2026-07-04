@@ -33,6 +33,7 @@ import SearchPage from "./pages/search-page";
 import EventSearchPage from "./pages/event-search-page";
 import EventDetailsCityPage from "./pages/event/[city]";
 import AdminArchives from "./pages/admin-archives";
+import FeaturedProductManager from "./components/admin/FeaturedProductManager";
 
 function Router() {
   return (
@@ -99,6 +100,15 @@ function Router() {
           </DefaultLayout>
         )
       } />
+      <ProtectedRoute
+        path="/admin/featured-products"
+        component={() => (
+          <AdminLayout>
+            <FeaturedProductManager />
+          </AdminLayout>
+        )}
+        roles={["admin"]}
+      />
       <ProtectedRoute
         path="/admin/archives"
         component={() => (

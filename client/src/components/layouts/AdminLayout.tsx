@@ -6,6 +6,7 @@ import {
   LogOut,
   Menu,
   PanelLeft,
+  Star,
   UserCircle,
   Users,
   X,
@@ -32,6 +33,11 @@ const adminNavItems: AdminNavItem[] = [
     label: "Dashboard",
     href: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Featured Products",
+    href: "/admin/featured-products",
+    icon: Star,
   },
   {
     label: "User Management",

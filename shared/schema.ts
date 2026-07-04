@@ -76,6 +76,7 @@ export const products = pgTable("products", {
     "giveaway",
     "promotional",
   ] }).notNull(),
+  featured: boolean("featured").notNull().default(false),
   stallId: integer("stall_id").notNull(),
   approved: boolean("approved").notNull().default(false),
   stock: integer("stock").notNull(),
