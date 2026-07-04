@@ -57,7 +57,17 @@ export default function AllProducts() {
         >
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-8 max-w-7xl mx-auto">
             {data?.products?.length === 0 ? (
-              <p className="text-muted-foreground">No products found</p>
+              <div
+                className={`text-center py-16 transition-all duration-500 ${animateItems ? "opacity-100" : "opacity-0"}`}
+              >
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                  No products found
+                </h3>
+                <p className="text-gray-500">
+                  Try adjusting your filters to find more products
+                </p>
+              </div>
             ) : (
               <>
                 {data?.products?.map((product, index) => (
