@@ -36,6 +36,7 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
       location: "",
       city: "",
       imageUrl: "",
+      coverImageUrl: "",
       startDate: "",
       endDate: "",
     },
@@ -154,6 +155,33 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Event Image</FormLabel>
+              <FormControl>
+                <FileDropzone
+                  onUploadComplete={field.onChange}
+                  accept={{
+                    'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+                  }}
+                />
+              </FormControl>
+              {field.value && (
+                <div className="mt-2">
+                  <img
+                    src={field.value}
+                    alt="Preview"
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                </div>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="coverImageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Cover Image</FormLabel>
               <FormControl>
                 <FileDropzone
                   onUploadComplete={field.onChange}

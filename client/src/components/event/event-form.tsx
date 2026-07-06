@@ -36,6 +36,7 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
         location: "",
         city: "",
         imageUrl: "",
+        coverImageUrl: "",
         startDate: new Date().toISOString().split("T")[0],
         endDate: new Date().toISOString().split("T")[0],
         vendorId: user?.id,
@@ -163,6 +164,33 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Event Image</FormLabel>
+                <FormControl>
+                  <FileDropzone
+                    onUploadComplete={field.onChange}
+                    accept={{
+                      'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+                    }}
+                  />
+                </FormControl>
+                {field.value && (
+                  <div className="mt-2">
+                    <img
+                      src={field.value}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  </div>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="coverImageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Event Cover Image</FormLabel>
                 <FormControl>
                   <FileDropzone
                     onUploadComplete={field.onChange}

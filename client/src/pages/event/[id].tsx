@@ -88,6 +88,7 @@ export default function EventDetailsPage() {
   }
 
   const eventImage = event?.imageUrl || DEFAULT_IMAGES.EVENT;
+  const eventCoverImage = new URL(event?.coverImageUrl || DEFAULT_IMAGES.EVENT , import.meta.url).href;
 
   return (
     <div className="min-h-screen bg-white">
@@ -95,7 +96,7 @@ export default function EventDetailsPage() {
         <div className="absolute inset-0 overflow-hidden">
           <div
             className="absolute inset-0 scale-105 bg-cover bg-center"
-            style={{ backgroundImage: `url(${eventImage})` }}
+            style={{ backgroundImage: `url(${eventCoverImage})` }}
           />
           <div className="absolute inset-0 bg-black/55" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10" />
@@ -198,7 +199,7 @@ export default function EventDetailsPage() {
                           <div className="flex items-start gap-4">
                             {/* image placeholder */}
                             <div className="w-24 h-24 p-1 border rounded-lg">
-                              <img src={publisherImage} alt="" />
+                              <img className="w-full h-full object-cover"  src={stall.imageUrl || DEFAULT_IMAGES.STALL} alt="" />
                             </div>
 
                             <div>
