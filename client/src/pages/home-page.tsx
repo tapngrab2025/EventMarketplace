@@ -315,7 +315,7 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
       <section className="mx-auto max-w-7xl  bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl text-center mb-12">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
               Why Choose Us
             </div>
 
@@ -377,7 +377,7 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
       <section className="mx-auto max-w-7xl py-20 bg-white relative">
         <div className="container mx-auto px-6">
           <div className="mx-auto text- mb-12">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
               What People Say
             </div>
 

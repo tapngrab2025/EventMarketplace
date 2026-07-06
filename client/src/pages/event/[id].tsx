@@ -1,24 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useRoute } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { Event, Product, Stall } from "@shared/schema";
 import {
   CalendarDays,
   CheckCircle2,
-  Eye,
   Loader2,
   MapPin,
   Package,
   ShoppingCart,
+  Ticket,
   Store,
-  Tag,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { useCart } from "@/hooks/use-cart";
 import { EventCoupons } from "@/components/coupon/event-coupons";
-import { useEffect, useMemo, useState } from "react";
+import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { DEFAULT_IMAGES } from "@/config/constants";
-import NotFound from "../not-found";
+import publisherImage from "@/assets/publisher.png";
 
 type StallWithProducts = Stall & {
   products?: Product[];
@@ -27,6 +32,7 @@ type StallWithProducts = Stall & {
 export default function EventDetailsPage() {
   const { addToCart } = useCart();
   const [, params] = useRoute("/event/:id");
+  const [, setLocation] = useLocation();
   const id = params?.id;
   const [animateItems, setAnimateItems] = useState(false);
 
@@ -34,13 +40,8 @@ export default function EventDetailsPage() {
     setAnimateItems(true);
   }, []);
 
-  // const { data: event, isLoading: loadingEvent } = useQuery<Event>({
-  //   queryKey: [`/api/events/${id}`],
-  //   enabled: !!id,
-  // });
-
   const { data: event, isLoading: loadingEvent } = useQuery<Event>({
-    queryKey: [`/api/events/active/${id}`],
+    queryKey: [`/api/events/${id}`],
     enabled: !!id,
   });
 
@@ -64,16 +65,19 @@ export default function EventDetailsPage() {
   const formatDate = (date?: string | Date | null) =>
     date ? dateFormatter.format(new Date(date)) : "Date not available";
 
-  const approvedProductCount = useMemo(
-    () =>
-      stalls?.reduce(
-        (acc, stall) =>
-          acc +
-          (stall.products?.filter((product) => product.approved).length || 0),
-        0,
-      ) || 0,
-    [stalls],
-  );
+  const openProductPage = (productId: number) => {
+    setLocation(`/products/${productId}`);
+  };
+
+  const handleProductCardKeyDown = (
+    event: KeyboardEvent<HTMLElement>,
+    productId: number,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openProductPage(productId);
+    }
+  };
 
   if (loadingEvent || loadingStalls) {
     return (
@@ -83,249 +87,264 @@ export default function EventDetailsPage() {
     );
   }
 
-  if (!event) {
-    return <NotFound />;
-  }
+  const eventImage = event?.imageUrl || DEFAULT_IMAGES.EVENT;
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto">
-        <section className="mx-auto max-w-7xl bg-orange-500 px-6 py-12 lg:px-10">
-          <div>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/80">
-              Event #{event?.id}
-            </p>
-            <h1 className="text-4xl font-semibold tracking-tight text-white">
-              {event?.name}
-            </h1>
-          </div>
-        </section>
+      <section className="relative overflow-visible bg-zinc-950">
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-0 scale-105 bg-cover bg-center"
+            style={{ backgroundImage: `url(${eventImage})` }}
+          />
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10" />
+        </div>
 
-        <main className="mx-auto max-w-7xl border-x border-b border-zinc-200 px-6 py-8 lg:px-10">
-          <div className="overflow-hidden rounded border border-zinc-200 bg-white">
-            <img
-              src={event?.imageUrl || DEFAULT_IMAGES.EVENT}
-              alt={event?.name || "Event"}
-              className="h-full w-full"
-            />
-          </div>
-          <section>
-            <div className="flex flex-col justify-between gap-8">
-              <div>
-                <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
-                  <span className="inline-flex items-center gap-1.5 font-medium text-zinc-600">
-                    <CheckCircle2 className="h-4 w-4 text-orange-500" />
-                    {event?.approved ? "Approved" : "Pending"}
-                  </span>
-                  <span className="font-semibold text-zinc-900">
-                    {event?.archived ? "Archived" : "Active"}
-                  </span>
-                </div>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+          <div className="grid min-h-[300px] items-end gap-6 pb-0 pt-20 sm:min-h-[330px] lg:grid-cols-[220px_minmax(0,1fr)] lg:pt-24">
+            <div className="relative z-20 order-2 -mb-28 w-44 sm:w-56 lg:order-1 lg:-mb-36 lg:w-[220px]">
+              <div className="overflow-hidden border-4 border-white bg-white">
+                <img
+                  src={eventImage}
+                  alt={event?.name || "Event poster"}
+                  className="aspect-[2/3] w-full object-cover"
+                />
+              </div>
+            </div>
 
-                <p className="text-base leading-7 text-zinc-700">
-                  {event?.description}
-                </p>
+            <div className="order-1 max-w-3xl pb-8 text-white lg:order-2 lg:pb-10">
+              <p className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-white/80">
+                Event #{event?.id}
+              </p>
+
+              <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-[38px]">
+                {event?.name}
+              </h1>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-white/85">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-600 border border-green-500 px-2 py-1 leading-none text-white">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-sky-200" />
+                  {event?.approved ? "Approved" : "Pending"}
+                </span>
+                <span className="rounded-full border border-white/65 px-3 py-1 leading-none text-white">
+                  {event?.archived ? "Archived" : "Active"}
+                </span>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-4">
-                <div className="border border-zinc-200 bg-white p-4">
-                  <MapPin className="mb-3 h-5 w-5 text-orange-500" />
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Location
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-900">
-                    {event?.location}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    {event?.city || "City not available"}
-                  </p>
-                </div>
-
-                <div className="border border-zinc-200 bg-white p-4">
-                  <CalendarDays className="mb-3 h-5 w-5 text-orange-500" />
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Dates
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-900">
-                    {formatDate(event?.startDate)} -{" "}
-                    {formatDate(event?.endDate)}
-                  </p>
-                </div>
-
-                <div className="border border-zinc-200 bg-white p-4">
-                  <Users className="mb-3 h-5 w-5 text-orange-500" />
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Vendors
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-900">
-                    {stalls?.length || 0}
-                  </p>
-                </div>
-
-                <div className="border border-zinc-200 bg-white p-4">
-                  <Tag className="mb-3 h-5 w-5 text-orange-500" />
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Products
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-900">
-                    {approvedProductCount}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    Vendor #{event?.vendorId}
-                  </p>
-                </div>
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-white/90">
+                <span className="inline-flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-sky-200" />
+                  {formatDate(event?.startDate)} - {formatDate(event?.endDate)}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-sky-200" />
+                  {event?.location},{" "}
+                  {event?.city || event?.location || "Location not available"}
+                </span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-32 sm:px-6 sm:pt-36 lg:px-10 lg:pt-12">
+        <div className="space-y-10">
+          <section className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <div className="hidden lg:block" aria-hidden="true" />
+            <div className="bg-white">
+              <div className="mb-5 flex items-center gap-4">
+                <h2 className="text-sm font-bold uppercase tracking-wide text-zinc-900">
+                  Synopsis
+                </h2>
+              </div>
+              <p className="text-base text-zinc-700 max-w-3xl">
+                {event?.description}
+              </p>
             </div>
           </section>
 
           <section
-            className={`mt-8 transition-all delay-200 duration-700 ${
+            className={`transition-all duration-700 ${
               animateItems
                 ? "translate-y-0 opacity-100"
                 : "translate-y-10 opacity-0"
             }`}
           >
-            <EventCoupons eventId={id} />
+            <EventCoupons eventId={id || ""} />
           </section>
 
-          <section className="mt-10 space-y-8">
-            {stalls?.map((stall, stallIndex) => {
-              const approvedProducts =
-                stall.products?.filter((product) => product.approved) || [];
+          <section className="space-y-8">
+            {stalls?.length ? (
+              stalls.map((stall, stallIndex) => {
+                const approvedProducts =
+                  stall.products?.filter((product) => product.approved) || [];
 
-              return (
-                <article
-                  key={stall.id}
-                  className={`border border-zinc-200 bg-white transition-all duration-700 ${
-                    animateItems
-                      ? "translate-y-0 opacity-100"
-                      : "translate-y-10 opacity-0"
-                  }`}
-                  style={{ transitionDelay: `${300 + stallIndex * 100}ms` }}
-                >
-                  <header className="border-b border-zinc-200 p-5">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <p className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-teal-500">
-                          <Store className="h-4 w-4 text-orange-500" />
-                          Stall #{stall.id}
-                        </p>
-                        <h2 className="text-2xl font-semibold text-zinc-900">
-                          {stall.name}
-                        </h2>
-
-
-                      <div className="my-2 flex shrink-0 items-start gap-1 text-sm text-zinc-600">
-                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
-                        <span>{stall.location}</span>
-                      </div>
-
-                        <p className="max-w-3xl text-sm leading-6 text-zinc-600">
-                          {stall.description}
-                        </p>
-                      </div>
-
-                    </div>
-                  </header>
-
-                  <div className="p-5">
-                    {approvedProducts.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        No approved products available for this stall.
-                      </p>
-                    ) : (
-                      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {approvedProducts.map((product, productIndex) => (
-                          <article
-                            key={product.id}
-                            className={`group flex h-full min-h-[390px] flex-col overflow-hidden rounded border border-zinc-200 bg-white transition duration-300 ${
-                              animateItems
-                                ? "translate-y-0 opacity-100"
-                                : "translate-y-10 opacity-0"
-                            }`}
-                            style={{
-                              transitionDelay: `${400 + productIndex * 50}ms`,
-                            }}
-                          >
-                            <div className="relative aspect-square overflow-hidden">
-                              <img
-                                src={product.imageUrl || DEFAULT_IMAGES.PRODUCT}
-                                alt={product.name}
-                                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                              />
+                return (
+                  <article
+                    key={stall.id}
+                    className={`bg-white transition-all duration-700 ${
+                      animateItems
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-10 opacity-0"
+                    }`}
+                    style={{
+                      transitionDelay: `${300 + stallIndex * 100}ms`,
+                    }}
+                  >
+                    <header className="p-5">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <div className="flex items-start gap-4">
+                            {/* image placeholder */}
+                            <div className="w-24 h-24 p-1 border rounded-lg">
+                              <img src={publisherImage} alt="" />
                             </div>
 
-                            <div className="flex flex-1 flex-col px-4 pt-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <h3 className="line-clamp-1 text-base font-semibold leading-snug text-zinc-900">
-                                  {product.name}
-                                </h3>
-                                <span className="shrink-0 text-xs font-semibold text-teal-500">
-                                  #{product.id}
-                                </span>
+                            <div>
+                              <h2 className="text-2xl font-semibold text-zinc-900">
+                                {stall.name}
+                              </h2>
+
+                              <div className="flex gap-2 my-2">
+                                <p className="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 inset-ring inset-ring-green-600/20">
+                                  <Store className="h-4 w-4 mr-1" />
+                                  Stall No: {stall.id}
+                                </p>
+
+                                <p className="inline-flex items-center rounded-md bg-white px-2 py-1 text-xs font-medium border border-slate-200 text-slate-600">
+                                  <MapPin className="h-4 w-4 mr-1" />
+                                  {stall.location}
+                                </p>
                               </div>
 
-                              <p className="my-3 line-clamp-3 text-sm font-medium text-teal-500">
-                                {product.description}
+                              <p className="max-w-lg text-sm leading-6 text-zinc-600">
+                                {stall.description}
                               </p>
-
-                              <div className="mt-auto space-y-3">
-                                <div className="flex items-center justify-between gap-3">
-                                  <span className="text-2xl font-bold text-zinc-900">
-                                    ${(product.price / 100).toFixed(2)}
-                                  </span>
-                                  <span className="inline-flex items-center gap-1.5 text-sm text-zinc-600">
-                                    <Package className="h-4 w-4 text-orange-500" />
-                                    {product.stock > 0
-                                      ? `${product.stock} left`
-                                      : "Sold out"}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center gap-2 pb-4">
-                                  <Button
-                                    className="inline-flex flex-1 items-center justify-center bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-400"
-                                    onClick={() =>
-                                      addToCart.mutate({
-                                        productId: product.id,
-                                        quantity: 1,
-                                      })
-                                    }
-                                    disabled={
-                                      addToCart.isPending || product.stock === 0
-                                    }
-                                  >
-                                    {addToCart.isPending ? (
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <ShoppingCart className="mr-2 h-4 w-4" />
-                                    )}
-                                    {product.stock === 0
-                                      ? "Sold Out"
-                                      : "Grab It"}
-                                  </Button>
-
-                                  <Link
-                                    to={`/products/${product.id}`}
-                                    aria-label={`View ${product.name}`}
-                                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-orange-500 hover:text-orange-500"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Link>
-                                </div>
-                              </div>
                             </div>
-                          </article>
-                        ))}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+                    </header>
+
+                    <div className="p-5">
+                      {approvedProducts.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No approved products available for this stall.
+                        </p>
+                      ) : (
+                        <Carousel
+                          opts={{
+                            align: "start",
+                            containScroll: "trimSnaps",
+                          }}
+                          className="relative"
+                        >
+                          <CarouselContent>
+                            {approvedProducts.map((product, productIndex) => (
+                              <CarouselItem
+                                key={product.id}
+                                className="basis-[86%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+                              >
+                                <article
+                                  role="link"
+                                  tabIndex={0}
+                                  aria-label={`View ${product.name}`}
+                                  onClick={() => openProductPage(product.id)}
+                                  onKeyDown={(event) =>
+                                    handleProductCardKeyDown(event, product.id)
+                                  }
+                                  className={`group flex h-full cursor-pointer rounded-lg flex-col overflow-hidden bg-white transition-[opacity,transform] duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${
+                                    animateItems
+                                      ? "translate-y-0 opacity-100"
+                                      : "translate-y-10 opacity-0"
+                                  }`}
+                                >
+                                  <div className="relative aspect-4/5 overflow-hidden">
+                                    <img
+                                      src={
+                                        product.imageUrl ||
+                                        DEFAULT_IMAGES.PRODUCT
+                                      }
+                                      alt={product.name}
+                                      className="h-full object-cover transition"
+                                    />
+
+                                    <div className="absolute top-0 right-0 p-4">
+                                      <span className="inline-flex items-center rounded-md bg-white px-2 py-1 text-xs font-medium text-blue-600 inset-ring inset-ring-yellow-600/20">
+                                        <Ticket className="h-4 w-4 mr-1" />
+                                        {product.stock > 0
+                                          ? `${product.stock} left`
+                                          : "Sold out"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-1 flex-col">
+                                    <div className="p-4 border-x">
+                                      <h3 className="line-clamp-1 text-base font-semibold leading-snug text-zinc-900">
+                                        {product.name}
+                                      </h3>
+                                      <div className="flex items-center justify-between gap-3">
+                                        <span className="text-base font-medium text-zinc-900">
+                                          ${(product.price / 100).toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-auto">
+                                      <div className="flex items-center">
+                                        <Button
+                                          className="inline-flex flex-1 items-center justify-center rounded-t-none rounded-b-lg bg-blue-600 px-5  text-sm font-semibold text-white transition hover:bg-blue-600"
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                            addToCart.mutate({
+                                              productId: product.id,
+                                              quantity: 1,
+                                            });
+                                          }}
+                                          disabled={
+                                            addToCart.isPending ||
+                                            product.stock === 0
+                                          }
+                                        >
+                                          {addToCart.isPending ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                          ) : (
+                                            <ShoppingCart className="mr-2 h-4 w-4" />
+                                          )}
+                                          {product.stock === 0
+                                            ? "Sold Out"
+                                            : "Grab It"}
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </article>
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+
+                          {approvedProducts.length > 1 && (
+                            <>
+                              <CarouselPrevious className="-left-4 z-10 h-8 w-8 border-zinc-200 bg-white text-zinc-900 shadow-sm hover:bg-slate-100 disabled:opacity-30" />
+                              <CarouselNext className="-right-4 z-10 h-8 w-8 border-zinc-200 bg-white text-zinc-900 shadow-sm hover:bg-slate-100 disabled:opacity-30" />
+                            </>
+                          )}
+                        </Carousel>
+                      )}
+                    </div>
+                  </article>
+                );
+              })
+            ) : (
+              <div className="bg-white p-6 text-sm text-muted-foreground shadow-sm ring-1 ring-zinc-200">
+                No stalls are available for this event yet.
+              </div>
+            )}
           </section>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

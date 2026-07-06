@@ -15,7 +15,7 @@ export default function ReverseDualSection() {
 
         <div className="order-1 flex items-center px-6 py-12 sm:px-10 lg:order-2 lg:px-16 lg:py-20">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">
               Why Choose Us
             </p>
 
@@ -39,7 +39,7 @@ export default function ReverseDualSection() {
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center rounded border border-orange-500 bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:border-orange-400 hover:bg-orange-400"
+                className="inline-flex items-center justify-center rounded border border-blue-600 bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:border-blue-700 hover:bg-blue-700"
               >
                 About Us
               </Link>

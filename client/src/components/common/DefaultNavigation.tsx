@@ -134,7 +134,7 @@ const CartButton = ({
         <ShoppingCart className="h-4 w-4" />
         {mobile && <span className="ml-2">Cart</span>}
         {cartCount > 0 && (
-          <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-xs font-semibold leading-none text-white">
+          <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-semibold leading-none text-white">
             {cartCount}
           </span>
         )}
@@ -210,7 +210,7 @@ export function DefaultNavigation() {
               href={item.href}
               className={[
                 "inline-flex items-center gap-1.5 transition-colors",
-                isActive ? "text-orange-500" : "hover:text-zinc-900",
+                isActive ? "text-blue-600" : "hover:text-zinc-900",
               ].join(" ")}
             >
               <span>{item.label.toUpperCase()}</span>
@@ -274,7 +274,7 @@ export function DefaultNavigation() {
           ) : (
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded bg-orange-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-orange-600"
+              className="inline-flex items-center justify-center rounded bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
               onClick={signIn}
             >
               Sign In
@@ -348,7 +348,7 @@ export function DefaultNavigation() {
                     className={[
                       "flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold transition",
                       isActive
-                        ? "bg-orange-50 text-orange-500"
+                        ? "bg-blue-50 text-blue-600"
                         : "text-zinc-900 hover:bg-zinc-50",
                     ].join(" ")}
                   >
@@ -356,7 +356,7 @@ export function DefaultNavigation() {
                     <span
                       className={[
                         "flex items-center gap-2",
-                        isActive ? "text-orange-500" : "text-zinc-500",
+                        isActive ? "text-blue-600" : "text-zinc-500",
                       ].join(" ")}
                     >
                       {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
@@ -403,7 +403,7 @@ export function DefaultNavigation() {
                   type="button"
                   onClick={logout}
                   disabled={logoutMutation.isPending}
-                  className="inline-flex h-11 items-center justify-center rounded bg-orange-500 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-11 items-center justify-center rounded bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {logoutMutation.isPending ? "Signing Out..." : "Sign Out"}
                 </button>
@@ -411,7 +411,7 @@ export function DefaultNavigation() {
                 <button
                   type="button"
                   onClick={signIn}
-                  className="inline-flex h-11 items-center justify-center rounded bg-orange-500 text-sm font-semibold text-white transition hover:bg-orange-600"
+                  className="inline-flex h-11 items-center justify-center rounded bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700"
                 >
                   Sign In
                 </button>

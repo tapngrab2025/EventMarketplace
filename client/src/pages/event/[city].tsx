@@ -126,7 +126,7 @@ export default function EventDetailsCityPage() {
                                                     <span className="font-bold text-xl text-primaryGreen">
                                                         ${(product?.products?.price / 100).toFixed(2)}
                                                     </span>
-                                                    <span className={`text-sm px-2 py-1 rounded ${product?.products?.stock > 10 ? 'bg-green-100 text-green-800' : product?.products?.stock > 0 ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'}`}>
+                                                    <span className={`text-sm px-2 py-1 rounded ${product?.products?.stock > 10 ? 'bg-green-100 text-green-800' : product?.products?.stock > 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
                                                         {product?.products?.stock > 0 ? `${product?.products?.stock} left` : 'Sold out'}
                                                     </span>
                                                 </div>

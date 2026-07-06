@@ -52,12 +52,12 @@ export default function FeaturedProductCard({
 
         <div className="mt-3 min-w-0 space-y-1.5 sm:mt-4">
           <div className="flex min-w-0 items-start gap-2 text-xs text-zinc-600 sm:gap-3 sm:text-sm">
-            <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
             <span className="min-w-0 line-clamp-1">{eventDate}</span>
           </div>
 
           <div className="flex min-w-0 items-start gap-2 text-xs text-zinc-600 sm:gap-3 sm:text-sm">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
             <span className="min-w-0 line-clamp-2">{location}</span>
           </div>
 
@@ -74,7 +74,7 @@ export default function FeaturedProductCard({
 
       <div className="mt-auto px-3 pb-3 pt-4 sm:px-4 sm:pb-4">
         <Button
-          className="inline-flex h-11 w-full min-w-0 items-center justify-center whitespace-normal bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-400"
+          className="inline-flex h-11 w-full min-w-0 items-center justify-center whitespace-normal bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
           onClick={() =>
             addToCart.mutate({ productId: featureProduct.id, quantity: 1 })
           }

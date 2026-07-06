@@ -73,7 +73,7 @@ export function DefaultFooter({
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:border-blue-700 hover:bg-blue-700 hover:text-white"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -109,7 +109,7 @@ export function DefaultFooter({
                 href={`mailto:${email}`}
                 className="flex items-center gap-3 text-white/75 transition hover:text-white"
               >
-                <Mail className="h-4 w-4 shrink-0 text-orange-500" />
+                <Mail className="h-4 w-4 shrink-0 text-blue-600" />
                 <span>{email}</span>
               </a>
 
@@ -117,7 +117,7 @@ export function DefaultFooter({
                 href={`tel:${phone.replace(/\s+/g, "")}`}
                 className="flex items-center gap-3 text-white/75 transition hover:text-white"
               >
-                <Phone className="h-4 w-4 shrink-0 text-orange-500" />
+                <Phone className="h-4 w-4 shrink-0 text-blue-600" />
                 <span>{phone}</span>
               </a>
             </div>

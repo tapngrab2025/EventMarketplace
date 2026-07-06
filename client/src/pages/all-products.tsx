@@ -44,7 +44,7 @@ export default function AllProducts() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="container mx-auto relative z-10">
-        <section className="mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-18 bg-orange-500">
+        <section className="mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-18 bg-blue-600">
           <div>
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
               Grabs

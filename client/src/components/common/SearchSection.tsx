@@ -36,7 +36,7 @@ export default function SearchSection() {
     <section className="max-w-full overflow-hidden bg-white">
       <div className="relative mx-auto w-full max-w-full overflow-hidden border border-t-0 border-zinc-200 pb-8 pt-12 overflow-x-hidden">
         <div className="mx-auto max-w-2xl px-6 text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
             Let's Find Your Grab
           </div>
 
@@ -47,7 +47,7 @@ export default function SearchSection() {
 
         <div className="mx-auto mt-12 max-w-5xl px-6">
           <div className="grid min-w-0 gap-4 lg:grid-cols-[1.2fr_1fr_0.9fr_auto]">
-            <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+            <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100">
               <MapPin className="h-5 w-5 text-zinc-400" />
               <input
                 type="text"
@@ -66,7 +66,7 @@ export default function SearchSection() {
                 <PopoverTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="flex h-12 w-full min-w-0 items-center justify-start gap-3 rounded border border-zinc-200 bg-white px-4 font-normal text-zinc-900 transition hover:bg-white focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                    className="flex h-12 w-full min-w-0 items-center justify-start gap-3 rounded border border-zinc-200 bg-white px-4 font-normal text-zinc-900 transition hover:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                   >
                     <CalendarDays className="h-5 w-5 text-zinc-400" />
                     {startDate && endDate ? (
@@ -93,7 +93,7 @@ export default function SearchSection() {
               </Popover>
             </div>
 
-            {/* <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+            {/* <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100">
              <SlidersHorizontal className="h-5 w-5 text-zinc-400" />
               <select
                 value={sortBy}
@@ -125,7 +125,7 @@ export default function SearchSection() {
             <button
               type="button"
               onClick={() => search()}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-orange-500 px-8 text-base text-white shadow-[0_18px_35px_rgba(249,115,22,0.35)] transition hover:bg-orange-400 lg:w-auto"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-blue-600 px-8 text-base text-white shadow-[0_18px_35px_rgba(37,99,235,0.35)] transition hover:bg-blue-700 lg:w-auto"
             >
               <Search className="h-5 w-5" />
               Search
@@ -145,7 +145,7 @@ export default function SearchSection() {
                     setSearchTerm(filter);
                     search(filter);
                   }}
-                  className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 lg:text-sm"
+                  className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs text-zinc-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 lg:text-sm"
                 >
                   {filter}
                 </button>

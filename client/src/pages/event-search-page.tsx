@@ -90,7 +90,7 @@ const EventSearchPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 pt-24">
       <div className="mx-auto max-w-2xl text-center mb-12">
-        <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
           Search Events
         </div>
         <h2 className="mt-4 font-serif text-4xl tracking-tight text-zinc-900 sm:text-5xl">
@@ -100,7 +100,7 @@ const EventSearchPage = () => {
 
       <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-4 mb-12 bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
         <div className="flex-[1.5] relative">
-          <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+          <label className="flex h-12 min-w-0 items-center gap-3 rounded border border-zinc-200 bg-white px-4 transition focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100">
           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
           <Input
             placeholder="Search by location, name or city"
@@ -155,7 +155,7 @@ const EventSearchPage = () => {
 
         <div className="flex gap-2">
           <Button
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-orange-500 px-8 text-base text-white shadow-[0_18px_35px_rgba(249,115,22,0.35)] transition hover:bg-orange-400 lg:w-auto"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-blue-600 px-8 text-base text-white shadow-[0_18px_35px_rgba(37,99,235,0.35)] transition hover:bg-blue-700 lg:w-auto"
             onClick={() => handleSearch.mutate()}
           >
             <Search className="h-5 w-5 mr-2" />
@@ -184,7 +184,7 @@ const EventSearchPage = () => {
       ) : data?.events.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-zinc-500 text-lg">No events found matching your criteria.</p>
-          <Button variant="link" onClick={handleClear} className="text-orange-500 mt-2">
+          <Button variant="link" onClick={handleClear} className="text-blue-600 mt-2">
             Clear all filters
           </Button>
         </div>

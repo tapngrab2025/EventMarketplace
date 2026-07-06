@@ -152,7 +152,7 @@ export default function FeaturedProductManager() {
 
       <div className="flex justify-center mt-8">
         <Button
-          className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-lg"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
           onClick={() => saveMutation.mutate()}
           disabled={saveMutation.isPending}
         >
@@ -189,7 +189,7 @@ function ProductCard({ product, onAdd, onRemove, isAvailable }: {
       <div className="flex-1">
         <h3 className="font-semibold text-gray-900 line-clamp-1">{product.name}</h3>
         <p className="text-sm text-gray-500 line-clamp-1">{product.event?.name || "Unknown Event"}</p>
-        <p className="text-orange-500 font-semibold mt-1">${(product.price / 100).toFixed(2)}</p>
+        <p className="text-blue-600 font-semibold mt-1">${(product.price / 100).toFixed(2)}</p>
       </div>
       {isAvailable ? (
         <Button

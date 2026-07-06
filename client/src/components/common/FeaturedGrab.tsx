@@ -16,7 +16,7 @@ export default function FeaturedGrab() {
       <section className="max-w-full overflow-hidden">
         <div className="relative mx-auto w-full max-w-full bg-white px-4 py-16 sm:px-8 lg:max-w-7xl lg:px-10">
           <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
         </div>
       </section>
@@ -27,7 +27,7 @@ export default function FeaturedGrab() {
     <section className="max-w-full overflow-hidden">
       <div className="relative mx-auto w-full max-w-full overflow-hidden bg-white px-4 py-14 sm:px-8 sm:py-16 lg:max-w-7xl lg:px-10">
         <div className="mx-auto max-w-2xl text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
             Featured Grabs
           </div>
 

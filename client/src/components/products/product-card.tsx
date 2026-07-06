@@ -53,7 +53,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </p>
 
           <div className="flex items-start gap-3 text-sm text-zinc-600">
-            <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
             <span>
               {productDetail?.event?.startDate
                 ? new Date(productDetail.event.startDate).toLocaleDateString(
@@ -69,7 +69,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
 
           <div className="flex items-start gap-3 text-sm text-zinc-600">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
             <span className="line-clamp-2">
               {productDetail?.stall?.location || "Location not available"}
             </span>
@@ -88,7 +88,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <div className="flex items-center gap-2 mt-auto px-4 pb-4 pt-4">
         <Button
-          className="inline-flex w-full items-center justify-center bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-400"
+          className="inline-flex w-full items-center justify-center bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
           onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
           disabled={addToCart.isPending || product.stock === 0}
         >
@@ -102,7 +102,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <Link
           to={`/products/${product.id}`}
           aria-label={`View ${product.name}`}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-orange-500 hover:text-orange-500"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-blue-600 hover:text-blue-600"
         >
           <Eye className="h-4 w-4" />
         </Link>

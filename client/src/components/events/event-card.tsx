@@ -37,7 +37,7 @@ export default function EventCard({ event }: { event: Event }) {
 
           <div className="space-y-1.5">
             <div className="flex items-start gap-3 text-sm text-zinc-600">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
               <span className="line-clamp-2">{event.location}</span>
             </div>
 
@@ -47,7 +47,7 @@ export default function EventCard({ event }: { event: Event }) {
             </p>
 
             <div className="flex items-start gap-3 text-sm text-zinc-600">
-              <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+              <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
               <span>
                 {dateFormatter.format(new Date(event.startDate))} -{" "}
                 {dateFormatter.format(new Date(event.endDate))}
@@ -55,7 +55,7 @@ export default function EventCard({ event }: { event: Event }) {
             </div>
 
             <div className="flex items-start gap-3 text-sm text-zinc-600">
-              <Tag className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+              <Tag className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
               <span>
                 <span className="font-semibold text-zinc-900">Vendor:</span>{" "}
                 #{event.vendorId}
@@ -66,7 +66,7 @@ export default function EventCard({ event }: { event: Event }) {
 
         <div className="mt-auto flex items-center justify-between gap-3 px-4 pb-4 pt-4 text-sm">
           <span className="inline-flex items-center gap-1.5 font-medium text-zinc-600">
-            <CheckCircle2 className="h-4 w-4 text-orange-500" />
+            <CheckCircle2 className="h-4 w-4 text-blue-600" />
             {event.approved ? "Approved" : "Pending"}
           </span>
           <span className="font-semibold text-zinc-900">

@@ -95,7 +95,7 @@ export function NewsletterComponent() {
 
       <section className="relative z-10 mx-auto flex h-full w-full flex-col items-center justify-center px-6 text-center">
         <div className="mx-auto max-w-2xl text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
             Newsletter
           </div>
 

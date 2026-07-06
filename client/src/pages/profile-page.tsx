@@ -161,7 +161,7 @@ function getStatusClass(status?: string | null) {
   }
 
   if (isPendingStatus(normalized)) {
-    // return "border-orange-200 bg-orange-50 text-orange-700";
+    // return "border-blue-200 bg-blue-50 text-blue-700";
     return "bg-yellow-100 text-yellow-700";
   }
 
@@ -176,7 +176,7 @@ function getStatusDotClass(status?: string | null) {
   const normalized = status?.toLowerCase();
 
   if (isCompletedStatus(normalized)) return "bg-emerald-500";
-  if (isPendingStatus(normalized)) return "bg-orange-500";
+  if (isPendingStatus(normalized)) return "bg-blue-600";
   if (normalized === "failed" || normalized === "cancelled")
     return "bg-red-500";
 
@@ -574,7 +574,7 @@ export default function ProfilePage() {
       value: pendingOrders,
       caption: "Orders awaiting action",
       icon: Clock3,
-      className: "bg-orange-50 text-orange-600",
+      className: "bg-blue-50 text-blue-700",
     },
     {
       label: "Completed",
