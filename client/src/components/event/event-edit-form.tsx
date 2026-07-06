@@ -11,7 +11,7 @@ import { FileDropzone } from "@/components/ui/file-dropzone";
 import { Event, insertEventSchema } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { LocationPicker } from "@/components/location-picker";
 import { CouponManagement } from "@/components/coupon/coupon-management";
 
@@ -27,6 +27,9 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
     queryKey: [`/api/events/${eventId}`],
     enabled: !!eventId,
   });
+  
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [coverImageUploadError, setCoverImageUploadError] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(insertEventSchema),
@@ -157,7 +160,11 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
               <FormLabel>Event Image</FormLabel>
               <FormControl>
                 <FileDropzone
-                  onUploadComplete={field.onChange}
+                  onUploadComplete={(url) => {
+                    setImageUploadError(null);
+                    field.onChange(url);
+                  }}
+                  onUploadError={(error) => setImageUploadError(error)}
                   accept={{
                     'image/*': ['.png', '.jpg', '.jpeg', '.gif']
                   }}
@@ -172,6 +179,9 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
                   />
                 </div>
               )}
+              {imageUploadError && (
+                <p className="text-red-500 text-sm">{imageUploadError}</p>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -184,7 +194,11 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
               <FormLabel>Event Cover Image</FormLabel>
               <FormControl>
                 <FileDropzone
-                  onUploadComplete={field.onChange}
+                  onUploadComplete={(url) => {
+                    setCoverImageUploadError(null);
+                    field.onChange(url);
+                  }}
+                  onUploadError={(error) => setCoverImageUploadError(error)}
                   accept={{
                     'image/*': ['.png', '.jpg', '.jpeg', '.gif']
                   }}
@@ -198,6 +212,9 @@ export function EditEventForm({ eventId, onClose }: EditDialogProps) {
                     className="w-full h-32 object-cover rounded-md"
                   />
                 </div>
+              )}
+              {coverImageUploadError && (
+                <p className="text-red-500 text-sm">{coverImageUploadError}</p>
               )}
               <FormMessage />
             </FormItem>

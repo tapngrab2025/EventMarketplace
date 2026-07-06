@@ -5,12 +5,13 @@ import { cn } from "@/lib/utils";
 
 interface FileDropzoneProps {
   onUploadComplete: (url: string) => void;
+  onUploadError?: (error: string) => void;
   accept?: Record<string, string[]>;
   className?: string;
   filePath?: string;
 }
 
-export function FileDropzone({ onUploadComplete, accept, className, filePath }: FileDropzoneProps) {
+export function FileDropzone({ onUploadComplete, onUploadError, accept, className, filePath }: FileDropzoneProps) {
   const [uploading, setUploading] = useState(false);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -28,16 +29,29 @@ export function FileDropzone({ onUploadComplete, accept, className, filePath }: 
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        let errorMessage = "Upload failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          // If we can't parse the error JSON, use default message
+        }
+        throw new Error(errorMessage);
+      }
 
       const { url } = await response.json();
       onUploadComplete(url);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       console.error("Upload error:", error);
+      if (onUploadError) {
+        onUploadError(errorMessage);
+      }
     } finally {
       setUploading(false);
     }
-  }, [onUploadComplete]);
+  }, [onUploadComplete, onUploadError]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

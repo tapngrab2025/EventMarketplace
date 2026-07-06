@@ -307,13 +307,37 @@ export function setupAuth(app: Express) {
     if (!user) return res.sendStatus(404);
     res.json(user);
   });
-  const upload = multer({ storage: multer.memoryStorage() });
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (_req, file, cb) => {
+      // Accept images only
+      if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        return cb(new Error("Only image files (jpg, jpeg, png, gif) are allowed!"));
+      }
+      cb(null, true);
+    },
+  });
+
+  // Error handling middleware for multer
+  function uploadErrorHandler(err: any, _req: any, res: any, _next: any) {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ message: "File too large! Maximum size is 5MB." });
+      }
+      return res.status(400).json({ message: err.message });
+    } else if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
 
   app.post("/api/upload", upload.single('file'), (req, res) => {
     try {
       const file = req.file;
       if (!file) {
-        return res.status(400).json({ error: "No file uploaded" });
+        return res.status(400).json({ message: "No file uploaded" });
       }
 
       const file_location = req.body.file_location || '';
@@ -334,9 +358,9 @@ export function setupAuth(app: Express) {
 
       res.json({ message: "File uploaded successfully!", url: fileURLPath });
     } catch (error) {
-      res.status(500).json({ error: "File upload failed", details: (error as Error).message });
+      res.status(500).json({ message: "File upload failed", details: (error as Error).message });
     }
-  });
+  }, uploadErrorHandler);
 
   // Update static file serving
   app.use(`${process.env.SERVER_UPLOAD_PATH}`, express.static(`${process.env.FILE_UPLOADER_PATH}`));

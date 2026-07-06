@@ -23,7 +23,7 @@ import { useCart } from "@/hooks/use-cart";
 import { EventCoupons } from "@/components/coupon/event-coupons";
 import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { DEFAULT_IMAGES } from "@/config/constants";
-import publisherImage from "@/assets/publisher.png";
+// import publisherImage from "@/assets/publisher.png";
 
 type StallWithProducts = Stall & {
   products?: Product[];

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { FileDropzone } from "@/components/ui/file-dropzone";
+import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -28,20 +29,23 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
     const { toast } = useToast();
     const { user } = useAuth();
   
-    const form = useForm({
-      resolver: zodResolver(insertEventSchema),
-      defaultValues: {
-        name: "",
-        description: "",
-        location: "",
-        city: "",
-        imageUrl: "",
-        coverImageUrl: "",
-        startDate: new Date().toISOString().split("T")[0],
-        endDate: new Date().toISOString().split("T")[0],
-        vendorId: user?.id,
-      },
-    });
+    const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [coverImageUploadError, setCoverImageUploadError] = useState<string | null>(null);
+  
+  const form = useForm({
+    resolver: zodResolver(insertEventSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      location: "",
+      city: "",
+      imageUrl: "",
+      coverImageUrl: "",
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: new Date().toISOString().split("T")[0],
+      vendorId: user?.id,
+    },
+  });
   
     const createEvent = useMutation({
       mutationFn: async (values: any) => {
@@ -166,7 +170,11 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
                 <FormLabel>Event Image</FormLabel>
                 <FormControl>
                   <FileDropzone
-                    onUploadComplete={field.onChange}
+                    onUploadComplete={(url) => {
+                      setImageUploadError(null);
+                      field.onChange(url);
+                    }}
+                    onUploadError={(error) => setImageUploadError(error)}
                     accept={{
                       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
                     }}
@@ -181,6 +189,9 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
                     />
                   </div>
                 )}
+                {imageUploadError && (
+                  <p className="text-red-500 text-sm">{imageUploadError}</p>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -193,7 +204,11 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
                 <FormLabel>Event Cover Image</FormLabel>
                 <FormControl>
                   <FileDropzone
-                    onUploadComplete={field.onChange}
+                    onUploadComplete={(url) => {
+                      setCoverImageUploadError(null);
+                      field.onChange(url);
+                    }}
+                    onUploadError={(error) => setCoverImageUploadError(error)}
                     accept={{
                       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
                     }}
@@ -207,6 +222,9 @@ export function EventForm({ onSuccess }: { onSuccess: () => void }) {
                       className="w-full h-32 object-cover rounded-md"
                     />
                   </div>
+                )}
+                {coverImageUploadError && (
+                  <p className="text-red-500 text-sm">{coverImageUploadError}</p>
                 )}
                 <FormMessage />
               </FormItem>
