@@ -32,6 +32,7 @@ import EventsPage from "@/pages/events";
 import SearchPage from "./pages/search-page";
 import EventSearchPage from "./pages/event-search-page";
 import EventDetailsCityPage from "./pages/event/[city]";
+import EventDetailsCategoryPage from "./pages/event/[category]";
 import AdminArchives from "./pages/admin-archives";
 import FeaturedProductManager from "./components/admin/FeaturedProductManager";
 
@@ -86,6 +87,13 @@ function Router() {
           </DefaultLayout>
         )
       } />
+      <Route path="/event/category/:category" component={
+        () => (
+          <DefaultLayout>
+            <EventDetailsCategoryPage />
+          </DefaultLayout>
+        )
+      } /> 
       <Route path="/search" component={
         () => (
           <DefaultLayout>

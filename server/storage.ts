@@ -57,6 +57,7 @@ export class DatabaseStorage implements IStorage {
     this.sessionStore = new PostgresSessionStore({
       pool,
       createTableIfMissing: true,
+      // tableName: 'sessions', // Explicitly set the table name!
     });
   }
 
@@ -294,6 +295,29 @@ export class DatabaseStorage implements IStorage {
   async createEvent(insertEvent: InsertEvent): Promise<Event> {
     const [event] = await db.insert(events).values(insertEvent).returning();
     return event;
+  }
+
+  async getCategoryEvent(category: string): Promise<any | undefined> {
+    // First get the event
+    const eventResults = await db.select()
+      .from(events)
+      .where(and(eq(events.archived, false), eq(lower(events.eventCategory), category.toLowerCase())));
+
+    if (eventResults.length === 0) return {};
+
+    const event = eventResults[0];
+
+    // Then get all products related to this event
+    const productsResults = await db.select({ products })
+      .from(products)
+      .innerJoin(stalls, eq(stalls.id, products.stallId))
+      .where(eq(stalls.eventId, event.id));
+
+    // Return the event with its products
+    return {
+      ...event,
+      products: productsResults
+    };
   }
 
   async updateEvent(id: number, event: Partial<Event>): Promise<Event | undefined> {
