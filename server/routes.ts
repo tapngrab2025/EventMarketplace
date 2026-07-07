@@ -62,6 +62,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/events/category/:category", async (req, res) => {
+    const event = await storage.getCategoryEvent(req.params.category);
+    if (!event) return res.sendStatus(404);
+    res.json(event);
+  })
+
+  app.get("/api/events/city/:city", async (req, res) => {
+    const event = await storage.getCityEvent(req.params.city);
+    if (!event) return res.sendStatus(404);
+    res.json(event);
+  })
   // Get archived events
   app.get("/api/events/archived", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") {
@@ -108,12 +119,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }else{
       event = await storage.getEvent(id);
     }
-    if (!event) return res.sendStatus(404);
-    res.json(event);
-  })
-
-  app.get("/api/events/city/:city", async (req, res) => {
-    const event = await storage.getCityEvent(req.params.city);
     if (!event) return res.sendStatus(404);
     res.json(event);
   })

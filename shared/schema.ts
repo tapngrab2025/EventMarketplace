@@ -40,6 +40,18 @@ export const events = pgTable("events", {
   city: text("city"),
   imageUrl: text("image_url").notNull(),
   coverImageUrl: text("cover_image_url").default(""),
+  eventCategory: text("event_category", { enum: [
+    "book-fair", 
+    "job-fair", 
+    "movie", 
+    "charity-event", 
+    "art-exhibition",
+    "concert", 
+    "festival", 
+    "conference", 
+    "exhibition", 
+    "other",
+  ] }).notNull().default("book-fair"),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   vendorId: integer("vendor_id").notNull(),
@@ -138,6 +150,7 @@ export const orderItems = pgTable("order_items", {
   couponId: integer("coupon_id").references(() => coupons.id),
 });
 
+// Sessions table - managed by connect-pg-simple, ignored by drizzle via tablesFilter in drizzle.config.ts
 export const sessions = pgTable("sessions", {
   sid: text("sid").primaryKey(),
   sess: jsonb("sess").notNull(),

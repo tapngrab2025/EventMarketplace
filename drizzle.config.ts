@@ -11,4 +11,6 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
+  // Ignore tables managed by external tools (like express-session)
+  tablesFilter: ["!sessions"],
 });
