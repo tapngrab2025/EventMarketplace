@@ -268,28 +268,30 @@ export class DatabaseStorage implements IStorage {
     return stall?.eventId;
   }
 
-  async getCityEvent(city: string): Promise<any | undefined> {
-    // First get the event
+  async getCityEvent(city: string): Promise<any[]> {
+    // First get all events for the city
     const eventResults = await db.select()
       .from(events)
       .where(and(eq(events.archived, false), eq(lower(events.city), city.toLowerCase())));
 
+    if (eventResults.length === 0) return [];
 
-    if (eventResults.length === 0) return {};
+    // For each event, get its products
+    const eventsWithProducts = await Promise.all(
+      eventResults.map(async (event) => {
+        const productsResults = await db.select({ products })
+          .from(products)
+          .innerJoin(stalls, eq(stalls.id, products.stallId))
+          .where(eq(stalls.eventId, event.id));
 
-    const event = eventResults[0];
+        return {
+          ...event,
+          products: productsResults
+        };
+      })
+    );
 
-    // Then get all products related to this event
-    const productsResults = await db.select({ products })
-      .from(products)
-      .innerJoin(stalls, eq(stalls.id, products.stallId))
-      .where(eq(stalls.eventId, event.id));
-
-    // Return the event with its products
-    return {
-      ...event,
-      products: productsResults
-    };
+    return eventsWithProducts;
   }
 
   async createEvent(insertEvent: InsertEvent): Promise<Event> {
@@ -297,27 +299,30 @@ export class DatabaseStorage implements IStorage {
     return event;
   }
 
-  async getCategoryEvent(category: string): Promise<any | undefined> {
-    // First get the event
+  async getCategoryEvent(category: string): Promise<any[]> {
+    // First get all events for the category
     const eventResults = await db.select()
       .from(events)
       .where(and(eq(events.archived, false), eq(lower(events.eventCategory), category.toLowerCase())));
 
-    if (eventResults.length === 0) return {};
+    if (eventResults.length === 0) return [];
 
-    const event = eventResults[0];
+    // For each event, get its products
+    const eventsWithProducts = await Promise.all(
+      eventResults.map(async (event) => {
+        const productsResults = await db.select({ products })
+          .from(products)
+          .innerJoin(stalls, eq(stalls.id, products.stallId))
+          .where(eq(stalls.eventId, event.id));
 
-    // Then get all products related to this event
-    const productsResults = await db.select({ products })
-      .from(products)
-      .innerJoin(stalls, eq(stalls.id, products.stallId))
-      .where(eq(stalls.eventId, event.id));
+        return {
+          ...event,
+          products: productsResults
+        };
+      })
+    );
 
-    // Return the event with its products
-    return {
-      ...event,
-      products: productsResults
-    };
+    return eventsWithProducts;
   }
 
   async updateEvent(id: number, event: Partial<Event>): Promise<Event | undefined> {
