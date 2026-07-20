@@ -32,4 +32,6 @@ export const Images = {
   davidMiller: new URL("@/assets/David-Miller.png", import.meta.url).href,
   sophiaLee: new URL("@/assets/Sophia-Lee.png", import.meta.url).href,
   loginUtils: new URL("@/assets/loginPage.png", import.meta.url).href,
+  adsSpace1: new URL("@/assets/AdsSpace1.svg", import.meta.url).href,
+  adsSpace2: new URL("@/assets/AdsSpace2.svg", import.meta.url).href,
 } as const;
