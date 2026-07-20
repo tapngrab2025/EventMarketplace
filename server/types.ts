@@ -44,7 +44,12 @@ export interface IStorage {
   createOrder(userId: number, cartItems: CartItem[], paymentMethod: string): Promise<number | undefined>;
   // Delivery status operations
   getDeliveryStatus(orderId: number): Promise<{ status: string, notes: string } | undefined>;
-  updateDeliveryStatus(orderId: number, status: string, notes: string): Promise<boolean>;
+  updateDeliveryStatus(
+    orderId: number,
+    stallId: number,
+    status: "pending" | "ready" | "delivered",
+    notes?: string
+  ): Promise<any>;
 
   // Subscriber operations
   createSubscriber(email: string): Promise<Subscriber[] | any>;

@@ -22,6 +22,19 @@ A full-stack web application for managing and participating in events, with dedi
 
 ## Database Commands
 
+## Dispatch email configuration
+
+Dispatch emails are sent through AWS SES when a stall order changes to `delivered`. Verify your sender domain or email address in SES, then add an IAM access key whose policy permits `ses:SendEmail`:
+
+```env
+AWS_REGION=ap-south-1
+AWS_ACCESS_KEY_ID=your_iam_access_key_id
+AWS_SECRET_ACCESS_KEY=your_iam_secret_access_key
+EMAIL_FROM="Tap & Grab <orders@your-verified-domain.com>"
+```
+
+Only a transition to `delivered` sends an email; saving the same status again does not.
+
 ### Push Schema Changes
 Update the database schema with your latest changes:
 ```bash

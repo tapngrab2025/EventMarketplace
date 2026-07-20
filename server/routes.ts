@@ -10,6 +10,7 @@ import { config } from "./config";
 import { exit } from "process";
 import fs from "fs";
 import path from "path";
+import { sendDispatchEmail } from "./dispatch-email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -699,7 +700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const stallId = parseInt(req.params.stallId);
     const { status, notes } = req.body;
 
-    if (!['pending', 'ready', 'delivered'].includes(status)) return res.status(500).json({ error: "Status should be either 'pending' | 'ready' | 'delivered'" });
+    if (!['pending', 'ready', 'delivered'].includes(status)) return res.status(400).json({ error: "Status should be either 'pending' | 'ready' | 'delivered'" });
     try {
       // Only admin or the stall's vendor can update delivery status
       const stall = await storage.getStall(stallId);
@@ -708,7 +709,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!isAdmin && !isVendorOwner) {
         return res.status(403).json({ message: "Forbidden" });
       }
+      const previousStatus = (await storage.getStallOrder(orderId, stallId))[0]?.items?.deliveryStatus?.status;
       const updated = await storage.updateDeliveryStatus(orderId, stallId, status, notes);
+
+      // A repeated "delivered" update must not send the customer another email.
+      if (status === 'delivered' && previousStatus !== 'delivered') {
+        const dispatchEmail = await storage.getDispatchEmail(orderId, stallId);
+        if (dispatchEmail) {
+          try {
+            await sendDispatchEmail(dispatchEmail);
+          } catch (emailError) {
+            // The delivery-status update has already succeeded, so do not report it as failed.
+            console.error(`Failed to send dispatch email for order ${orderId}:`, emailError);
+          }
+        }
+      }
       res.json(updated);
     } catch (error) {
       res.status(500).json({ error: "Failed to update delivery status" });

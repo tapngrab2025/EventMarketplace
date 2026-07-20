@@ -1185,6 +1185,43 @@ export class DatabaseStorage implements IStorage {
       .returning();
   }
 
+  async getDispatchEmail(orderId: number, stallId: number): Promise<any> {
+    const rows = await db
+      .select({
+        email: users.email,
+        customerName: orders.fullName,
+        orderId: orders.id,
+        notes: orderDeliveryStatus.notes,
+        productName: products.name,
+        quantity: orderItems.quantity,
+        price: orderItems.price,
+      })
+      .from(orders)
+      .innerJoin(users, eq(users.id, orders.user_id))
+      .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .innerJoin(products, eq(products.id, orderItems.productId))
+      .leftJoin(orderDeliveryStatus, and(
+        eq(orderDeliveryStatus.orderId, orders.id),
+        eq(orderDeliveryStatus.stallId, stallId)
+      ))
+      .where(and(eq(orders.id, orderId), eq(products.stallId, stallId)));
+
+    if (!rows.length) return undefined;
+
+    const first = rows[0];
+    return {
+      email: first.email,
+      customerName: first.customerName,
+      orderId: first.orderId,
+      notes: first.notes,
+      items: rows.map((row) => ({
+        name: row.productName,
+        quantity: row.quantity,
+        price: row.price,
+      })),
+    };
+  }
+
   // Vendor: list distinct events where vendor has stalls
   async getVendorEvents(vendorId: number): Promise<Event[]> {
     const rows = await db
