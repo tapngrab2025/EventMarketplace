@@ -234,9 +234,23 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
         {true ? <HomeHeroCarousel /> : <BrandHeroCarousel />}
       </section>
       <SearchSection />
-      <DualSection />
-      <ReverseDualSection />
+
       <FeaturedGrab />
+
+      <section className="bg-white pb-14 sm:pb-16" aria-label="Promotions">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:px-8 md:grid-cols-2 lg:px-10">
+          <img
+            src={Images.adsSpace1}
+            alt="Promotion"
+            className="h-auto w-full rounded-[10px] object-cover"
+          />
+          <img
+            src={Images.adsSpace2}
+            alt="Promotion"
+            className="h-auto w-full rounded-[10px] object-cover"
+          />
+        </div>
+      </section>
 
       {/* <section className="relative bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible" style={{ backgroundImage: `url(${Images.transferBg.src || Images.transferBg})` }}> */}
       <section className="hidden transferGrabs py-32 relative bg-primaryGreen bg-cover bg-center text-white min-h-[700px] md:min-h-[500px] overflow-visible my-[105px]">
@@ -312,7 +326,10 @@ export default function HomePage({ searchTerm = "" }: VendorDashboardProps) {
         </div>
       </section> */}
 
-      <section className="mx-auto max-w-7xl  bg-white py-20">
+      <DualSection />
+      <ReverseDualSection />
+
+      <section className="hidden mx-auto max-w-7xl  bg-white py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl text-center mb-12">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
