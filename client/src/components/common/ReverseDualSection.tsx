@@ -9,7 +9,7 @@ export default function ReverseDualSection() {
           <img
             src={Images.dualReverse}
             alt="Tap and Grab community experience artwork"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover aspect-square object-[center_65%]"
           />
         </div>
 

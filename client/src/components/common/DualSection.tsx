@@ -48,7 +48,7 @@ export default function DualSection() {
           <img
             src={Images.dualSection}
             alt="Tap and Grab featured section artwork"
-            className="w-full object-cover"
+            className="w-full object-cover aspect-square"
           />
         </div>
       </div>
