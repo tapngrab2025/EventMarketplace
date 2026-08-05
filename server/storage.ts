@@ -941,6 +941,30 @@ export class DatabaseStorage implements IStorage {
               })
               .where(eq(products.id, item.productId));
           }
+
+          // Create orderDeliveryStatus records for each distinct stall
+          // Get distinct stall IDs from products in order items
+          const productIds = insertOrder.items.map((item: any) => item.productId);
+          const productsWithStalls = await tx
+            .select({ stallId: products.stallId })
+            .from(products)
+            .where(inArray(products.id, productIds));
+          
+          // Get unique stall IDs (filter out nulls just in case)
+          const distinctStallIds = Array.from(
+            new Set(productsWithStalls.map(p => p.stallId).filter(Boolean))
+          ) as number[];
+
+          // Insert a pending delivery status record for each stall
+          if (distinctStallIds.length > 0) {
+            await tx.insert(orderDeliveryStatus).values(
+              distinctStallIds.map(stallId => ({
+                orderId: order.id,
+                stallId,
+                status: 'pending' as const,
+              }))
+            );
+          }
         }
 
         // Clear cart if user is logged in
@@ -1149,40 +1173,50 @@ export class DatabaseStorage implements IStorage {
         eq(orderDeliveryStatus.orderId, orderId),
         eq(orderDeliveryStatus.stallId, stallId)
       ));
-    const orderIds = await db
-      .select()
-      .from(orderItems)
-      .where(and(
-        eq(orderItems.orderId, orderId)
-      ));
 
-    if (orderIds) {
-      await db.transaction(async (tx) => {
-        for (const orderId of orderIds) {
-          return await tx
-            .update(products)
-            .set({
-              availableToDispatch: sql<number>`${products.availableToDispatch} - ${orderId.quantity}`,
-              dispatchStock: sql<number>`${products.dispatchStock} + ${orderId.quantity}`,
-            })
-            .where(eq(products.id, orderId.productId))
-            .returning();
-        }
-      });
+    // Only update stock if status is changing to 'delivered' and it wasn't already delivered
+    const wasAlreadyDelivered = existing?.status === 'delivered';
+    if (status === 'delivered' && !wasAlreadyDelivered) {
+      // Get order items only for this specific stall
+      const itemsForStall = await db
+        .select({
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+        })
+        .from(orderItems)
+        .innerJoin(products, eq(products.id, orderItems.productId))
+        .where(and(
+          eq(orderItems.orderId, orderId),
+          eq(products.stallId, stallId)
+        ));
+
+      if (itemsForStall.length > 0) {
+        await db.transaction(async (tx) => {
+          for (const item of itemsForStall) {
+            await tx
+              .update(products)
+              .set({
+                availableToDispatch: sql<number>`${products.availableToDispatch} - ${item.quantity}`,
+                dispatchStock: sql<number>`${products.dispatchStock} + ${item.quantity}`,
+              })
+              .where(eq(products.id, item.productId));
+          }
+        });
+      }
     }
 
     if (existing) {
-      return await db
+      return (await db
         .update(orderDeliveryStatus)
         .set({ status, notes, updatedAt: new Date() })
         .where(eq(orderDeliveryStatus.id, existing.id))
-        .returning();
+        .returning())[0];
     }
 
-    return await db
+    return (await db
       .insert(orderDeliveryStatus)
       .values({ orderId, stallId, status, notes })
-      .returning();
+      .returning())[0];
   }
 
   async getDispatchEmail(orderId: number, stallId: number): Promise<any> {
@@ -1418,6 +1452,263 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await db.insert(subscribers).values({ email }).returning();
+  }
+
+  // Get all vendor orders grouped hierarchically: Event -> Stall -> Order
+  // Each order has items with quantities, totals, payment & dispatch status
+  async getVendorOrdersGrouped(vendorId: number): Promise<Array<{
+    event: Event;
+    stalls: Array<{
+      stall: Stall;
+      orders: Array<{
+        id: number;
+        total: number;
+        status: string;        // order payment/status (e.g. pending/paid/delivered)
+        paymentMethod: string;
+        createdAt: Date;
+        items: Array<{ id: number; name: string; quantity: number; price: number; productId: number; imageUrl?: string }>;
+        itemsQuantity: number;
+        deliveryStatus: 'pending' | 'ready' | 'delivered' | null;
+        deliveryNotes: string | null;
+      }>;
+      totals: { revenue: number; orders: number; items: number };
+    }>;
+    totals: { revenue: number; orders: number; items: number };
+  }>> {
+    // 1. Get ALL order rows for THIS VENDOR ONLY (via his stalls)
+    //    (Events that have never had any orders simply won't appear here.)
+    const rows = await db
+      .select({
+        // Event
+        eventId: events.id,
+        eventName: events.name,
+        eventDescription: events.description,
+        eventStartDate: events.startDate,
+        eventEndDate: events.endDate,
+        eventImageUrl: events.imageUrl,
+        eventApproved: events.approved,
+        eventArchived: events.archived,
+        eventVendorId: events.vendorId,
+        eventLocation: events.location,
+        eventCity: events.city,
+        // Stall
+        stallId: stalls.id,
+        stallName: stalls.name,
+        stallDescription: stalls.description,
+        stallLocation: stalls.location,
+        stallVendorId: stalls.vendorId,
+        stallEventId: stalls.eventId,
+        // Order
+        orderId: orders.id,
+        orderTotal: orders.total,
+        orderStatus: orders.status,
+        orderPaymentMethod: orders.paymentMethod,
+        orderCreatedAt: orders.createdAt,
+        // Order items + product
+        itemId: orderItems.id,
+        quantity: orderItems.quantity,
+        price: orderItems.price,
+        productId: products.id,
+        productName: products.name,
+        productImageUrl: products.imageUrl,
+        // Delivery status per order+stall
+        deliveryStatus: orderDeliveryStatus.status,
+        deliveryNotes: orderDeliveryStatus.notes,
+      })
+      .from(orders)
+      .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .innerJoin(products, eq(products.id, orderItems.productId))
+      .innerJoin(stalls, eq(stalls.id, products.stallId))
+      .innerJoin(events, eq(events.id, stalls.eventId))
+      .leftJoin(orderDeliveryStatus, and(
+        eq(orderDeliveryStatus.orderId, orders.id),
+        eq(orderDeliveryStatus.stallId, stalls.id)
+      ))
+      .where(eq(stalls.vendorId, vendorId))
+      .orderBy(orders.createdAt, 'desc');
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    // 2. Group: eventId -> stallId -> orderId -> items
+    type OrderGroup = {
+      id: number;
+      total: number;
+      status: string;
+      paymentMethod: string;
+      createdAt: Date;
+      items: any[];
+      itemsQuantity: number;
+      deliveryStatus: any;
+      deliveryNotes: any;
+      stallSubtotal: number;
+    };
+    type StallGroup = {
+      stall: any;
+      orderMap: Map<number, OrderGroup>;
+    };
+    type EventGroup = {
+      event: any;
+      stallMap: Map<number, StallGroup>;
+    };
+
+    const eventMap = new Map<number, EventGroup>();
+
+    for (const r of rows as any[]) {
+      // --- Build / fetch Event bucket ---
+      if (!eventMap.has(r.eventId)) {
+        eventMap.set(r.eventId, {
+          event: {
+            id: r.eventId,
+            name: r.eventName,
+            description: r.eventDescription,
+            startDate: r.eventStartDate,
+            endDate: r.eventEndDate,
+            imageUrl: r.eventImageUrl,
+            approved: r.eventApproved,
+            archived: r.eventArchived,
+            vendorId: r.eventVendorId,
+            location: r.eventLocation,
+            city: r.eventCity,
+          },
+          stallMap: new Map(),
+        });
+      }
+      const evGroup = eventMap.get(r.eventId)!;
+
+      // --- Build / fetch Stall bucket ---
+      if (!evGroup.stallMap.has(r.stallId)) {
+        evGroup.stallMap.set(r.stallId, {
+          stall: {
+            id: r.stallId,
+            name: r.stallName,
+            description: r.stallDescription,
+            location: r.stallLocation,
+            vendorId: r.stallVendorId,
+            eventId: r.stallEventId,
+          },
+          orderMap: new Map(),
+        });
+      }
+      const stallGroup = evGroup.stallMap.get(r.stallId)!;
+
+      // --- Build / fetch Order bucket ---
+      if (!stallGroup.orderMap.has(r.orderId)) {
+        stallGroup.orderMap.set(r.orderId, {
+          id: r.orderId,
+          total: r.orderTotal,
+          status: r.orderStatus,
+          paymentMethod: r.orderPaymentMethod,
+          createdAt: r.orderCreatedAt,
+          items: [],
+          itemsQuantity: 0,
+          deliveryStatus: r.deliveryStatus ?? null,
+          deliveryNotes: r.deliveryNotes ?? null,
+          stallSubtotal: 0,
+        });
+      }
+      const orderGroup = stallGroup.orderMap.get(r.orderId)!;
+
+      const lineTotal = Number(r.price) * Number(r.quantity);
+      orderGroup.stallSubtotal += lineTotal;
+      orderGroup.itemsQuantity += Number(r.quantity);
+      orderGroup.items.push({
+        id: r.itemId,
+        productId: r.productId,
+        name: r.productName,
+        imageUrl: r.productImageUrl,
+        quantity: r.quantity,
+        price: r.price,
+        lineTotal,
+      });
+
+      // Delivery status is per (stall, order) — same for all rows of same combo
+      if (r.deliveryStatus) {
+        orderGroup.deliveryStatus = r.deliveryStatus;
+        orderGroup.deliveryNotes = r.deliveryNotes;
+      }
+    }
+
+    // 3. Collapse maps into arrays, compute stall/event totals
+    const result: any[] = [];
+    for (const evGroup of eventMap.values()) {
+      let eventRevenue = 0;
+      let eventOrders = 0;
+      let eventItems = 0;
+
+      const stallsArr: any[] = [];
+      for (const stallGroup of evGroup.stallMap.values()) {
+        let stallRevenue = 0;
+        let stallOrders = 0;
+        let stallItems = 0;
+
+        const ordersArr: any[] = [];
+        for (const order of stallGroup.orderMap.values()) {
+          stallRevenue += order.stallSubtotal;
+          stallOrders += 1;
+          stallItems += order.itemsQuantity;
+
+          ordersArr.push({
+            id: order.id,
+            total: order.stallSubtotal,
+            orderGrandTotal: order.total,
+            status: order.status,
+            paymentMethod: order.paymentMethod,
+            createdAt: order.createdAt,
+            items: order.items,
+            itemsQuantity: order.itemsQuantity,
+            deliveryStatus: order.deliveryStatus,
+            deliveryNotes: order.deliveryNotes,
+          });
+        }
+
+        // Skip stalls that somehow have 0 orders (safety filter)
+        if (stallOrders === 0) continue;
+
+        eventRevenue += stallRevenue;
+        eventOrders += stallOrders;
+        eventItems += stallItems;
+
+        stallsArr.push({
+          stall: stallGroup.stall,
+          // Newest orders first
+          orders: ordersArr.sort(
+            (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt),
+          ),
+          totals: {
+            revenue: stallRevenue,
+            orders: stallOrders,
+            items: stallItems,
+          },
+        });
+      }
+
+      // Skip events that somehow have 0 stalls/orders (safety filter)
+      if (stallsArr.length === 0 || eventOrders === 0) continue;
+
+      result.push({
+        event: evGroup.event,
+        // Stalls sorted alphabetically by name
+        stalls: stallsArr.sort((a, b) =>
+          a.stall.name.localeCompare(b.stall.name),
+        ),
+        totals: {
+          revenue: eventRevenue,
+          orders: eventOrders,
+          items: eventItems,
+        },
+      });
+    }
+
+    // Sort events: newest first (by end_date desc, then start_date desc)
+    result.sort((a, b) => {
+      const aDate = +new Date(a.event.endDate || a.event.startDate || 0);
+      const bDate = +new Date(b.event.endDate || b.event.startDate || 0);
+      return bDate - aDate;
+    });
+
+    return result;
   }
 
   // Get archived events

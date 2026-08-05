@@ -706,24 +706,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stall = await storage.getStall(stallId);
       const isAdmin = req.user?.role === "admin";
       const isVendorOwner = stall?.vendorId === req.user?.id;
+      // return res.json({ stallVendorId: stall?.vendorId, userId: req.user?.id });
       if (!isAdmin && !isVendorOwner) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      const previousStatus = (await storage.getStallOrder(orderId, stallId))[0]?.items?.deliveryStatus?.status;
+      // Get existing delivery status before update to prevent re-sending emails
+      // const stallOrders = await storage.getStallOrder(orderId, stallId);
+      // const previousStatus = stallOrders?.[0]?.items?.deliveryStatus?.status;
       const updated = await storage.updateDeliveryStatus(orderId, stallId, status, notes);
 
       // A repeated "delivered" update must not send the customer another email.
-      if (status === 'delivered' && previousStatus !== 'delivered') {
-        const dispatchEmail = await storage.getDispatchEmail(orderId, stallId);
-        if (dispatchEmail) {
-          try {
-            await sendDispatchEmail(dispatchEmail);
-          } catch (emailError) {
-            // The delivery-status update has already succeeded, so do not report it as failed.
-            console.error(`Failed to send dispatch email for order ${orderId}:`, emailError);
-          }
-        }
-      }
+      // if (status === 'delivered' && previousStatus !== 'delivered') {
+      //   const dispatchEmail = await storage.getDispatchEmail(orderId, stallId);
+      //   if (dispatchEmail) {
+      //     try {
+      //       await sendDispatchEmail(dispatchEmail);
+      //     } catch (emailError) {
+      //       // The delivery-status update has already succeeded, so do not report it as failed.
+      //       console.error(`Failed to send dispatch email for order ${orderId}:`, emailError);
+      //     }
+      //   }
+      // }
       res.json(updated);
     } catch (error) {
       res.status(500).json({ error: "Failed to update delivery status" });
@@ -1161,6 +1164,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(Array.from(map.values()));
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch vendor orders" });
+    }
+  });
+
+  // Vendor: all orders grouped hierarchically by Event -> Stall -> Order
+  app.get("/api/vendor/orders/grouped", requireAuth, async (req, res) => {
+    if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const grouped = await storage.getVendorOrdersGrouped(req.user.id);
+      res.json(grouped);
+    } catch (error) {
+      console.error("Failed to fetch grouped vendor orders:", error);
+      res.status(500).json({ message: "Failed to fetch grouped vendor orders" });
     }
   });
 

@@ -23,6 +23,7 @@ import { useCart } from "@/hooks/use-cart";
 import { EventCoupons } from "@/components/coupon/event-coupons";
 import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { DEFAULT_IMAGES } from "@/config/constants";
+import NotFound from "../not-found";
 // import publisherImage from "@/assets/publisher.png";
 
 type StallWithProducts = Stall & {
@@ -86,6 +87,9 @@ export default function EventDetailsPage() {
       </div>
     );
   }
+    if (!event || !event.approved) {
+      return <NotFound />;
+    }
 
   const eventImage = event?.imageUrl || DEFAULT_IMAGES.EVENT;
   const eventCoverImage = new URL(event?.coverImageUrl || DEFAULT_IMAGES.EVENT , import.meta.url).href;

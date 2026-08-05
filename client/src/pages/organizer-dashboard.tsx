@@ -102,8 +102,16 @@ export default function OrganizerDashboard({ searchTerm = "" }: VendorDashboardP
     myEvents?.some((event) => event.id === stall.eventId),
   );
 
-  const pendingEvents = events?.filter((event) => !event.approved);
-  const pendingProducts = products?.filter((product) => !product.approved);
+  // const pendingEvents = events?.filter((event) => !event.approved);
+  const pendingEvents = events?.filter((event) => 
+    myEvents?.some((myEvent) => myEvent.id === event.id) &&
+    !event.approved
+  );
+  // const pendingProducts = products?.filter((product) => !product.approved);
+  const pendingProducts = products?.filter((product) => 
+    myStalls?.some((myStall) => myStall.id === product.stallId) &&
+    !product.approved
+  );
 
   const approveEvent = useMutation({
     mutationFn: async (eventId: number) => {

@@ -39,6 +39,7 @@ export default function EventsPage() {
 
     return matchesLocation && matchesDate;
   });
+  console.log(filteredEvents);
 
   if (isLoading) {
     return (
@@ -139,13 +140,14 @@ export default function EventsPage() {
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8 max-w-7xl mx-auto">
             {filteredEvents?.map((event, index) => (
-              <div
-                key={event.id}
-                className={`transform transition-all duration-500 hover:shadow-xl hover:-translate-y-2 ${animateItems ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-                style={{ transitionDelay: `${index * 50}ms` }}
-              >
-                <EventCard event={event} />
-              </div>
+              event.approved && (
+                <div
+                  key={event.id}
+                  className={`transform transition-all duration-500 hover:shadow-xl hover:-translate-y-2 ${animateItems ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+                  style={{ transitionDelay: `${index * 50}ms` }}
+                >
+                  <EventCard event={event} />
+                </div>)
             ))}
           </div>
         )}

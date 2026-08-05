@@ -187,6 +187,13 @@ export function ProductForm({ stall, onSuccess }: { stall: Stall; onSuccess: () 
                     <option value="souvenir">Souvenir</option>
                     <option value="giveaway">Giveaway</option>
                     <option value="promotional">Promotional</option>
+                    <option value="book">Book</option>
+                    <option value="kids_book">Children's Book</option>
+                    <option value="educational">Educational</option>
+                    <option value="comic">Comic</option>
+                    <option value="magazine">Magazine</option>
+                    <option value="stationery">Stationery</option>
+                    <option value="art_craft">Art/Craft</option>
                   </select>
                 </FormControl>
                 <FormMessage />

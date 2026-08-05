@@ -135,7 +135,7 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              {/* <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
@@ -145,8 +145,32 @@ export function ProductEditForm({ productId, onClose }: EditProductFormProps) {
                   <SelectItem value="souvenir">Souvenir</SelectItem>
                   <SelectItem value="giveaway">Giveaway</SelectItem>
                   <SelectItem value="promotional">Promotional</SelectItem>
+                  <SelectItem value="book">Book</SelectItem>
+                  <SelectItem value="kids_book">Children's Book</SelectItem>
+                  <SelectItem value="comic">Comic</SelectItem>
+                  <SelectItem value="educational">Educational</SelectItem>
+                  <SelectItem value="magazine">Magazine</SelectItem>
+                  <SelectItem value="stationery">Stationery</SelectItem>
+                  <SelectItem value="art_craft">Art/Craft</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
+              <FormControl>
+                <select
+                  {...field}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                >
+                  <option value="souvenir">Souvenir</option>
+                  <option value="giveaway">Giveaway</option>
+                  <option value="promotional">Promotional</option>
+                  <option value="book">Book</option>
+                  <option value="kids_book">Children's Book</option>
+                  <option value="educational">Educational</option>
+                  <option value="comic">Comic</option>
+                  <option value="magazine">Magazine</option>
+                  <option value="stationery">Stationery</option>
+                  <option value="art_craft">Art/Craft</option>
+                </select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
