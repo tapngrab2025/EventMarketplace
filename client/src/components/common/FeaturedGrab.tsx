@@ -140,7 +140,13 @@ function ProductSliderSection<TItem>({
         ) : null}
       </div>
 
-      {items.length > 0 ? (
+      {items.length === 1 ? (
+        <div className="mt-6 w-full sm:w-1/2 md:w-1/3 xl:w-1/4">
+          <div className="h-full px-2 sm:px-3">
+            <div className="h-full min-w-0">{renderItem(items[0])}</div>
+          </div>
+        </div>
+      ) : items.length > 1 ? (
         <div className="mt-6 overflow-hidden">
           <Slider
             ref={sliderRef}
