@@ -1146,7 +1146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch sales" });
     }
   });
-
+// To be deprecated as we already have "/api/vendor/orders/grouped" 
+// Following function is access by mobile vendor app
   app.get("/api/vendor/orders", requireAuth, async (req, res) => {
     if (!req.user || !["vendor", "admin"].includes(req.user.role)) {
       return res.status(403).json({ message: "Forbidden" });

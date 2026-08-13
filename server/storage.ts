@@ -1346,6 +1346,8 @@ export class DatabaseStorage implements IStorage {
           id: orderItems.id,
           quantity: orderItems.quantity,
           price: orderItems.price,
+          notes: orderDeliveryStatus.notes,
+          deliveryStatus: orderDeliveryStatus.status,
         },
         product: {
           id: products.id,
@@ -1361,6 +1363,9 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
       .innerJoin(products, eq(products.id, orderItems.productId))
       .innerJoin(stalls, eq(stalls.id, products.stallId))
+      .leftJoin(orderDeliveryStatus, and(
+        eq(orderDeliveryStatus.orderId, orders.id)
+      ))
       .where(and(eq(stalls.vendorId, vendorId), eq(stalls.eventId, eventId)))
       .orderBy(orders.createdAt, 'desc');
 
