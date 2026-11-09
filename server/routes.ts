@@ -537,6 +537,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return_url: `https://${req.get("host")}/payment/thank-you/${orderId}`,
         cancel_url: `https://${req.get("host")}/payment/cancel/${orderId}`,
         notify_url: `https://${req.get("host")}/api/payhere/notify`,
+        // return_url: `https://tapgrabnow.com/payment/thank-you/${orderId}`,
+        // cancel_url: `https://tapgrabnow.com/payment/cancel/${orderId}`,
+        // notify_url: `https://tapgrabnow.com/api/payhere/notify`,
         order_id: orderId,
         items: Array.isArray(items) ? items.map((item: any) => item.name).join(", ") : "Events",
         amount: amountFormatted,
@@ -552,7 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log("PayHere checkout data:", payhereData);
-      throw new Error("Process stopped for debugging"); // Remove this line in production
+      // throw new Error("Process stopped for debugging"); // Remove this line in production
       res.json(payhereData);
     } catch (error) {
       console.error("PayHere checkout error:", error);
