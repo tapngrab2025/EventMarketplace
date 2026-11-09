@@ -554,8 +554,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hash: hash,
       };
 
-      console.log("PayHere checkout data:", payhereData);
-      // throw new Error("Process stopped for debugging"); // Remove this line in production
       res.json(payhereData);
     } catch (error) {
       console.error("PayHere checkout error:", error);
